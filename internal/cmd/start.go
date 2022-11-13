@@ -1,11 +1,19 @@
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/chtushar/toggler.in/internal/logger"
+	"github.com/chtushar/toggler.in/internal/server"
 	"github.com/spf13/cobra"
 )
 
 func start(cmd *cobra.Command, _ []string) {
-	fmt.Printf("Starting toggler server")
+	log := logger.New(&logger.Config{Production: true})
+
+	srv := server.NewServer(&server.Config{
+		Logger: log,
+	})
+
+	go srv.Listen()
+
+	srv.WaitForShutdown()
 }
