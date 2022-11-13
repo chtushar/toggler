@@ -1,9 +1,9 @@
 package main
 
 import (
-	"fmt"
+	"github.com/chtushar/toggler.in/internal/cmd"
 )
 
 func main() {
-	fmt.Println("Hello, world!")
+	cmd.Execute()
 }
