@@ -1,7 +1,7 @@
 package web
 
 import (
-	"github.com/chtushar/toggler.in/internal/admin"
+	"github.com/chtushar/toggler/internal/admin"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 )

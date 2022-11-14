@@ -1,11 +1,15 @@
 package server
 
 import (
+	"context"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
-	"github.com/chtushar/toggler.in/internal/logger"
-	"github.com/chtushar/toggler.in/internal/server/web"
+	"github.com/chtushar/toggler/internal/logger"
+	"github.com/chtushar/toggler/internal/server/web"
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 )
@@ -45,6 +49,7 @@ func (s *Server) Listen() {
 }
 
 func (s *Server) setup() {
+	defer s.graceFullShutdown()
 	web.Routes(s.router, s.logger)
 
 	s.server.Handler = s.router
@@ -55,4 +60,26 @@ func (s *Server) setup() {
 
 func (s *Server) WaitForShutdown() {
 	<-s.connClose
+}
+
+func (s *Server) graceFullShutdown() {
+	go func() {
+		sigint := make(chan os.Signal, 1)
+		signal.Notify(sigint, os.Interrupt, syscall.SIGINT, syscall.SIGABRT, syscall.SIGTERM)
+
+		sig := <-sigint
+		s.logger.Info("OS terminate signal received", zap.String("signal", sig.String()))
+
+		s.logger.Debug("Shutting down server")
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		err := s.server.Shutdown(ctx)
+		if err != nil {
+			s.logger.Error("Error shutting down server", zap.Error(err))
+		}
+
+		close(s.connClose)
+	}()
 }

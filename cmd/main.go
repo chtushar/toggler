@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/chtushar/toggler.in/internal/cmd"
+	"github.com/chtushar/toggler/internal/cmd"
 )
 
 func main() {
