@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -22,6 +23,7 @@ type Server struct {
 }
 
 type Config struct {
+	Port   int
 	Logger *zap.Logger
 }
 
@@ -29,7 +31,7 @@ func NewServer(cfg *Config) *Server {
 	r := mux.NewRouter().StrictSlash(true)
 	return &Server{
 		server: http.Server{
-			Addr:         ":8080",
+			Addr:         fmt.Sprintf("%s:%d", "", cfg.Port),
 			ReadTimeout:  2 * time.Second,
 			WriteTimeout: 5 * time.Second,
 		},

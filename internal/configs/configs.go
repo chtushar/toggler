@@ -1,4 +1,4 @@
-package config
+package configs
 
 import (
 	"log"
@@ -18,14 +18,14 @@ func Get() *App {
 
 	once.Do(func() {
 		cfg = &App{
-			Port:       8080,
-			Production: false,
+			Port:       viper.GetInt(keyPort),
+			Production: isProduction(viper.GetString(keyEnv)),
 			DB: &DB{
-				Host:     "localhost",
-				Port:     5432,
-				User:     "postgres",
-				Password: "postgres",
-				Name:     "postgres",
+				Host:     viper.GetString(keyDBHost),
+				Port:     viper.GetInt(keyDBPort),
+				User:     viper.GetString(keyDBUser),
+				Password: viper.GetString(keyDBPass),
+				Name:     viper.GetString(keyDBName),
 			},
 		}
 	})
@@ -46,4 +46,8 @@ func readConfig() {
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatal("Failed to read config file")
 	}
+}
+
+func isProduction(env string) bool {
+	return env == "prod"
 }
