@@ -12,6 +12,7 @@ import (
 	"github.com/chtushar/toggler/internal/logger"
 	"github.com/chtushar/toggler/internal/server/web"
 	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 )
 
@@ -27,7 +28,7 @@ type Config struct {
 	Logger *zap.Logger
 }
 
-func NewServer(cfg *Config) *Server {
+func NewServer(cfg *Config, db *sqlx.DB) *Server {
 	r := mux.NewRouter().StrictSlash(true)
 	return &Server{
 		server: http.Server{
