@@ -9,10 +9,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/chtushar/toggler/internal/db"
 	"github.com/chtushar/toggler/internal/logger"
+	"github.com/chtushar/toggler/internal/router"
 	"github.com/chtushar/toggler/internal/server/web"
 	"github.com/gorilla/mux"
-	"github.com/jmoiron/sqlx"
 	"go.uber.org/zap"
 )
 
@@ -21,6 +22,7 @@ type Server struct {
 	router    *mux.Router
 	connClose chan int
 	logger    *zap.Logger
+	db        *db.DB
 }
 
 type Config struct {
@@ -28,7 +30,7 @@ type Config struct {
 	Logger *zap.Logger
 }
 
-func NewServer(cfg *Config, db *sqlx.DB) *Server {
+func NewServer(cfg *Config, db *db.DB) *Server {
 	r := mux.NewRouter().StrictSlash(true)
 	return &Server{
 		server: http.Server{
@@ -39,6 +41,7 @@ func NewServer(cfg *Config, db *sqlx.DB) *Server {
 		router:    r,
 		connClose: make(chan int, 1),
 		logger:    cfg.Logger,
+		db:        db,
 	}
 }
 
@@ -55,8 +58,15 @@ func (s *Server) setup() {
 	defer s.graceFullShutdown()
 	web.Routes(s.router, s.logger)
 
-	s.server.Handler = s.router
+	apiRouter := s.router.PathPrefix("/api").Subrouter()
 
+	router.Routes(&router.Config{
+		R:      apiRouter,
+		DB:     s.db,
+		Logger: s.logger,
+	})
+
+	s.server.Handler = s.router
 	// handlers queue
 	s.server.Handler = logger.NewHandler(s.logger)(s.server.Handler)
 }
