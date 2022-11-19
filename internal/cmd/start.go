@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"context"
-
 	"github.com/chtushar/toggler/internal/configs"
 	"github.com/chtushar/toggler/internal/db"
 	"github.com/chtushar/toggler/internal/logger"
@@ -14,7 +12,7 @@ func start(cmd *cobra.Command, _ []string) {
 	cfg := configs.Get()
 	log := logger.New(&logger.Config{Production: true})
 
-	dbConn := db.Get(context.Background(), cfg.DB, log)
+	dbConn := db.Get(cfg.DB, log)
 
 	srv := server.NewServer(&server.Config{
 		Port:   cfg.Port,

@@ -1,12 +1,12 @@
 package db
 
 import (
-	"context"
 	"fmt"
 	"sync"
 
 	"github.com/chtushar/toggler/internal/configs"
 	"github.com/jmoiron/sqlx"
+	_ "github.com/lib/pq"
 	"go.uber.org/zap"
 )
 
@@ -19,18 +19,17 @@ var (
 	dbConn *DB
 )
 
-func Get(ctx context.Context, cfg *configs.DB, logger *zap.Logger) *DB {
+func Get(cfg *configs.DB, logger *zap.Logger) *DB {
 	once.Do(func() {
-		dbConn = New(ctx, cfg, logger)
+		dbConn = New(cfg, logger)
 		fmt.Println("Connected to database")
 	})
 	return dbConn
 }
 
-func New(ctx context.Context, cfg *configs.DB, logger *zap.Logger) *DB {
-	dsn := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", cfg.Host, cfg.Port, cfg.User, cfg.Password, cfg.Name)
-
-	dbConn, err := sqlx.ConnectContext(ctx, "postgres", dsn)
+func New(cfg *configs.DB, logger *zap.Logger) *DB {
+	dsn := fmt.Sprintf("host=%s port=%d user=%s dbname=%s sslmode=disable", cfg.Host, cfg.Port, cfg.User, cfg.Name)
+	dbConn, err := sqlx.Connect("postgres", dsn)
 
 	if err != nil {
 		logger.Panic("Failed to connect to database")
