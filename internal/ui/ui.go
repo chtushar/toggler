@@ -19,7 +19,19 @@ func Serve(r *mux.Router, log *zap.Logger) {
 		return
 	}
 
-	fs := http.FileServer(http.FS(sub))
-	r.PathPrefix("/admin").Handler(http.StripPrefix("/admin", fs))
-	r.PathPrefix("/admin/*").Handler(http.StripPrefix("/admin/*", fs))
+	fileServer := http.FileServer(Embed{http.FS(sub)})
+
+	r.PathPrefix("/admin").Handler(http.StripPrefix("/admin", fileServer))
+}
+
+type Embed struct {
+	http.FileSystem
+}
+
+func (e Embed) Open(name string) (http.File, error) {
+	if f, err := e.FileSystem.Open(name); err == nil {
+		return f, err
+	} else {
+		return e.FileSystem.Open("index.html")
+	}
 }
