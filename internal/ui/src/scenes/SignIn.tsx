@@ -13,6 +13,7 @@ const SignIn = () => {
                 </div>
                 <button className="p-2 bg-accent-500 text-accent-50 rounded" type="submit">Sign In</button>
             </form>
+            <a href="/admin/dashboard">Dashboard</a>
         </div>
     );
 }

@@ -1,3 +1,5 @@
+cd internal/ui && npm run build && cd ../.. || exit 1
+
 OUTPUT='bin/toggler'
 
 echo "Building app $VERSION"

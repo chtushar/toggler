@@ -20,6 +20,6 @@ func Serve(r *mux.Router, log *zap.Logger) {
 	}
 
 	fs := http.FileServer(http.FS(sub))
-
 	r.PathPrefix("/admin").Handler(http.StripPrefix("/admin", fs))
+	r.PathPrefix("/admin/*").Handler(http.StripPrefix("/admin/*", fs))
 }
