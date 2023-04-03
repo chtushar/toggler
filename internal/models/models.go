@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"github.com/google/uuid"
+)
 
 type Base struct {
 	ID        int       `db:"id" json:"id"`
@@ -38,7 +42,15 @@ type FeatureFlagTypes struct {
 type FeatureFlag struct {
 	Base
 
-	Name   string `json:"name" db:"name"`
-	Type   int    `json:"type" db:"type"`
-	TeamID int    `json:"team_id" db:"team_id"`
+	Uuid   uuid.NullUUID `json:"uuid" db:"uuid"`
+	Name   string        `json:"name" db:"name"`
+	Type   int           `json:"type" db:"type"`
+	TeamID int           `json:"team_id" db:"team_id"`
+}
+
+type FF_Resolution_Boolean struct {
+	ID     int    `json:"id" db:"id"`
+	FlagID int    `json:"flag_id" db:"flag_id"`
+	Key    string `json:"key" db:"key"`
+	Value  bool   `json:"value" db:"value"`
 }
