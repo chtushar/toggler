@@ -1,0 +1,9 @@
+port: 9090
+environment: dev
+db:
+  port: 5432
+  host: localhost
+  user: postgres
+  name: toggler
+  password: postgres
+  forceTLS: false
