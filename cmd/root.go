@@ -1,12 +1,14 @@
 package cmd
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/chtushar/toggler/db"
+	"github.com/chtushar/toggler/db/queries"
 	"github.com/jackc/pgx/v4/stdlib"
 )
 
@@ -34,8 +36,11 @@ func Execute() {
 	app := &App{
 		port:   cfg.Port,
 		dbConn: dbConn,
+		q:      queries.New(dbConn),
 		log:    log.New(os.Stdout, "toggler: ", log.LstdFlags),
 	}
+
+	defer dbConn.Close(context.Background())
 
 	// If the up-migration flag is set, run the up migration and exit
 	if *runUPMigrationPtr {
