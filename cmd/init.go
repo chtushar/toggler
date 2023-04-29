@@ -23,7 +23,7 @@ var (
 	cfg    = configs.Get()
 )
 
-func initDB() *pgx.Conn {
+func getPGXConfig() (*pgx.ConnConfig, error) {
 	sslMode := "prefer"
 
 	if cfg.DB.ForceTLS {
@@ -39,7 +39,25 @@ func initDB() *pgx.Conn {
 		sslMode,
 	)
 
-	conn, err := pgx.Connect(context.Background(), connString)
+	connConfig, err := pgx.ParseConfig(connString)
+
+	if err != nil {
+		log.Fatalln("Failed to parse config", err)
+		return nil, err
+	}
+
+	return connConfig, nil
+}
+
+func initDB() *pgx.Conn {
+	pgxConfig, err := getPGXConfig()
+
+	if err != nil {
+		log.Fatal("Failed to get database config", err)
+		os.Exit(1)
+	}
+
+	conn, err := pgx.ConnectConfig(context.Background(), pgxConfig)
 
 	if err != nil {
 		log.Fatal("Failed to connect to database", err)
@@ -67,19 +85,4 @@ func initHTTPServer(app *App) *echo.Echo {
 	fmt.Println("Initialized HTTP Server")
 	srv.Logger.Fatal(srv.Start(fmt.Sprintf(":%d", app.port)))
 	return srv
-}
-
-// Init is the entry point for the application
-func init() {
-	// Initialize the database
-	dbConn = initDB()
-
-	app := &App{
-		port:   cfg.Port,
-		dbConn: dbConn,
-		log:    log.New(os.Stdout, "toggler: ", log.LstdFlags),
-	}
-
-	// Initialize the HTTP server
-	initHTTPServer(app)
 }
