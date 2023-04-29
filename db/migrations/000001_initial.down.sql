@@ -1,0 +1,5 @@
+DROP TABLE IF EXISTS project_members;
+DROP TABLE IF EXISTS feature_flags;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS projects;
+DROP TYPE IF EXISTS user_role CASCADE;
