@@ -1,35 +1,52 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/chtushar/toggler/configs"
-	"github.com/jmoiron/sqlx"
+	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
 )
 
 type App struct {
-	port int
-	db   *sqlx.DB
-	log  *log.Logger
+	port   int
+	dbConn *pgx.Conn
+	log    *log.Logger
 }
 
 var (
-	db  *sqlx.DB
-	cfg = configs.Get()
+	dbConn *pgx.Conn
+	cfg    = configs.Get()
 )
 
-func initDB() *sqlx.DB {
-	db, err := sqlx.Connect("postgres", fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", cfg.DB.Host, cfg.DB.Port, cfg.DB.User, cfg.DB.Password, cfg.DB.Name))
+func initDB() *pgx.Conn {
+	sslMode := "prefer"
+
+	if cfg.DB.ForceTLS {
+		sslMode = "require"
+	}
+	connString := fmt.Sprintf(
+		"postgres://%s:%s@%s:%d/%s?sslmode=%s",
+		cfg.DB.User,
+		cfg.DB.Password,
+		cfg.DB.Host,
+		cfg.DB.Port,
+		cfg.DB.Name,
+		sslMode,
+	)
+
+	conn, err := pgx.Connect(context.Background(), connString)
 
 	if err != nil {
 		log.Fatal("Failed to connect to database", err)
 	}
 
-	return db
+	defer conn.Close(context.Background())
+	return conn
 }
 
 func initHTTPServer(app *App) *echo.Echo {
@@ -55,12 +72,12 @@ func initHTTPServer(app *App) *echo.Echo {
 // Init is the entry point for the application
 func init() {
 	// Initialize the database
-	db = initDB()
+	dbConn = initDB()
 
 	app := &App{
-		port: cfg.Port,
-		db:   db,
-		log:  log.New(os.Stdout, "toggler: ", log.LstdFlags),
+		port:   cfg.Port,
+		dbConn: dbConn,
+		log:    log.New(os.Stdout, "toggler: ", log.LstdFlags),
 	}
 
 	// Initialize the HTTP server

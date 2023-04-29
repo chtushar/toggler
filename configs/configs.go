@@ -26,6 +26,7 @@ func Get() *Config {
 				User:     viper.GetString(keyDBUser),
 				Password: viper.GetString(keyDBPass),
 				Name:     viper.GetString(keyDBName),
+				ForceTLS: viper.GetBool(keyDBForceTLS),
 			},
 		}
 	})

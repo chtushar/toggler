@@ -7,6 +7,7 @@ type (
 		User     string
 		Password string
 		Name     string
+		ForceTLS bool
 	}
 
 	Config struct {
