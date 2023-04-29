@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/chtushar/toggler/configs"
+	"github.com/chtushar/toggler/db/queries"
 	"github.com/jackc/pgx/v4"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
@@ -15,6 +16,7 @@ import (
 type App struct {
 	port   int
 	dbConn *pgx.Conn
+	q      *queries.Queries
 	log    *log.Logger
 }
 

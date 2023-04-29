@@ -7,12 +7,25 @@ package queries
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
+
+const countUsers = `-- name: CountUsers :one
+SELECT COUNT(*) FROM users
+`
+
+func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
+	row := q.db.QueryRow(ctx, countUsers)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users(name, email, email_verified, password, role)
 VALUES ($1, $2, $3, $4, $5)
-RETURNING id, uuid, name, password, email, email_verified, created_at, updated_at, role
+RETURNING id, uuid, name, password, email, email_verified, role, created_at, updated_at
 `
 
 type CreateUserParams struct {
@@ -24,7 +37,7 @@ type CreateUserParams struct {
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRowContext(ctx, createUser,
+	row := q.db.QueryRow(ctx, createUser,
 		arg.Name,
 		arg.Email,
 		arg.EmailVerified,
@@ -39,9 +52,185 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.Password,
 		&i.Email,
 		&i.EmailVerified,
+		&i.Role,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const deleteUser = `-- name: DeleteUser :exec
+DELETE FROM users WHERE id = $1
+`
+
+func (q *Queries) DeleteUser(ctx context.Context, id int32) error {
+	_, err := q.db.Exec(ctx, deleteUser, id)
+	return err
+}
+
+const getAllUsers = `-- name: GetAllUsers :many
+SELECT id, uuid, name, password, email, email_verified, role, created_at, updated_at FROM users
+`
+
+func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
+	rows, err := q.db.Query(ctx, getAllUsers)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []User
+	for rows.Next() {
+		var i User
+		if err := rows.Scan(
+			&i.ID,
+			&i.Uuid,
+			&i.Name,
+			&i.Password,
+			&i.Email,
+			&i.EmailVerified,
+			&i.Role,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUser = `-- name: GetUser :one
+SELECT id, uuid, name, password, email, email_verified, role, created_at, updated_at FROM users WHERE id = $1
+`
+
+func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
+	row := q.db.QueryRow(ctx, getUser, id)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.Name,
+		&i.Password,
+		&i.Email,
+		&i.EmailVerified,
 		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, uuid, name, password, email, email_verified, role, created_at, updated_at FROM users WHERE email = $1
+`
+
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByEmail, email)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.Name,
+		&i.Password,
+		&i.Email,
+		&i.EmailVerified,
+		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getUserByUUID = `-- name: GetUserByUUID :one
+SELECT id, uuid, name, password, email, email_verified, role, created_at, updated_at FROM users WHERE uuid = $1
+`
+
+func (q *Queries) GetUserByUUID(ctx context.Context, uuid uuid.UUID) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByUUID, uuid)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.Name,
+		&i.Password,
+		&i.Email,
+		&i.EmailVerified,
+		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateUser = `-- name: UpdateUser :one
+UPDATE users
+SET name           = $1,
+    email          = $2,
+    role           = $3,
+    email_verified = $4
+WHERE id = $5
+RETURNING id, uuid, name, password, email, email_verified, role, created_at, updated_at
+`
+
+type UpdateUserParams struct {
+	Name          string
+	Email         string
+	Role          UserRole
+	EmailVerified bool
+	ID            int32
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUser,
+		arg.Name,
+		arg.Email,
+		arg.Role,
+		arg.EmailVerified,
+		arg.ID,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.Name,
+		&i.Password,
+		&i.Email,
+		&i.EmailVerified,
+		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const updateUserPassword = `-- name: UpdateUserPassword :one
+UPDATE users
+SET password = $1
+WHERE id = $2
+RETURNING id, uuid, name, password, email, email_verified, role, created_at, updated_at
+`
+
+type UpdateUserPasswordParams struct {
+	Password string
+	ID       int32
+}
+
+func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUserPassword, arg.Password, arg.ID)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.Name,
+		&i.Password,
+		&i.Email,
+		&i.EmailVerified,
+		&i.Role,
+		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }

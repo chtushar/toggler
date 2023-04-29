@@ -85,7 +85,7 @@ type User struct {
 	Password      string
 	Email         string
 	EmailVerified bool
+	Role          UserRole
 	CreatedAt     time.Time
 	UpdatedAt     time.Time
-	Role          UserRole
 }
