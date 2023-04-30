@@ -8,8 +8,6 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type UserRole string
@@ -56,7 +54,6 @@ func (ns NullUserRole) Value() (driver.Value, error) {
 
 type FeatureFlag struct {
 	ID        int32
-	Uuid      uuid.UUID
 	ProjectID int64
 	Type      int32
 	Name      string
@@ -64,7 +61,6 @@ type FeatureFlag struct {
 
 type Project struct {
 	ID        int32
-	Uuid      uuid.UUID
 	Name      string
 	OwnerID   int64
 	CreatedAt time.Time
@@ -80,7 +76,6 @@ type ProjectMember struct {
 
 type User struct {
 	ID            int32
-	Uuid          uuid.UUID
 	Name          string
 	Password      string
 	Email         string

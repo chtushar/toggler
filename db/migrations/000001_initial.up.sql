@@ -1,11 +1,8 @@
-CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-
 DROP TYPE IF EXISTS user_role CASCADE;
 CREATE TYPE user_role AS ENUM ('member', 'admin');
 
 CREATE TABLE IF NOT EXISTS projects (
     id SERIAL PRIMARY KEY,
-    uuid uuid NOT NULL,
     name VARCHAR(255) NOT NULL,
     owner_id BIGINT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -14,7 +11,6 @@ CREATE TABLE IF NOT EXISTS projects (
 
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
-    uuid uuid NOT NULL,
     name VARCHAR(255) NOT NULL,
     password VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL,
@@ -26,7 +22,6 @@ CREATE TABLE IF NOT EXISTS users (
 
 CREATE TABLE IF NOT EXISTS feature_flags (
     id SERIAL PRIMARY KEY,
-    uuid uuid NOT NULL,
     project_id BIGINT NOT NULL,
     type INTEGER NOT NULL,
     name VARCHAR(255) NOT NULL

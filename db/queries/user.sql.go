@@ -7,8 +7,6 @@ package queries
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
 const countUsers = `-- name: CountUsers :one
@@ -25,7 +23,7 @@ func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
 const createUser = `-- name: CreateUser :one
 INSERT INTO users(name, email, email_verified, password, role)
 VALUES ($1, $2, $3, $4, $5)
-RETURNING id, uuid, name, password, email, email_verified, role, created_at, updated_at
+RETURNING id, name, password, email, email_verified, role, created_at, updated_at
 `
 
 type CreateUserParams struct {
@@ -47,7 +45,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Uuid,
 		&i.Name,
 		&i.Password,
 		&i.Email,
@@ -69,7 +66,7 @@ func (q *Queries) DeleteUser(ctx context.Context, id int32) error {
 }
 
 const getAllUsers = `-- name: GetAllUsers :many
-SELECT id, uuid, name, password, email, email_verified, role, created_at, updated_at FROM users
+SELECT id, name, password, email, email_verified, role, created_at, updated_at FROM users
 `
 
 func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
@@ -83,7 +80,6 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 		var i User
 		if err := rows.Scan(
 			&i.ID,
-			&i.Uuid,
 			&i.Name,
 			&i.Password,
 			&i.Email,
@@ -103,7 +99,7 @@ func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT id, uuid, name, password, email, email_verified, role, created_at, updated_at FROM users WHERE id = $1
+SELECT id, name, password, email, email_verified, role, created_at, updated_at FROM users WHERE id = $1
 `
 
 func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
@@ -111,7 +107,6 @@ func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Uuid,
 		&i.Name,
 		&i.Password,
 		&i.Email,
@@ -124,7 +119,7 @@ func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, uuid, name, password, email, email_verified, role, created_at, updated_at FROM users WHERE email = $1
+SELECT id, name, password, email, email_verified, role, created_at, updated_at FROM users WHERE email = $1
 `
 
 func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
@@ -132,28 +127,6 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Uuid,
-		&i.Name,
-		&i.Password,
-		&i.Email,
-		&i.EmailVerified,
-		&i.Role,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const getUserByUUID = `-- name: GetUserByUUID :one
-SELECT id, uuid, name, password, email, email_verified, role, created_at, updated_at FROM users WHERE uuid = $1
-`
-
-func (q *Queries) GetUserByUUID(ctx context.Context, uuid uuid.UUID) (User, error) {
-	row := q.db.QueryRow(ctx, getUserByUUID, uuid)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Uuid,
 		&i.Name,
 		&i.Password,
 		&i.Email,
@@ -172,7 +145,7 @@ SET name           = $1,
     role           = $3,
     email_verified = $4
 WHERE id = $5
-RETURNING id, uuid, name, password, email, email_verified, role, created_at, updated_at
+RETURNING id, name, password, email, email_verified, role, created_at, updated_at
 `
 
 type UpdateUserParams struct {
@@ -194,7 +167,6 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, e
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Uuid,
 		&i.Name,
 		&i.Password,
 		&i.Email,
@@ -210,7 +182,7 @@ const updateUserPassword = `-- name: UpdateUserPassword :one
 UPDATE users
 SET password = $1
 WHERE id = $2
-RETURNING id, uuid, name, password, email, email_verified, role, created_at, updated_at
+RETURNING id, name, password, email, email_verified, role, created_at, updated_at
 `
 
 type UpdateUserPasswordParams struct {
@@ -223,7 +195,6 @@ func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPassword
 	var i User
 	err := row.Scan(
 		&i.ID,
-		&i.Uuid,
 		&i.Name,
 		&i.Password,
 		&i.Email,

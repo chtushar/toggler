@@ -15,9 +15,6 @@ SELECT * FROM users;
 -- name: GetUserByEmail :one
 SELECT * FROM users WHERE email = $1;
 
--- name: GetUserByUUID :one
-SELECT * FROM users WHERE uuid = $1;
-
 -- name: UpdateUser :one
 UPDATE users
 SET name           = $1,
