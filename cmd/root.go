@@ -36,6 +36,7 @@ func Execute() {
 	app := &App{
 		port:   cfg.Port,
 		dbConn: dbConn,
+		jwt:    cfg.JWTSecret,
 		q:      queries.New(dbConn),
 		log:    log.New(os.Stdout, "toggler: ", log.LstdFlags),
 	}

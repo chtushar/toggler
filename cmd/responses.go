@@ -20,6 +20,7 @@ type (
 
 var (
 	ForbiddenResponse           = responseType{false, nil, &errorWrap{"Forbidden", http.StatusForbidden, nil}}
+	UnauthorizedResponse        = responseType{false, nil, &errorWrap{"Unauthorized", http.StatusUnauthorized, nil}}
 	InternalServerErrorResponse = responseType{false, nil, &errorWrap{"Internal Server Error", http.StatusInternalServerError, nil}}
 	BadRequestResponse          = responseType{false, nil, &errorWrap{"Bad Request", http.StatusBadRequest, nil}}
 )

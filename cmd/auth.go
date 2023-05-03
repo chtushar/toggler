@@ -1,11 +1,31 @@
 package cmd
 
 import (
+	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/chtushar/toggler/db/queries"
+	"github.com/chtushar/toggler/utils"
 	"github.com/labstack/echo/v4"
 )
+
+func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		authHeader := c.Request().Header.Get("Authorization")
+		if authHeader == "" {
+			return echo.NewHTTPError(http.StatusUnauthorized, UnauthorizedResponse)
+		}
+
+		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+
+		if tokenString == "" {
+			return echo.NewHTTPError(http.StatusUnauthorized, UnauthorizedResponse)
+		}
+
+		return next(c)
+	}
+}
 
 func handleAddAdmin(c echo.Context) error {
 	var (
@@ -43,11 +63,19 @@ func handleAddAdmin(c echo.Context) error {
 		return nil
 	}
 
+	hash, err := utils.HashPassword(req.Password)
+
+	if err != nil {
+		app.log.Println("Failed to hash password", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
 	user, err := app.q.CreateUser(c.Request().Context(), queries.CreateUserParams{
 		Name:          req.Name,
 		Email:         req.Email,
 		EmailVerified: true,
-		Password:      req.Password,
+		Password:      hash,
 		Role:          queries.UserRoleAdmin,
 	})
 
@@ -56,6 +84,16 @@ func handleAddAdmin(c echo.Context) error {
 		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 		return err
 	}
+
+	token, err := generateToken(user.ID, user.Email, user.Name, user.Role)
+
+	if err != nil {
+		app.log.Println("Failed to generate token", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
+	fmt.Println(token)
 
 	response := resType{
 		Id:            user.ID,

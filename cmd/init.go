@@ -15,6 +15,7 @@ import (
 
 type App struct {
 	port   int
+	jwt    string
 	dbConn *pgx.Conn
 	q      *queries.Queries
 	log    *log.Logger

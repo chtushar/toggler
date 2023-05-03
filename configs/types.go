@@ -14,5 +14,6 @@ type (
 		Port       int
 		Production bool
 		DB         *DB
+		JWTSecret  string
 	}
 )
