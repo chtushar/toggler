@@ -39,5 +39,10 @@ func validateToken(tokenString string) (*jwt.Token, error) {
 		return nil, err
 	}
 
+	// If the token is has expired, return an error
+	if !token.Valid {
+		return nil, fmt.Errorf("invalid token")
+	}
+
 	return token, nil
 }

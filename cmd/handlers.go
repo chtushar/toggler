@@ -14,21 +14,26 @@ func handleHealthCheck(c echo.Context) error {
 
 func initHTTPHandler(e *echo.Echo, app *App) {
 	fmt.Println("Initializing HTTP handlers")
+
+	// Echo group for protected routes
+	g := e.Group("/api")
+	g.Use(authMiddleware)
+
 	// ...
 	e.GET("/api/healthcheck", handleHealthCheck)
 
 	// Auth
 	e.POST("/api/add_admin", handleAddAdmin)
 	e.POST("/api/login", handleLogin)
-	e.POST("/api/logout", handleLogout)
+	g.POST("/logout", handleLogout)
 
 	// Users
-	e.GET("/api/get_user/:id", handleGetUserByID)
-	e.GET("/api/get_user_by_email/:email", handleGetUserByEmail)
-	e.GET("/api/get_users", handleGetAllUsers)
-	e.POST("/api/create_user", handleCreateUser)
-	e.PUT("/api/update_user/:id", handleUpdateUser)
-	e.DELETE("/api/delete_user/:id", handleDeleteUser)
+	g.GET("/api/get_user/:id", handleGetUserByID)
+	g.GET("/api/get_user_by_email/:email", handleGetUserByEmail)
+	g.GET("/api/get_users", handleGetAllUsers)
+	g.POST("/api/create_user", handleCreateUser)
+	g.PUT("/api/update_user/:id", handleUpdateUser)
+	g.DELETE("/api/delete_user/:id", handleDeleteUser)
 
 	fmt.Println("Initialized HTTP handlers")
 }

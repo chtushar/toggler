@@ -3,26 +3,25 @@ package cmd
 import (
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/chtushar/toggler/utils"
 	"github.com/labstack/echo/v4"
 )
 
-func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
+func writeAuthTokenToCookie(c echo.Context, token string) {
+	cookie := new(http.Cookie)
+	cookie.Name = "auth_token"
+	cookie.Value = token
+	cookie.Path = "/"
+	cookie.HttpOnly = true
+	cookie.Secure = true
+	c.SetCookie(cookie)
+}
+
+func authMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		authHeader := c.Request().Header.Get("Authorization")
-		if authHeader == "" {
-			return echo.NewHTTPError(http.StatusUnauthorized, UnauthorizedResponse)
-		}
-
-		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
-
-		if tokenString == "" {
-			return echo.NewHTTPError(http.StatusUnauthorized, UnauthorizedResponse)
-		}
-
+		fmt.Println("Auth middleware")
 		return next(c)
 	}
 }
@@ -93,7 +92,7 @@ func handleAddAdmin(c echo.Context) error {
 		return err
 	}
 
-	fmt.Println(token)
+	writeAuthTokenToCookie(c, token)
 
 	response := resType{
 		Id:            user.ID,
