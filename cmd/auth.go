@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/chtushar/toggler/db/queries"
@@ -21,7 +20,24 @@ func writeAuthTokenToCookie(c echo.Context, token string) {
 
 func authMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		fmt.Println("Auth middleware")
+		// var (
+		// 	app = c.Get("app").(*App)
+		// )
+
+		token, err := c.Request().Cookie("auth_token")
+
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, UnauthorizedResponse)
+			return err
+		}
+
+		_, err = validateToken(token.Value)
+
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, UnauthorizedResponse)
+			return err
+		}
+
 		return next(c)
 	}
 }
