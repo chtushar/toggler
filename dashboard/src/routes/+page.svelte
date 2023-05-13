@@ -1,59 +1,56 @@
-<script>
-	import Counter from './Counter.svelte';
-	import welcome from '$lib/images/svelte-welcome.webp';
-	import welcome_fallback from '$lib/images/svelte-welcome.png';
+<script lang="ts">
+	import axios from '../utils/axios'
+
+	const handleAddAdmin = async (e: Event & { currentTarget: EventTarget & HTMLFormElement; }) => {
+		const formData = new FormData(e.target as HTMLFormElement);
+		await axios.post('/api/add_admin', {
+			email: formData.get('email'),
+			name: formData.get('name'),
+			password: formData.get('password')
+		})
+	}
+
+	const handleLogin = async (e: Event & { currentTarget: EventTarget & HTMLFormElement; }) => {
+		const formData = new FormData(e.target as HTMLFormElement);
+		await axios.post('/api/login', {
+			email: formData.get('email'),
+			password: formData.get('password')
+		})
+	}
+
+	const handleGetAllUsers = async () => {
+		const { data } = await axios.get('/api/get_users')
+		console.log(data)
+	}
+
+	const handleLogout = async () => {
+		await axios.post('/api/logout')
+	}
 </script>
 
-<svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
-</svelte:head>
+<!-- Take email, name and password and create an admin -->
+<form on:submit={handleAddAdmin}>
+	<input type="text" placeholder="Email" name="email" />
+	<input type="text" placeholder="Name" name="name" />
+	<input type="password" placeholder="Password" name="password" />
+	<button type="submit">Create</button>
+</form>
 
-<section>
-	<h1>
-		<span class="welcome">
-			<picture>
-				<source srcset={welcome} type="image/webp" />
-				<img src={welcome_fallback} alt="Welcome" />
-			</picture>
-		</span>
+<br />
+<br />
 
-		to your new<br />SvelteKit app
-	</h1>
+<form on:submit={handleLogin}>
+	<input type="text" placeholder="Email" name="email" />
+	<input type="password" placeholder="Password" name="password" />
+	<button type="submit">Login</button>
+</form>
 
-	<h2>
-		try editing <strong>src/routes/+page.svelte</strong>
-	</h2>
+<br />
+<br />
 
-	<Counter />
-</section>
+<button on:click={handleGetAllUsers}>Get all users</button>
 
-<style>
-	section {
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		align-items: center;
-		flex: 0.6;
-	}
+<br />
+<br />
 
-	h1 {
-		width: 100%;
-	}
-
-	.welcome {
-		display: block;
-		position: relative;
-		width: 100%;
-		height: 0;
-		padding: 0 0 calc(100% * 495 / 2048) 0;
-	}
-
-	.welcome img {
-		position: absolute;
-		width: 100%;
-		height: 100%;
-		top: 0;
-		display: block;
-	}
-</style>
+<button on:click={handleLogout}>Logout</button>

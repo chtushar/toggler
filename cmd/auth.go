@@ -18,30 +18,6 @@ func writeAuthTokenToCookie(c echo.Context, token string) {
 	c.SetCookie(cookie)
 }
 
-func authMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
-		// var (
-		// 	app = c.Get("app").(*App)
-		// )
-
-		token, err := c.Request().Cookie("auth_token")
-
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, UnauthorizedResponse)
-			return err
-		}
-
-		_, err = validateToken(token.Value)
-
-		if err != nil {
-			c.JSON(http.StatusUnauthorized, UnauthorizedResponse)
-			return err
-		}
-
-		return next(c)
-	}
-}
-
 func handleAddAdmin(c echo.Context) error {
 	var (
 		app = c.Get("app").(*App)
@@ -123,11 +99,72 @@ func handleAddAdmin(c echo.Context) error {
 }
 
 func handleLogin(c echo.Context) error {
-	c.JSON(200, "ok")
+	var (
+		app = c.Get("app").(*App)
+		req = &struct {
+			Email    string `json:"email"`
+			Password string `json:"password"`
+		}{}
+	)
+
+	type resType struct {
+		Id            int32            `json:"id"`
+		Name          string           `json:"name"`
+		Email         string           `json:"email"`
+		EmailVerified bool             `json:"email_verified"`
+		Role          queries.UserRole `json:"role"`
+	}
+
+	if err := c.Bind(req); err != nil {
+		c.JSON(http.StatusBadRequest, BadRequestResponse)
+		return err
+	}
+
+	user, err := app.q.GetUserByEmail(c.Request().Context(), req.Email)
+
+	if err != nil {
+		app.log.Println("Failed to get user", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
+	if !utils.CheckPasswordHash(req.Password, user.Password) {
+		c.JSON(http.StatusUnauthorized, UnauthorizedResponse)
+	}
+
+	token, err := generateToken(user.ID, user.Email, user.Name, user.Role)
+
+	if err != nil {
+		app.log.Println("Failed to generate token", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
+	writeAuthTokenToCookie(c, token)
+
+	response := resType{
+		Id:            user.ID,
+		Name:          user.Name,
+		Email:         user.Email,
+		EmailVerified: user.EmailVerified,
+		Role:          user.Role,
+	}
+
+	c.JSON(http.StatusOK, responseType{true, response, nil})
 	return nil
 }
 
 func handleLogout(c echo.Context) error {
-	c.JSON(200, "ok")
+
+	// Clear the auth token
+	cookie := new(http.Cookie)
+	cookie.Name = "auth_token"
+	cookie.Value = ""
+	cookie.Path = "/"
+	cookie.HttpOnly = true
+	cookie.Secure = true
+	c.SetCookie(cookie)
+
+	c.JSON(200, "Logged Out")
 	return nil
 }
