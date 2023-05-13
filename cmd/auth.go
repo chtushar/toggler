@@ -28,6 +28,7 @@ func handleAddAdmin(c echo.Context) error {
 		}{}
 	)
 
+	// Response type
 	type resType struct {
 		Id            int32            `json:"id"`
 		Name          string           `json:"name"`
@@ -41,6 +42,7 @@ func handleAddAdmin(c echo.Context) error {
 		return err
 	}
 
+	// Check if there are any users in the database
 	count, err := app.q.CountUsers(c.Request().Context())
 
 	if err != nil {
@@ -49,11 +51,13 @@ func handleAddAdmin(c echo.Context) error {
 		return err
 	}
 
+	// If there are any users, then we can't add an admin
 	if count > 0 {
 		c.JSON(http.StatusForbidden, ForbiddenResponse)
 		return nil
 	}
 
+	// Hash the password
 	hash, err := utils.HashPassword(req.Password)
 
 	if err != nil {
@@ -62,6 +66,7 @@ func handleAddAdmin(c echo.Context) error {
 		return err
 	}
 
+	// Create the user with admin role
 	user, err := app.q.CreateUser(c.Request().Context(), queries.CreateUserParams{
 		Name:          req.Name,
 		Email:         req.Email,
@@ -76,6 +81,7 @@ func handleAddAdmin(c echo.Context) error {
 		return err
 	}
 
+	// Generate JWT token
 	token, err := generateToken(user.ID, user.Email, user.Name, user.Role)
 
 	if err != nil {
@@ -84,6 +90,7 @@ func handleAddAdmin(c echo.Context) error {
 		return err
 	}
 
+	// Write token to cookie
 	writeAuthTokenToCookie(c, token)
 
 	response := resType{
