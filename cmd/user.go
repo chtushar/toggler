@@ -55,7 +55,51 @@ func handleGetUserByEmail(c echo.Context) error {
 }
 
 func handleCreateUser(c echo.Context) error {
-	c.JSON(200, "ok")
+	var (
+		app = c.Get("app").(*App)
+		req = &struct {
+			Name     string           `json:"name"`
+			Email    string           `json:"email"`
+			Password string           `json:"password"`
+			Role     queries.UserRole `json:"role"`
+		}{}
+	)
+
+	type resType struct {
+		Id            int32            `json:"id"`
+		Name          string           `json:"name"`
+		Email         string           `json:"email"`
+		EmailVerified bool             `json:"email_verified"`
+		Role          queries.UserRole `json:"role"`
+	}
+
+	if err := c.Bind(req); err != nil {
+		c.JSON(http.StatusBadRequest, BadRequestResponse)
+		return err
+	}
+
+	user, err := app.q.CreateUser(c.Request().Context(), queries.CreateUserParams{
+		Name:     req.Name,
+		Email:    req.Email,
+		Password: req.Password,
+		Role:     req.Role,
+	})
+
+	if err != nil {
+		app.log.Println("Failed to create user", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
+	response := resType{
+		Id:            user.ID,
+		Name:          user.Name,
+		Email:         user.Email,
+		EmailVerified: user.EmailVerified,
+		Role:          user.Role,
+	}
+
+	c.JSON(http.StatusOK, responseType{true, response, nil})
 	return nil
 }
 

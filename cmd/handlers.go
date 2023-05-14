@@ -37,7 +37,6 @@ func initHTTPHandler(e *echo.Echo, app *App) {
 		SigningKey:  []byte(cfg.JWTSecret),
 		TokenLookup: "cookie:auth_token",
 		ErrorHandler: func(c echo.Context, err error) error {
-			app.log.Println("JWT Error:", err)
 			return c.JSON(http.StatusUnauthorized, UnauthorizedResponse)
 		},
 	}))
@@ -52,6 +51,9 @@ func initHTTPHandler(e *echo.Echo, app *App) {
 	g.POST("/create_user", handleCreateUser)
 	g.PUT("/update_user/:id", handleUpdateUser)
 	g.DELETE("/delete_user/:id", handleDeleteUser)
+
+	// Projects
+	g.POST(("/create_project"), handleCreateProject)
 
 	fmt.Println("Initialized HTTP handlers")
 }
