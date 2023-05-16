@@ -28,6 +28,20 @@ func handleCreateProject(c echo.Context) error {
 	})
 
 	if err != nil {
+		app.log.Println("Failed to create project", err)
+		c.JSON(500, InternalServerErrorResponse)
+		return err
+	}
+
+	// add to project_members table
+	err = app.q.AddProjectMember(c.Request().Context(), queries.AddProjectMemberParams{
+		UserID:    ownerId,
+		ProjectID: int64(project.ID),
+	})
+
+	if err != nil {
+		app.log.Println("Failed to add project member", err)
+		c.JSON(500, InternalServerErrorResponse)
 		return err
 	}
 

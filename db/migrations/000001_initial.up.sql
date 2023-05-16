@@ -1,6 +1,9 @@
 DROP TYPE IF EXISTS user_role CASCADE;
 CREATE TYPE user_role AS ENUM ('member', 'admin');
 
+DROP TYPE IF EXISTS feature_flag_type CASCADE;
+CREATE TYPE feature_flag_type AS ENUM ('boolean');
+
 CREATE TABLE IF NOT EXISTS projects (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -23,9 +26,11 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS feature_flags (
     id SERIAL PRIMARY KEY,
     project_id BIGINT NOT NULL,
-    type INTEGER NOT NULL,
+    type feature_flag_type NOT NULL DEFAULT 'boolean'::feature_flag_type,
     name VARCHAR(255) NOT NULL
 );
+
+CREATE TABLE 
 
 CREATE TABLE IF NOT EXISTS project_members (
     user_id BIGINT NOT NULL,

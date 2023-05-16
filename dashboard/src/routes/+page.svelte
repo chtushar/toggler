@@ -29,7 +29,9 @@
 
 	const handleCreateProject = async (e: Event & { currentTarget: EventTarget & HTMLFormElement; }) => {
 		const formData = new FormData(e.target as HTMLFormElement);
-		await axios.post('/api/create_project')
+		await axios.post('/api/create_project', {
+			name: formData.get('name')
+		})
 	}	
 
 	const handleGetAllUsers = async () => {
