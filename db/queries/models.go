@@ -8,7 +8,50 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"time"
+
+	"github.com/jackc/pgtype"
 )
+
+type FeatureFlagType string
+
+const (
+	FeatureFlagTypeBoolean FeatureFlagType = "boolean"
+)
+
+func (e *FeatureFlagType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = FeatureFlagType(s)
+	case string:
+		*e = FeatureFlagType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for FeatureFlagType: %T", src)
+	}
+	return nil
+}
+
+type NullFeatureFlagType struct {
+	FeatureFlagType FeatureFlagType
+	Valid           bool // Valid is true if FeatureFlagType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullFeatureFlagType) Scan(value interface{}) error {
+	if value == nil {
+		ns.FeatureFlagType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.FeatureFlagType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullFeatureFlagType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.FeatureFlagType), nil
+}
 
 type UserRole string
 
@@ -52,11 +95,28 @@ func (ns NullUserRole) Value() (driver.Value, error) {
 	return string(ns.UserRole), nil
 }
 
+type Environment struct {
+	ID        int32
+	Name      string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
 type FeatureFlag struct {
 	ID        int32
 	ProjectID int64
-	Type      int32
+	Type      FeatureFlagType
 	Name      string
+}
+
+type FeatureState struct {
+	ID            int32
+	EnvironmentID int64
+	FeatureFlagID int64
+	Enabled       bool
+	Value         pgtype.JSONB
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 type Project struct {
@@ -65,6 +125,20 @@ type Project struct {
 	OwnerID   int64
 	CreatedAt time.Time
 	UpdatedAt time.Time
+}
+
+type ProjectEnviornment struct {
+	ProjectID     int64
+	EnvironmentID int64
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
+}
+
+type ProjectFeature struct {
+	ProjectID     int64
+	FeatureFlagID int64
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 type ProjectMember struct {
