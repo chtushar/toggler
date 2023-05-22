@@ -54,6 +54,7 @@ func initHTTPHandler(e *echo.Echo, app *App) {
 
 	// Projects
 	g.POST(("/create_project"), handleCreateProject)
+	g.GET("/get_user_projects", handleGetUserProjects)
 
 	fmt.Println("Initialized HTTP handlers")
 }

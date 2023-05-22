@@ -99,3 +99,24 @@ func handleCreateProject(c echo.Context) error {
 	c.JSON(http.StatusOK, responseType{true, response, nil})
 	return nil
 }
+
+func handleGetUserProjects(c echo.Context) error {
+	var (
+		app  = c.Get("app").(*App)
+		user = c.Get("user").(*jwt.Token)
+	)
+
+	userId := int64(user.Claims.(jwt.MapClaims)["id"].(float64))
+
+	projects, err := app.q.GetUserProjects(c.Request().Context(), userId)
+
+	if err != nil {
+		app.log.Println("Failed to get user projects", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
+	c.JSON(http.StatusOK, responseType{true, projects, nil})
+
+	return nil
+}

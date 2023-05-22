@@ -39,6 +39,11 @@
 		console.log(data)
 	}
 
+	const handleGetAllUserProjects = async () => {
+		const { data } = await axios.get('/api/get_user_projects')
+		console.log(data)
+	}
+
 	const handleLogout = async () => {
 		await axios.post('/api/logout')
 	}
@@ -97,6 +102,11 @@
 <br />
 
 <button on:click={handleGetAllUsers}>Get all users</button>
+
+<br />
+<br />
+
+<button on:click={handleGetAllUserProjects}>Get all user projects</button>
 
 <br />
 <br />

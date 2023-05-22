@@ -1,0 +1,11 @@
+@import 'tailwindcss/base';
+
+@import 'tailwindcss/components';
+@import './styles/atoms.scss';
+
+@import 'tailwindcss/utilities';
+
+
+html, body {
+    @apply h-full w-full bg-neutral-800;
+}
