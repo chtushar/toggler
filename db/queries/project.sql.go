@@ -64,3 +64,35 @@ func (q *Queries) GetProject(ctx context.Context, id int32) (Project, error) {
 	)
 	return i, err
 }
+
+const getUserProjects = `-- name: GetUserProjects :many
+SELECT p.id, p.name, p.owner_id, p.created_at, p.updated_at FROM projects p
+INNER JOIN project_members pm ON pm.project_id = p.id
+WHERE pm.user_id = $1
+`
+
+func (q *Queries) GetUserProjects(ctx context.Context, userID int64) ([]Project, error) {
+	rows, err := q.db.Query(ctx, getUserProjects, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Project
+	for rows.Next() {
+		var i Project
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.OwnerID,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

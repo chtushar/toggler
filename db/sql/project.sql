@@ -9,3 +9,8 @@ VALUES ($1, $2);
 
 -- name: GetProject :one
 SELECT * FROM projects WHERE id = $1;
+
+-- name: GetUserProjects :many
+SELECT p.* FROM projects p
+INNER JOIN project_members pm ON pm.project_id = p.id
+WHERE pm.user_id = $1;
