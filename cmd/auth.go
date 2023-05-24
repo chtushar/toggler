@@ -18,6 +18,23 @@ func writeAuthTokenToCookie(c echo.Context, token string) {
 	c.SetCookie(cookie)
 }
 
+func handleHasAdmin(c echo.Context) error {
+	var (
+		app = c.Get("app").(*App)
+	)
+
+	count, err := app.q.CountUsers(c.Request().Context())
+
+	if err != nil {
+		app.log.Println("Failed to count users", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
+	c.JSON(http.StatusOK, responseType{true, count > 0, nil})
+	return nil
+}
+
 func handleAddAdmin(c echo.Context) error {
 	var (
 		app = c.Get("app").(*App)

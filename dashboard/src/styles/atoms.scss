@@ -5,7 +5,11 @@
             @apply block w-full px-4 py-2 rounded-md;
             @apply border border-solid border-neutral-700 outline-none focus:ring-1 focus:ring-indigo-900;
             @apply placeholder:text-sm placeholder-neutral-700;
-            @apply bg-neutral-900;
+            @apply bg-neutral-900 text-neutral-100 text-sm;
         }
+    }
+
+    label {
+        @apply block text-sm font-normal text-neutral-100 leading-6;
     }
 }

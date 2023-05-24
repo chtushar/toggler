@@ -40,6 +40,7 @@
 	"type": "module",
 	"dependencies": {
 		"@tanstack/svelte-query": "^4.29.7",
-		"axios": "^1.4.0"
+		"axios": "^1.4.0",
+		"clsx": "^1.2.1"
 	}
 }

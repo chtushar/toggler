@@ -18,14 +18,23 @@ func handleHealthCheck(c echo.Context) error {
 func initHTTPHandler(e *echo.Echo, app *App) {
 	fmt.Println("Initializing HTTP handlers")
 
+	// Middlewares
 	// Serve static files
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 		Filesystem: dashboard.BuildHTTPFS(),
 		HTML5:      true,
 	}))
 
+	// CORS
+	allowedOrigins := []string{"http://localhost:5173", "http://localhost:9091"}
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: allowedOrigins,
+		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
+	}))
+
 	// ...
 	e.GET("/api/healthcheck", handleHealthCheck)
+	e.GET("/api/has_admin", handleHasAdmin)
 
 	// Auth
 	e.POST("/api/add_admin", handleAddAdmin)
