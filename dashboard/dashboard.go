@@ -7,12 +7,12 @@ import (
 	"net/http"
 )
 
-//go:embed all:build
+//go:embed all:out
 var BuildFs embed.FS
 
 // Get the subtree of the embedded files with `build` directory as a root.
 func BuildHTTPFS() http.FileSystem {
-	build, err := fs.Sub(BuildFs, "build")
+	build, err := fs.Sub(BuildFs, "out")
 	if err != nil {
 		log.Fatal(err)
 	}
