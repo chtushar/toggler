@@ -3,4 +3,6 @@ build:
 
 run: build
 	'./bin/toggler'
- 
+
+build-api:
+	@sh -c './scripts/build-api.sh'

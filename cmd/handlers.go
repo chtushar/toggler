@@ -18,6 +18,11 @@ func handleHealthCheck(c echo.Context) error {
 func initHTTPHandler(e *echo.Echo, app *App) {
 	fmt.Println("Initializing HTTP handlers")
 
+	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:9091"},
+		AllowCredentials: true,
+	}))
+
 	// Middlewares
 	// Serve static files
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
@@ -25,12 +30,8 @@ func initHTTPHandler(e *echo.Echo, app *App) {
 		HTML5:      true,
 	}))
 
-	// CORS
-	allowedOrigins := []string{"http://localhost:5173", "http://localhost:9091"}
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: allowedOrigins,
-		AllowHeaders: []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAccept},
-	}))
+	// Check if the admin exists
+	// If not, redirect to /register-admin
 
 	// ...
 	e.GET("/api/healthcheck", handleHealthCheck)

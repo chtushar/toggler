@@ -70,7 +70,6 @@ func initDB() *pgx.Conn {
 }
 
 func initHTTPServer(app *App) *echo.Echo {
-	fmt.Println("Initializing HTTP Server")
 	srv := echo.New()
 
 	// Passing the app instance to all the handlers
@@ -84,7 +83,6 @@ func initHTTPServer(app *App) *echo.Echo {
 
 	// Initialize all the API handlers
 	initHTTPHandler(srv, app)
-	fmt.Println("Initialized HTTP Server")
 	srv.Logger.Fatal(srv.Start(fmt.Sprintf(":%d", app.port)))
 	return srv
 }
