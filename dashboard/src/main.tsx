@@ -1,3 +1,4 @@
+import './index.css'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -9,7 +10,6 @@ import {
 } from "react-router-dom";
 import Root from './scenes/root.tsx';
 import RegisterAdmin from './scenes/resgister-admin.tsx';
-import './index.css'
 import { getHasAdmin } from './hooks/queries/useHasAdmin.ts';
 
 const router = createBrowserRouter([

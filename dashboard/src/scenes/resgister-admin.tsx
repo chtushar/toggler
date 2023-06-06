@@ -1,7 +1,9 @@
+import { Button } from "@/components/ui/button";
+
 const RegisterAdmin = () => {
   return (
     <div>
-      <h1>Register Admin</h1>
+      <Button>Register Admin</Button>
     </div>
   );
 };
