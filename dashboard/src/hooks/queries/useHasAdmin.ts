@@ -3,15 +3,19 @@ import axios from "../../utils/axios"
 
 import { queryKey } from "../../constants/queryKey"
 
-const fetcher = async () => {
-    const { data } = await axios.get('/api/has_admin')
-    return data.data
+export const getHasAdmin = async () => {
+    try {
+        const { data } = await axios.get('/api/has_admin')
+        return data.data
+    } catch (error: any) {
+        throw new Error(error)
+    }
 }
 
 const useHasAdmin = () => {
     return useQuery({
         queryKey: queryKey.hasAdmin(),
-        queryFn: fetcher,
+        queryFn: getHasAdmin,
     })
 }
 
