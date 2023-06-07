@@ -55,6 +55,7 @@ func initHTTPHandler(e *echo.Echo, app *App) {
 	g.POST("/logout", handleLogout)
 
 	// Users
+	g.GET("/get_user", handleGetUser)
 	g.GET("/get_user/:id", handleGetUserByID)
 	g.GET("/get_user_by_email/:email", handleGetUserByEmail)
 	g.GET("/get_users", handleGetAllUsers)

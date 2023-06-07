@@ -154,6 +154,7 @@ func handleLogin(c echo.Context) error {
 
 	if !utils.CheckPasswordHash(req.Password, user.Password) {
 		c.JSON(http.StatusUnauthorized, UnauthorizedResponse)
+		return nil
 	}
 
 	token, err := generateToken(user.ID, user.Email, user.Name, user.Role)
