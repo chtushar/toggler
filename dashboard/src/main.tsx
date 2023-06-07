@@ -8,9 +8,13 @@ import {
   redirect,
   RouterProvider,
 } from "react-router-dom";
+
 import Root from './scenes/root.tsx';
 import RegisterAdmin from './scenes/resgister-admin.tsx';
+import Login from './scenes/login.tsx'
+
 import { getHasAdmin } from './hooks/queries/useHasAdmin.ts';
+import { getUser } from './hooks/queries/useUser.ts';
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 
 const router = createBrowserRouter([
@@ -23,7 +27,24 @@ const router = createBrowserRouter([
       if (!hasAdmin) {
         return redirect("/register-admin")
       }
-      return null
+      try {
+        await getUser()
+        return null
+      } catch (error: unknown) {
+        return redirect("/login")
+      }
+    }
+  },
+  {
+    path: "/login",
+    element: <Login />,
+    loader: async () => {
+      try {
+        await getUser()
+        return redirect("/")
+      } catch (error: unknown) {
+        return null
+      }
     }
   },
   {
