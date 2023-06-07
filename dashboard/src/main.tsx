@@ -11,6 +11,7 @@ import {
 import Root from './scenes/root.tsx';
 import RegisterAdmin from './scenes/resgister-admin.tsx';
 import { getHasAdmin } from './hooks/queries/useHasAdmin.ts';
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 
 const router = createBrowserRouter([
   {
@@ -28,6 +29,13 @@ const router = createBrowserRouter([
   {
     path: "/register-admin",
     element: <RegisterAdmin />,
+    loader: async () => {
+      const hasAdmin = await getHasAdmin()
+      if (hasAdmin) {
+        return redirect("/")
+      }
+      return null
+    }
   }
 ]);
 
@@ -35,6 +43,7 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
+      <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
   </React.StrictMode>,
 )
