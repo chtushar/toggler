@@ -3,62 +3,58 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './utils/queryClient'
-import {
-  createBrowserRouter,
-  redirect,
-  RouterProvider,
-} from "react-router-dom";
+import { createBrowserRouter, redirect, RouterProvider } from 'react-router-dom'
 
-import Root from './scenes/root.tsx';
-import RegisterAdmin from './scenes/resgister-admin.tsx';
+import Root from './scenes/root.tsx'
+import RegisterAdmin from './scenes/resgister-admin.tsx'
 import Login from './scenes/login.tsx'
 
-import { getHasAdmin } from './hooks/queries/useHasAdmin.ts';
-import { getUser } from './hooks/queries/useUser.ts';
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
+import { getHasAdmin } from './hooks/queries/useHasAdmin.ts'
+import { getUser } from './hooks/queries/useUser.ts'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <Root />,
     errorElement: <div>Something went wrong</div>,
     loader: async () => {
       const hasAdmin = await getHasAdmin()
       if (!hasAdmin) {
-        return redirect("/register-admin")
+        return redirect('/register-admin')
       }
       try {
         await getUser()
         return null
       } catch (error: unknown) {
-        return redirect("/login")
+        return redirect('/login')
       }
-    }
+    },
   },
   {
-    path: "/login",
+    path: '/login',
     element: <Login />,
     loader: async () => {
       try {
         await getUser()
-        return redirect("/")
+        return redirect('/')
       } catch (error: unknown) {
         return null
       }
-    }
+    },
   },
   {
-    path: "/register-admin",
+    path: '/register-admin',
     element: <RegisterAdmin />,
     loader: async () => {
       const hasAdmin = await getHasAdmin()
       if (hasAdmin) {
-        return redirect("/")
+        return redirect('/')
       }
       return null
-    }
-  }
-]);
+    },
+  },
+])
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
@@ -66,5 +62,5 @@ ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
       <RouterProvider router={router} />
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>
-  </React.StrictMode>,
+  </React.StrictMode>
 )
