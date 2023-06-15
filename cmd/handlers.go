@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/chtushar/toggler/dashboard"
@@ -16,7 +15,6 @@ func handleHealthCheck(c echo.Context) error {
 }
 
 func initHTTPHandler(e *echo.Echo, app *App) {
-	fmt.Println("Initializing HTTP handlers")
 
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:9091"},
@@ -66,6 +64,4 @@ func initHTTPHandler(e *echo.Echo, app *App) {
 	// Projects
 	g.POST(("/create_project"), handleCreateProject)
 	g.GET("/get_user_projects", handleGetUserProjects)
-
-	fmt.Println("Initialized HTTP handlers")
 }

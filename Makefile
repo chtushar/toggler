@@ -6,3 +6,6 @@ run: build
 
 build-api:
 	@sh -c './scripts/build-api.sh'
+
+tests:
+	@sh -c './scripts/run-tests.sh'
