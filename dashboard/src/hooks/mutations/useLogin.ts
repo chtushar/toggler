@@ -19,7 +19,7 @@ const useLogin = () => {
     },
     onSuccess: async data => {
       if (data.success) {
-        await client.setQueryData(queryKey.user(), data.data)
+        await client.setQueryData(queryKey.user(), data)
         navigate('/')
       }
     },

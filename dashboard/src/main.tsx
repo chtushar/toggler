@@ -10,38 +10,27 @@ import RegisterAdmin from './scenes/resgister-admin.tsx'
 import Login from './scenes/login.tsx'
 
 import { getHasAdmin } from './hooks/queries/useHasAdmin.ts'
-import { getUser } from './hooks/queries/useUser.ts'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { loginLoader, rootLoader } from './utils/loaders.ts'
+import Settings from './scenes/settings.tsx'
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Root />,
     errorElement: <div>Something went wrong</div>,
-    loader: async () => {
-      const hasAdmin = await getHasAdmin()
-      if (!hasAdmin) {
-        return redirect('/register-admin')
-      }
-      try {
-        await getUser()
-        return null
-      } catch (error: unknown) {
-        return redirect('/login')
-      }
-    },
+    loader: rootLoader(queryClient),
+    children: [
+      {
+        path: '/settings',
+        element: <Settings />,
+      },
+    ],
   },
   {
     path: '/login',
     element: <Login />,
-    loader: async () => {
-      try {
-        await getUser()
-        return redirect('/')
-      } catch (error: unknown) {
-        return null
-      }
-    },
+    loader: loginLoader(queryClient),
   },
   {
     path: '/register-admin',

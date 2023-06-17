@@ -1,20 +1,24 @@
-import useLogout from '@/hooks/mutations/useLogout'
+import { Outlet, redirect } from 'react-router-dom'
+import Layout from '@/components/common/layout'
+import SidebarConfigProvider from '@/context/SidebarConfigProvider'
+import useUser from '@/hooks/queries/useUser'
+import React from 'react'
 
 const Root = () => {
-  const { mutate } = useLogout()
+  const { data, isError } = useUser()
 
-  const handleLogout: React.MouseEventHandler<HTMLButtonElement> = e => {
-    e.preventDefault()
-    mutate()
-  }
+  React.useEffect(() => {
+    if (data || isError) {
+      redirect('/login')
+    }
+  }, [data, isError])
 
   return (
-    <>
-      <div>
-        <h1>Root</h1>
-        <button onClick={handleLogout}>Logout</button>
-      </div>
-    </>
+    <SidebarConfigProvider>
+      <Layout>
+        <Outlet />
+      </Layout>
+    </SidebarConfigProvider>
   )
 }
 
