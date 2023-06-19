@@ -8,13 +8,15 @@ import {
 interface ButtonItem {
   as: 'button'
   label: string
+  icon?: React.ReactElement
   onClick: () => void
   path?: never
 }
 
 interface AnchorItem {
-  as: 'button'
+  as: 'a'
   label: string
+  icon?: React.ReactElement
   onClick?: never
   path: string
 }
@@ -66,7 +68,7 @@ const SidebarConfigProvider = ({ children }: { children: React.ReactNode }) => {
   )
 
   useEffect(() => {
-    if (location.pathname === '/settings') {
+    if (location.pathname.startsWith('/settings')) {
       dispatch({
         type: 'SETTINGS',
         config: settingsPageSidebarConfig,

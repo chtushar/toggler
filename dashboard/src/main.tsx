@@ -8,11 +8,13 @@ import { createBrowserRouter, redirect, RouterProvider } from 'react-router-dom'
 import Root from './scenes/root.tsx'
 import RegisterAdmin from './scenes/resgister-admin.tsx'
 import Login from './scenes/login.tsx'
+import Settings from './scenes/settings.tsx'
+
+import Members from './components/settings/members.tsx'
 
 import { getHasAdmin } from './hooks/queries/useHasAdmin.ts'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { loginLoader, rootLoader } from './utils/loaders.ts'
-import Settings from './scenes/settings.tsx'
 
 const router = createBrowserRouter([
   {
@@ -24,6 +26,16 @@ const router = createBrowserRouter([
       {
         path: '/settings',
         element: <Settings />,
+        children: [
+          {
+            path: '/settings/account',
+            element: <Members />,
+          },
+          {
+            path: '/settings/members',
+            element: <Members />,
+          },
+        ],
       },
     ],
   },
