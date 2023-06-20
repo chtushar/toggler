@@ -7,7 +7,7 @@ const useLogout = () => {
 
   return useMutation({
     mutationFn: async () => {
-      await axios.post('/api/logout')
+      await axios.post('/api/v1/logout')
       queryClient.removeQueries()
 
       window.location.reload()

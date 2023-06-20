@@ -5,7 +5,7 @@ import { queryKey } from '../../constants/queryKey'
 
 export const getHasAdmin = async () => {
   try {
-    const { data } = await axios.get('/api/has_admin')
+    const { data } = await axios.get('/api/v1/has_admin')
     return data.data
   } catch (error: any) {
     throw new Error(error)

@@ -6,7 +6,7 @@ import { queryClient } from './utils/queryClient'
 import { createBrowserRouter, redirect, RouterProvider } from 'react-router-dom'
 
 import Root from './scenes/root.tsx'
-import RegisterAdmin from './scenes/resgister-admin.tsx'
+import RegisterAdmin from './scenes/register-admin.tsx'
 import Login from './scenes/login.tsx'
 import Settings from './scenes/settings.tsx'
 

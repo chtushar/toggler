@@ -8,31 +8,19 @@ const Sidebar = () => {
   return (
     <div className="h-full p-4 md:max-w-[240px] w-full border border-r border-solid border-slate-200">
       {config.topBar}
-      <ul className="w-full mt-16">
-        {config.items.map(item => {
+      <div className="flex w-full flex-col">
+        {config.sections?.map(section => {
           return (
-            <li key={item.label} className="w-full">
-              <Button
-                asChild={item.as === 'a'}
-                className="w-full justify-start"
-                variant="ghost"
-              >
-                {item.as === 'a' ? (
-                  <Link to={item.path}>
-                    {item?.icon}
-                    {item.label}
-                  </Link>
-                ) : (
-                  <>
-                    {item?.icon}
-                    {item.label}
-                  </>
-                )}
-              </Button>
-            </li>
+            <div className="w-full flex flex-col gap-4 py-4">
+              {!!section.label && (
+                <p className="text-base text-muted-foreground">
+                  {section.label}
+                </p>
+              )}
+            </div>
           )
         })}
-      </ul>
+      </div>
     </div>
   )
 }

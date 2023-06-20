@@ -11,6 +11,7 @@ interface ButtonItem {
   icon?: React.ReactElement
   onClick: () => void
   path?: never
+  section?: string
 }
 
 interface AnchorItem {
@@ -19,12 +20,20 @@ interface AnchorItem {
   icon?: React.ReactElement
   onClick?: never
   path: string
+  section?: string
+}
+
+interface SectionItem {
+  id: string
+  label?: string
+  sectionCTA?: ButtonItem | AnchorItem
 }
 
 export interface SidebarConfigType {
   key: string
   topBar: React.ReactElement
   items: Array<ButtonItem | AnchorItem>
+  sections?: Array<SectionItem>
 }
 
 export interface SidebarConfigAction {

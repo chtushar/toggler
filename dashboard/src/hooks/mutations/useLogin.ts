@@ -14,7 +14,7 @@ const useLogin = () => {
 
   return useMutation({
     mutationFn: async (data: LoginData) => {
-      const response = await axios.post('/api/login', data)
+      const response = await axios.post('/api/v1/login', data)
       return response.data
     },
     onSuccess: async data => {

@@ -1,3 +1,6 @@
+DROP TABLE IF EXISTS organization_onboarding;
+DROP TABLE IF EXISTS organization_members;
+DROP TABLE IF EXISTS organizations;
 DROP TABLE IF EXISTS project_members;
 DROP TABLE IF EXISTS feature_flags;
 DROP TABLE IF EXISTS users;

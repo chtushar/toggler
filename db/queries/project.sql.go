@@ -25,22 +25,24 @@ func (q *Queries) AddProjectMember(ctx context.Context, arg AddProjectMemberPara
 }
 
 const createProject = `-- name: CreateProject :one
-INSERT INTO projects(name, owner_id)
-VALUES ($1, $2)
-RETURNING id, name, owner_id, created_at, updated_at
+INSERT INTO projects(name, owner_id, org_id)
+VALUES ($1, $2, $3)
+RETURNING id, name, org_id, owner_id, created_at, updated_at
 `
 
 type CreateProjectParams struct {
 	Name    string
 	OwnerID int64
+	OrgID   int64
 }
 
 func (q *Queries) CreateProject(ctx context.Context, arg CreateProjectParams) (Project, error) {
-	row := q.db.QueryRow(ctx, createProject, arg.Name, arg.OwnerID)
+	row := q.db.QueryRow(ctx, createProject, arg.Name, arg.OwnerID, arg.OrgID)
 	var i Project
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
+		&i.OrgID,
 		&i.OwnerID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -49,7 +51,9 @@ func (q *Queries) CreateProject(ctx context.Context, arg CreateProjectParams) (P
 }
 
 const getProject = `-- name: GetProject :one
-SELECT id, name, owner_id, created_at, updated_at FROM projects WHERE id = $1
+SELECT id, name, org_id, owner_id, created_at, updated_at
+FROM projects
+WHERE id = $1
 `
 
 func (q *Queries) GetProject(ctx context.Context, id int32) (Project, error) {
@@ -58,6 +62,7 @@ func (q *Queries) GetProject(ctx context.Context, id int32) (Project, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
+		&i.OrgID,
 		&i.OwnerID,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -66,8 +71,9 @@ func (q *Queries) GetProject(ctx context.Context, id int32) (Project, error) {
 }
 
 const getUserProjects = `-- name: GetUserProjects :many
-SELECT p.id, p.name, p.owner_id, p.created_at, p.updated_at FROM projects p
-INNER JOIN project_members pm ON pm.project_id = p.id
+SELECT p.id, p.name, p.org_id, p.owner_id, p.created_at, p.updated_at
+FROM projects p
+    INNER JOIN project_members pm ON pm.project_id = p.id
 WHERE pm.user_id = $1
 `
 
@@ -83,6 +89,7 @@ func (q *Queries) GetUserProjects(ctx context.Context, userID int64) ([]Project,
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
+			&i.OrgID,
 			&i.OwnerID,
 			&i.CreatedAt,
 			&i.UpdatedAt,

@@ -22,7 +22,7 @@ const useRegisterAdmin = () => {
 
   return useMutation({
     mutationFn: async (data: RegisterAdminData) => {
-      const response = await axios.post('/api/add_admin', data)
+      const response = await axios.post('/api/v1/add_admin', data)
       return response.data
     },
     onSuccess: async (data: ApiResponse<RegisterAdminResponseData>) => {

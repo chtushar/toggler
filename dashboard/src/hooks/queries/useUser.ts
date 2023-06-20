@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 
 export const getUser = async () => {
   try {
-    const response = await axios.get('/api/get_user')
+    const response = await axios.get('/api/v1/get_user')
     return response.data
   } catch (error: any) {
     throw new Error(error)

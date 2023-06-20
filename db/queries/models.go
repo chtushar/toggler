@@ -5,6 +5,7 @@
 package queries
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"fmt"
 	"time"
@@ -119,9 +120,29 @@ type FeatureState struct {
 	UpdatedAt     time.Time
 }
 
+type Organization struct {
+	ID        int32
+	Name      string
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type OrganizationMember struct {
+	UserID    int64
+	OrgID     int64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+}
+
+type OrganizationOnboarding struct {
+	OrgID         int64
+	CreateProject sql.NullBool
+}
+
 type Project struct {
 	ID        int32
 	Name      string
+	OrgID     int64
 	OwnerID   int64
 	CreatedAt time.Time
 	UpdatedAt time.Time
