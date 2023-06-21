@@ -15,8 +15,8 @@ VALUES ($1, $2)
 `
 
 type AddOrganizationMemberParams struct {
-	UserID int64
-	OrgID  int64
+	UserID int64 `json:"user_id"`
+	OrgID  int64 `json:"org_id"`
 }
 
 func (q *Queries) AddOrganizationMember(ctx context.Context, arg AddOrganizationMemberParams) error {

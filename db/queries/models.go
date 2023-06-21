@@ -97,85 +97,85 @@ func (ns NullUserRole) Value() (driver.Value, error) {
 }
 
 type Environment struct {
-	ID        int32
-	Name      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        int32     `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type FeatureFlag struct {
-	ID        int32
-	ProjectID int64
-	Type      FeatureFlagType
-	Name      string
+	ID        int32           `json:"id"`
+	ProjectID int64           `json:"project_id"`
+	Type      FeatureFlagType `json:"type"`
+	Name      string          `json:"name"`
 }
 
 type FeatureState struct {
-	ID            int32
-	EnvironmentID int64
-	FeatureFlagID int64
-	Enabled       bool
-	Value         pgtype.JSONB
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	ID            int32        `json:"id"`
+	EnvironmentID int64        `json:"environment_id"`
+	FeatureFlagID int64        `json:"feature_flag_id"`
+	Enabled       bool         `json:"enabled"`
+	Value         pgtype.JSONB `json:"value"`
+	CreatedAt     time.Time    `json:"created_at"`
+	UpdatedAt     time.Time    `json:"updated_at"`
 }
 
 type Organization struct {
-	ID        int32
-	Name      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        int32     `json:"id"`
+	Name      string    `json:"name"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type OrganizationMember struct {
-	UserID    int64
-	OrgID     int64
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	UserID    int64     `json:"user_id"`
+	OrgID     int64     `json:"org_id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type OrganizationOnboarding struct {
-	OrgID         int64
-	CreateProject sql.NullBool
+	OrgID         int64        `json:"org_id"`
+	CreateProject sql.NullBool `json:"create_project"`
 }
 
 type Project struct {
-	ID        int32
-	Name      string
-	OrgID     int64
-	OwnerID   int64
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID        int32     `json:"id"`
+	Name      string    `json:"name"`
+	OrgID     int64     `json:"org_id"`
+	OwnerID   int64     `json:"owner_id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type ProjectEnviornment struct {
-	ProjectID     int64
-	EnvironmentID int64
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	ProjectID     int64     `json:"project_id"`
+	EnvironmentID int64     `json:"environment_id"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 type ProjectFeature struct {
-	ProjectID     int64
-	FeatureFlagID int64
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	ProjectID     int64     `json:"project_id"`
+	FeatureFlagID int64     `json:"feature_flag_id"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }
 
 type ProjectMember struct {
-	UserID    int64
-	ProjectID int64
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	UserID    int64     `json:"user_id"`
+	ProjectID int64     `json:"project_id"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type User struct {
-	ID            int32
-	Name          string
-	Password      string
-	Email         string
-	EmailVerified bool
-	Role          UserRole
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	ID            int32     `json:"id"`
+	Name          string    `json:"name"`
+	Password      string    `json:"password"`
+	Email         string    `json:"email"`
+	EmailVerified bool      `json:"email_verified"`
+	Role          UserRole  `json:"role"`
+	CreatedAt     time.Time `json:"created_at"`
+	UpdatedAt     time.Time `json:"updated_at"`
 }

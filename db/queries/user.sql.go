@@ -27,11 +27,11 @@ RETURNING id, name, password, email, email_verified, role, created_at, updated_a
 `
 
 type CreateUserParams struct {
-	Name          string
-	Email         string
-	EmailVerified bool
-	Password      string
-	Role          UserRole
+	Name          string   `json:"name"`
+	Email         string   `json:"email"`
+	EmailVerified bool     `json:"email_verified"`
+	Password      string   `json:"password"`
+	Role          UserRole `json:"role"`
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
@@ -149,11 +149,11 @@ RETURNING id, name, password, email, email_verified, role, created_at, updated_a
 `
 
 type UpdateUserParams struct {
-	Name          string
-	Email         string
-	Role          UserRole
-	EmailVerified bool
-	ID            int32
+	Name          string   `json:"name"`
+	Email         string   `json:"email"`
+	Role          UserRole `json:"role"`
+	EmailVerified bool     `json:"email_verified"`
+	ID            int32    `json:"id"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
@@ -186,8 +186,8 @@ RETURNING id, name, password, email, email_verified, role, created_at, updated_a
 `
 
 type UpdateUserPasswordParams struct {
-	Password string
-	ID       int32
+	Password string `json:"password"`
+	ID       int32  `json:"id"`
 }
 
 func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error) {

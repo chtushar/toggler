@@ -8,3 +8,4 @@ sql:
         package: "queries"
         sql_package: "pgx/v4"
         out: "queries"
+        emit_json_tags: true

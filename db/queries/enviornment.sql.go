@@ -15,9 +15,9 @@ VALUES ($1, $2), ($1, $3)
 `
 
 type AddProdAndDevProjectEnviornmentsParams struct {
-	ProjectID       int64
-	EnvironmentID   int64
-	EnvironmentID_2 int64
+	ProjectID       int64 `json:"project_id"`
+	EnvironmentID   int64 `json:"environment_id"`
+	EnvironmentID_2 int64 `json:"environment_id_2"`
 }
 
 func (q *Queries) AddProdAndDevProjectEnviornments(ctx context.Context, arg AddProdAndDevProjectEnviornmentsParams) error {
@@ -31,8 +31,8 @@ VALUES ($1, $2)
 `
 
 type AddProjectEnvironmentParams struct {
-	ProjectID     int64
-	EnvironmentID int64
+	ProjectID     int64 `json:"project_id"`
+	EnvironmentID int64 `json:"environment_id"`
 }
 
 func (q *Queries) AddProjectEnvironment(ctx context.Context, arg AddProjectEnvironmentParams) error {

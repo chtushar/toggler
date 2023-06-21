@@ -27,12 +27,12 @@ interface SectionItem {
   id: string
   label?: string
   sectionCTA?: ButtonItem | AnchorItem
+  items?: Array<ButtonItem | AnchorItem>
 }
 
 export interface SidebarConfigType {
   key: string
-  topBar: React.ReactElement
-  items: Array<ButtonItem | AnchorItem>
+  topBar?: React.ReactElement
   sections?: Array<SectionItem>
 }
 

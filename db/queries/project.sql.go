@@ -15,8 +15,8 @@ VALUES ($1, $2)
 `
 
 type AddProjectMemberParams struct {
-	UserID    int64
-	ProjectID int64
+	UserID    int64 `json:"user_id"`
+	ProjectID int64 `json:"project_id"`
 }
 
 func (q *Queries) AddProjectMember(ctx context.Context, arg AddProjectMemberParams) error {
@@ -31,9 +31,9 @@ RETURNING id, name, org_id, owner_id, created_at, updated_at
 `
 
 type CreateProjectParams struct {
-	Name    string
-	OwnerID int64
-	OrgID   int64
+	Name    string `json:"name"`
+	OwnerID int64  `json:"owner_id"`
+	OrgID   int64  `json:"org_id"`
 }
 
 func (q *Queries) CreateProject(ctx context.Context, arg CreateProjectParams) (Project, error) {

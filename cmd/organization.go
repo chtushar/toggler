@@ -14,7 +14,6 @@ func handleCreateOrganization(c echo.Context) error {
 		app  = c.Get("app").(*App)
 		req = &struct {
 			Name string `json:"name"`;
-			UserID string `json:"user_id"`;
 		}{}
 	)
 
@@ -34,7 +33,7 @@ func handleCreateOrganization(c echo.Context) error {
 	tx, err := app.dbConn.Begin(c.Request().Context())
 
 	if err != nil {
-		app.log.Println("Failed to create project", err)
+		app.log.Println("Failed to create organization", err)
 		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 		return err
 	}
@@ -67,10 +66,37 @@ func handleCreateOrganization(c echo.Context) error {
 		return err
 	}
 
+	tx.Commit(c.Request().Context())
+
 	c.JSON(http.StatusOK, responseType{
 		Success: true,
 		Data: org,
 		Error: nil,
 	})
+	return nil
+}
+
+func handleGetUserOrganizations (c echo.Context) error {
+	var (
+		user = c.Get("user").(*jwt.Token)
+		app  = c.Get("app").(*App)
+	)
+
+	claims := user.Claims.(jwt.MapClaims)
+	userId := int64(claims["id"].(float64))
+
+	orgs, err := app.q.GetUserOrganizations(c.Request().Context(), userId)
+	if err != nil {
+		app.log.Println("Failed to get user organizations", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
+	c.JSON(http.StatusOK, responseType{
+		Success: true,
+		Data: orgs,
+		Error: nil,
+	})
+
 	return nil
 }

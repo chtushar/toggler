@@ -1,6 +1,10 @@
-import { queryKey } from '@/constants/queryKey'
-import axios from '@/utils/axios'
 import { useQuery } from '@tanstack/react-query'
+import axios from '@/utils/axios'
+
+import { queryKey } from '@/constants/queryKey'
+
+import type { ApiResponse } from '@/types'
+import { User } from '@/types/models'
 
 export const getUser = async () => {
   try {
@@ -12,7 +16,7 @@ export const getUser = async () => {
 }
 
 const useUser = () => {
-  return useQuery({
+  return useQuery<ApiResponse<User>>({
     queryKey: queryKey.user(),
     queryFn: getUser,
   })

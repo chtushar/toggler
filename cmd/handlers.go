@@ -53,6 +53,7 @@ func initHTTPHandler(e *echo.Echo, app *App) {
 
 	// Organizations
 	v1_protected.POST("/create_organization", handleCreateOrganization)
+	v1_protected.GET("/get_user_organizations", handleGetUserOrganizations)
 
 	// Auth
 	v1_protected.POST("/logout", handleLogout)

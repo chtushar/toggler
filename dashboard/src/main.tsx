@@ -8,13 +8,13 @@ import { createBrowserRouter, redirect, RouterProvider } from 'react-router-dom'
 import Root from './scenes/root.tsx'
 import RegisterAdmin from './scenes/register-admin.tsx'
 import Login from './scenes/login.tsx'
-import Settings from './scenes/settings.tsx'
-
-import Members from './components/settings/members.tsx'
 
 import { getHasAdmin } from './hooks/queries/useHasAdmin.ts'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { loginLoader, rootLoader } from './utils/loaders.ts'
+import New from './scenes/new.tsx'
+import CreateOrg from './components/new/CreateOrg.tsx'
+import CreateProject from './components/new/Createproject.tsx'
 
 const router = createBrowserRouter([
   {
@@ -22,20 +22,20 @@ const router = createBrowserRouter([
     element: <Root />,
     errorElement: <div>Something went wrong</div>,
     loader: rootLoader(queryClient),
+  },
+  {
+    path: '/organizations',
+    element: <New />,
+    errorElement: <div>Something went wrong</div>,
+    loader: rootLoader(queryClient),
     children: [
       {
-        path: '/settings',
-        element: <Settings />,
-        children: [
-          {
-            path: '/settings/account',
-            element: <Members />,
-          },
-          {
-            path: '/settings/members',
-            element: <Members />,
-          },
-        ],
+        path: '/organizations/new',
+        element: <CreateOrg />,
+      },
+      {
+        path: '/organizations/new/:orgId/project',
+        element: <CreateProject />,
       },
     ],
   },
