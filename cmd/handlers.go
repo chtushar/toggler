@@ -61,4 +61,7 @@ func initHTTPHandler(e *echo.Echo, app *App) {
 	// Users
 	v1_protected.GET("/get_user", handleGetUser)
 	v1_protected.GET("/get_user/:id", handleGetUserByID)
+
+	// Projects
+	v1_protected.POST("/create_project", handleCreateProject)
 }

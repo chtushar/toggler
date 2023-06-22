@@ -14,7 +14,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { loginLoader, rootLoader } from './utils/loaders.ts'
 import New from './scenes/new.tsx'
 import CreateOrg from './components/new/CreateOrg.tsx'
-import CreateProject from './components/new/Createproject.tsx'
+import CreateProject from './components/new/CreateProject.tsx'
 
 const router = createBrowserRouter([
   {

@@ -1,4 +1,8 @@
 version: "2"
+plugins:
+  - name: "ts"
+    process:
+      cmd: "sqlc-ts"
 sql:
   - engine: "postgresql"
     queries: "./sql"

@@ -14,16 +14,13 @@ func handleCreateProject(c echo.Context) error {
 		user = c.Get("user").(*jwt.Token)
 		req  = &struct {
 			Name string `json:"name"`
+			OrgId int32 `json:"orgId"`
 		}{}
 	)
 
-	type resType struct {
-		ID           int32                 `json:"id"`
-		Name         string                `json:"name"`
-		Enviornments []queries.Environment `json:"enviornments"`
-	}
-
 	if err := c.Bind(req); err != nil {
+		app.log.Println("Failed to create project", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 		return err
 	}
 
@@ -46,6 +43,7 @@ func handleCreateProject(c echo.Context) error {
 	project, err := qtx.CreateProject(c.Request().Context(), queries.CreateProjectParams{
 		Name:    req.Name,
 		OwnerID: ownerId,
+		OrgID: int64(req.OrgId),
 	})
 
 	if err != nil {
@@ -90,13 +88,7 @@ func handleCreateProject(c echo.Context) error {
 
 	tx.Commit(c.Request().Context())
 
-	response := resType{
-		ID:           project.ID,
-		Name:         project.Name,
-		Enviornments: envs,
-	}
-
-	c.JSON(http.StatusOK, responseType{true, response, nil})
+	c.JSON(http.StatusOK, responseType{true, project, nil})
 	return nil
 }
 

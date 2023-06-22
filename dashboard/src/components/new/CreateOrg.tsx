@@ -19,12 +19,8 @@ const CreateOrg = () => {
     }
 
     mutate(data, {
-      onError: () => {
-        formRef.current?.reset()
-      },
-      onSuccess: () => {
-        formRef.current?.reset()
-      },
+      onError: () => formRef.current?.reset(),
+      onSuccess: () => formRef.current?.reset(),
     })
   }
 
