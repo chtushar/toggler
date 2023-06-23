@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"database/sql"
 	"net/http"
 
 	"github.com/chtushar/toggler/db/queries"
@@ -25,7 +26,7 @@ func handleGetAllUsers(c echo.Context) error {
 	type resType struct {
 		Id            int32            `json:"id"`
 		Name          string           `json:"name"`
-		Email         string           `json:"email"`
+		Email         sql.NullString   `json:"email"`
 		EmailVerified bool             `json:"email_verified"`
 		Role          queries.UserRole `json:"role"`
 	}
@@ -69,7 +70,7 @@ func handleCreateUser(c echo.Context) error {
 		app = c.Get("app").(*App)
 		req = &struct {
 			Name     string           `json:"name"`
-			Email    string           `json:"email"`
+			Email    sql.NullString           `json:"email"`
 			Password string           `json:"password"`
 			Role     queries.UserRole `json:"role"`
 		}{}
@@ -78,7 +79,7 @@ func handleCreateUser(c echo.Context) error {
 	type resType struct {
 		Id            int32            `json:"id"`
 		Name          string           `json:"name"`
-		Email         string           `json:"email"`
+		Email         sql.NullString           `json:"email"`
 		EmailVerified bool             `json:"email_verified"`
 		Role          queries.UserRole `json:"role"`
 	}

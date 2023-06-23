@@ -43,7 +43,7 @@ func (q *Queries) AddProjectEnvironment(ctx context.Context, arg AddProjectEnvir
 const createEnvironment = `-- name: CreateEnvironment :one
 INSERT INTO environments(name)
 VALUES ($1)
-RETURNING id, name, created_at, updated_at
+RETURNING id, name, uuid, created_at, updated_at
 `
 
 func (q *Queries) CreateEnvironment(ctx context.Context, name string) (Environment, error) {
@@ -52,6 +52,7 @@ func (q *Queries) CreateEnvironment(ctx context.Context, name string) (Environme
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
+		&i.Uuid,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -61,7 +62,7 @@ func (q *Queries) CreateEnvironment(ctx context.Context, name string) (Environme
 const createProdAndDevEnvironments = `-- name: CreateProdAndDevEnvironments :many
 INSERT INTO environments(name)
 VALUES ('production'), ('development')
-RETURNING id, name, created_at, updated_at
+RETURNING id, name, uuid, created_at, updated_at
 `
 
 func (q *Queries) CreateProdAndDevEnvironments(ctx context.Context) ([]Environment, error) {
@@ -76,6 +77,7 @@ func (q *Queries) CreateProdAndDevEnvironments(ctx context.Context) ([]Environme
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
+			&i.Uuid,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {

@@ -11,3 +11,4 @@ DROP TABLE IF EXISTS project_features;
 DROP TABLE IF EXISTS feature_states;
 DROP TYPE IF EXISTS user_role CASCADE;
 DROP TYPE IF EXISTS feature_flag_type CASCADE;
+DROP EXTENSION IF EXISTS "uuid-ossp";

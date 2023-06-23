@@ -27,7 +27,7 @@ func (q *Queries) AddOrganizationMember(ctx context.Context, arg AddOrganization
 const createOrganization = `-- name: CreateOrganization :one
 INSERT INTO organizations(name)
 VALUES ($1)
-RETURNING id, name, created_at, updated_at
+RETURNING id, uuid, name, created_at, updated_at
 `
 
 func (q *Queries) CreateOrganization(ctx context.Context, name string) (Organization, error) {
@@ -35,6 +35,7 @@ func (q *Queries) CreateOrganization(ctx context.Context, name string) (Organiza
 	var i Organization
 	err := row.Scan(
 		&i.ID,
+		&i.Uuid,
 		&i.Name,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -43,7 +44,7 @@ func (q *Queries) CreateOrganization(ctx context.Context, name string) (Organiza
 }
 
 const getOrganization = `-- name: GetOrganization :one
-SELECT id, name, created_at, updated_at
+SELECT id, uuid, name, created_at, updated_at
 FROM organizations
 WHERE id = $1
 `
@@ -53,6 +54,7 @@ func (q *Queries) GetOrganization(ctx context.Context, id int32) (Organization, 
 	var i Organization
 	err := row.Scan(
 		&i.ID,
+		&i.Uuid,
 		&i.Name,
 		&i.CreatedAt,
 		&i.UpdatedAt,
@@ -61,7 +63,7 @@ func (q *Queries) GetOrganization(ctx context.Context, id int32) (Organization, 
 }
 
 const getUserOrganizations = `-- name: GetUserOrganizations :many
-SELECT o.id, o.name, o.created_at, o.updated_at
+SELECT o.id, o.uuid, o.name, o.created_at, o.updated_at
 FROM organizations o
     INNER JOIN organization_members om ON om.org_id = o.id
 WHERE om.user_id = $1
@@ -78,6 +80,7 @@ func (q *Queries) GetUserOrganizations(ctx context.Context, userID int64) ([]Org
 		var i Organization
 		if err := rows.Scan(
 			&i.ID,
+			&i.Uuid,
 			&i.Name,
 			&i.CreatedAt,
 			&i.UpdatedAt,

@@ -1,10 +1,13 @@
 package cmd
 
 import (
+	"database/sql"
+	"fmt"
 	"net/http"
 
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/chtushar/toggler/utils"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -48,8 +51,9 @@ func handleAddAdmin(c echo.Context) error {
 	// Response type
 	type resType struct {
 		Id            int32            `json:"id"`
+		Uuid		  uuid.NullUUID	`json:"uuid"`
 		Name          string           `json:"name"`
-		Email         string           `json:"email"`
+		Email         string  `json:"email"`
 		EmailVerified bool             `json:"email_verified"`
 		Role          queries.UserRole `json:"role"`
 	}
@@ -86,7 +90,7 @@ func handleAddAdmin(c echo.Context) error {
 	// Create the user with admin role
 	user, err := app.q.CreateUser(c.Request().Context(), queries.CreateUserParams{
 		Name:          req.Name,
-		Email:         req.Email,
+		Email:         sql.NullString{ String: req.Email, Valid: true},
 		EmailVerified: true,
 		Password:      hash,
 		Role:          queries.UserRoleAdmin,
@@ -99,7 +103,7 @@ func handleAddAdmin(c echo.Context) error {
 	}
 
 	// Generate JWT token
-	token, err := generateToken(user.ID, user.Email, user.Name, user.Role)
+	token, err := generateToken(user.ID, user.Uuid, user.Email, user.Name, user.Role)
 
 	if err != nil {
 		app.log.Println("Failed to generate token", err)
@@ -113,7 +117,7 @@ func handleAddAdmin(c echo.Context) error {
 	response := resType{
 		Id:            user.ID,
 		Name:          user.Name,
-		Email:         user.Email,
+		Email:         user.Email.String,
 		EmailVerified: user.EmailVerified,
 		Role:          user.Role,
 	}
@@ -133,18 +137,20 @@ func handleLogin(c echo.Context) error {
 
 	type resType struct {
 		Id            int32            `json:"id"`
+		Uuid		  uuid.NullUUID	   `json:"uuid"`
 		Name          string           `json:"name"`
-		Email         string           `json:"email"`
+		Email         string   		   `json:"email"`
 		EmailVerified bool             `json:"email_verified"`
 		Role          queries.UserRole `json:"role"`
 	}
 
 	if err := c.Bind(req); err != nil {
+		fmt.Println(err)
 		c.JSON(http.StatusBadRequest, BadRequestResponse)
 		return err
 	}
 
-	user, err := app.q.GetUserByEmail(c.Request().Context(), req.Email)
+	user, err := app.q.GetUserByEmail(c.Request().Context(), sql.NullString{String: req.Email, Valid: true })
 
 	if err != nil {
 		app.log.Println("Failed to get user", err)
@@ -157,7 +163,7 @@ func handleLogin(c echo.Context) error {
 		return nil
 	}
 
-	token, err := generateToken(user.ID, user.Email, user.Name, user.Role)
+	token, err := generateToken(user.ID, user.Uuid, user.Email, user.Name, user.Role)
 
 	if err != nil {
 		app.log.Println("Failed to generate token", err)
@@ -169,8 +175,9 @@ func handleLogin(c echo.Context) error {
 
 	response := resType{
 		Id:            user.ID,
+		Uuid: 		   user.Uuid,
 		Name:          user.Name,
-		Email:         user.Email,
+		Email:         user.Email.String,
 		EmailVerified: user.EmailVerified,
 		Role:          user.Role,
 	}
