@@ -19,6 +19,7 @@ const useUser = () => {
   return useQuery<ApiResponse<User>>({
     queryKey: queryKey.user(),
     queryFn: getUser,
+    staleTime: 2 * 60 * 1000,
   })
 }
 

@@ -19,6 +19,7 @@ const useUserOrganizations = () => {
   return useQuery<ApiResponse<Array<Organization>>>({
     queryKey: queryKey.userOrganizations(data?.data.id as string),
     queryFn: getUserOrganizations,
+    staleTime: 2 * 60 * 1000,
   })
 }
 

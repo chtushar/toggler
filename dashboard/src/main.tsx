@@ -22,6 +22,12 @@ const router = createBrowserRouter([
     element: <Root />,
     errorElement: <div>Something went wrong</div>,
     loader: rootLoader(queryClient),
+    children: [
+      {
+        path: '/organizations/:orgId',
+        element: <div>Hello</div>,
+      },
+    ],
   },
   {
     path: '/organizations',

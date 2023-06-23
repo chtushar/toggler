@@ -1,9 +1,6 @@
-import { Dispatch, createContext, useEffect, useReducer } from 'react'
-import { Location, useLocation } from 'react-router-dom'
-import {
-  defaultSidebarConfig,
-  settingsPageSidebarConfig,
-} from './sidebar-configs'
+import { Dispatch, createContext, useReducer } from 'react'
+import { produce } from 'immer'
+import { defaultSidebarConfig } from './sidebar-configs'
 
 interface ButtonItem {
   as: 'button'
@@ -37,58 +34,36 @@ export interface SidebarConfigType {
 }
 
 export interface SidebarConfigAction {
-  type: 'DEFAULT' | 'SETTINGS'
-  config: SidebarConfigType
+  type: 'DEFAULT' | 'ADD_ORGANIZATIONS'
+  data: unknown
 }
 
 const SidebarConfigContext = createContext<{
   config: SidebarConfigType
   dispatch: Dispatch<SidebarConfigAction> | null
-}>({
-  config: defaultSidebarConfig,
-  dispatch: null,
-})
+} | null>(null)
 
 const reducer = (state: SidebarConfigType, action: SidebarConfigAction) => {
   switch (action.type) {
     case 'DEFAULT':
       return defaultSidebarConfig
-    case 'SETTINGS':
-      return action.config
+    case 'ADD_ORGANIZATIONS':
+      return produce(state, draft => {
+        const orgs = draft.sections?.find(
+          section => section.id === 'organizations'
+        )
+        if (orgs) {
+          orgs.items = action.data as Array<any>
+        }
+        return draft
+      })
     default:
       return defaultSidebarConfig
   }
 }
 
-const createInitialState =
-  (location: Location) => (initialState: SidebarConfigType) => {
-    if (location.pathname === '/settings') {
-      return settingsPageSidebarConfig
-    }
-    return initialState
-  }
-
 const SidebarConfigProvider = ({ children }: { children: React.ReactNode }) => {
-  const location = useLocation()
-  const [config, dispatch] = useReducer(
-    reducer,
-    defaultSidebarConfig,
-    createInitialState(location)
-  )
-
-  useEffect(() => {
-    if (location.pathname.startsWith('/settings')) {
-      dispatch({
-        type: 'SETTINGS',
-        config: settingsPageSidebarConfig,
-      })
-    } else {
-      dispatch({
-        type: 'DEFAULT',
-        config: defaultSidebarConfig,
-      })
-    }
-  }, [location])
+  const [config, dispatch] = useReducer(reducer, defaultSidebarConfig)
 
   return (
     <SidebarConfigContext.Provider

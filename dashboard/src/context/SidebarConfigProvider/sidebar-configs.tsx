@@ -1,8 +1,5 @@
 import { UserCog, PlusIcon, LogOut } from 'lucide-react'
 
-import DefaultTopbar from '@/components/common/sidebar/DefaultTopBar'
-import SettingsTopBar from '@/components/common/sidebar/SettingsTopBar'
-
 import { logout } from '@/hooks/mutations/useLogout'
 import { queryClient } from '@/utils/queryClient'
 
@@ -30,7 +27,6 @@ export const defaultSidebarConfig: SidebarConfigType = {
           path: '/account/preferences',
           label: 'Preferences',
           icon: <UserCog className="mr-2 h-4 w-4" />,
-          section: 'account',
         },
         {
           as: 'button',
