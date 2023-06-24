@@ -29,14 +29,9 @@ const fetchInitialData = async (queryClient: QueryClient) => {
 
 export const rootLoader = (queryClient: QueryClient) => async () => {
   await fetchInitialData(queryClient)
-  const hasAdmin = queryClient.getQueryData(queryKey.hasAdmin())
   const user = queryClient.getQueryData(queryKey.user())
 
-  if (!hasAdmin) {
-    return redirect('/register-admin')
-  }
-
-  if (hasAdmin && typeof user === 'undefined') {
+  if (typeof user === 'undefined') {
     return redirect('/login')
   }
 
@@ -45,12 +40,7 @@ export const rootLoader = (queryClient: QueryClient) => async () => {
 
 export const loginLoader = (queryClient: QueryClient) => async () => {
   await fetchInitialData(queryClient)
-  const hasAdmin = queryClient.getQueryData(queryKey.hasAdmin())
   const user = queryClient.getQueryData(queryKey.user())
-
-  if (!hasAdmin) {
-    return redirect('/register-admin')
-  }
 
   if (user) {
     return redirect('/')

@@ -19,9 +19,9 @@ const Sidebar = () => {
                 <p className="text-sm text-muted-foreground">{section.label}</p>
               )}
               <ul className="w-full">
-                {section.items?.map(item => {
+                {section.items?.map((item, index) => {
                   return (
-                    <li key={item.label} className="w-full">
+                    <li key={`${item.label}-${index}`} className="w-full">
                       <Button
                         asChild={item.as === 'a'}
                         variant="ghost"

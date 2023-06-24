@@ -15,6 +15,7 @@ import { loginLoader, rootLoader } from './utils/loaders.ts'
 import New from './scenes/new.tsx'
 import CreateOrg from './components/new/CreateOrg.tsx'
 import CreateProject from './components/new/CreateProject.tsx'
+import Organization from './scenes/organization.tsx'
 
 const router = createBrowserRouter([
   {
@@ -24,8 +25,8 @@ const router = createBrowserRouter([
     loader: rootLoader(queryClient),
     children: [
       {
-        path: '/organizations/:orgId',
-        element: <div>Hello</div>,
+        path: '/organizations/:orgUuid',
+        element: <Organization />,
       },
     ],
   },
@@ -40,7 +41,7 @@ const router = createBrowserRouter([
         element: <CreateOrg />,
       },
       {
-        path: '/organizations/new/:orgId/project',
+        path: '/organizations/new/:orgUuid/project',
         element: <CreateProject />,
       },
     ],
@@ -51,15 +52,8 @@ const router = createBrowserRouter([
     loader: loginLoader(queryClient),
   },
   {
-    path: '/register-admin',
+    path: '/register',
     element: <RegisterAdmin />,
-    loader: async () => {
-      const hasAdmin = await getHasAdmin()
-      if (hasAdmin) {
-        return redirect('/')
-      }
-      return null
-    },
   },
 ])
 

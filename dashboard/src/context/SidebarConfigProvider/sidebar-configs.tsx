@@ -4,9 +4,11 @@ import { logout } from '@/hooks/mutations/useLogout'
 import { queryClient } from '@/utils/queryClient'
 
 import { SidebarConfigType } from '.'
+import DefaultTopbar from '@/components/common/sidebar/DefaultTopBar'
 
 export const defaultSidebarConfig: SidebarConfigType = {
   key: 'DEFAULT',
+  topBar: <DefaultTopbar />,
   sections: [
     {
       id: 'organizations',

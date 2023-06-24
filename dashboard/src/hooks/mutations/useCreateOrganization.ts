@@ -18,13 +18,15 @@ const useCreateOrganization = () => {
       const response = await axios.post('/api/v1/create_organization', data)
       return response.data
     },
-    onSuccess: (data: ApiResponse<Organization>) => {
+    onSuccess: async (data: ApiResponse<Organization>) => {
       if (data.success) {
-        client.setQueryData(
-          queryKey.organization(String(data.data.id)),
+        await client.setQueryData(
+          queryKey.organization(data.data.uuid),
           data.data
         )
-        navigate(`/organizations/new/${data.data.id}/project`)
+        if (data?.data?.uuid) {
+          navigate(`/organizations/new/${data.data.uuid}/project`)
+        }
       }
     },
   })

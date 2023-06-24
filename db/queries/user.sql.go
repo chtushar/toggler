@@ -108,6 +108,7 @@ const getUser = `-- name: GetUser :one
 SELECT id, name, uuid, password, email, email_verified, role, created_at, updated_at
 FROM users
 WHERE id = $1
+LIMIT 1
 `
 
 func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {

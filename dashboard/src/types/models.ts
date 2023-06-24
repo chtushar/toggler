@@ -6,6 +6,7 @@ export enum UserRole {
 export interface User {
   id: string
   name: string
+  uuid: string
   created_at: string
   updated_at: string
   role: UserRole
@@ -16,6 +17,7 @@ export interface User {
 export interface Organization {
   id: string
   name: string
+  uuid: string
   created_at: string
   updated_at: string
 }
@@ -23,6 +25,7 @@ export interface Organization {
 export interface Project {
   id: string
   name: string
+  uuid: string
   org_id: string
   owner_id: string
   created_at: string

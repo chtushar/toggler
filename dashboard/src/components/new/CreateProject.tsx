@@ -18,21 +18,24 @@ import {
 
 const CreateProject = () => {
   const { data } = useUserOrganizations()
-  const { orgId } = useParams()
+  const { orgUuid } = useParams()
   const { mutate: createProject } = useCreateProject()
   const navigate = useNavigate()
   const formRef = useRef<HTMLFormElement>(null)
 
-  const selectedOrgName = useMemo(() => {
-    return data?.data.find(
-      org => parseInt(org.id) === parseInt(orgId as string)
-    )?.name
-  }, [orgId, data?.data])
+  const selectedOrg = useMemo(() => {
+    return data?.data?.find(org => org.uuid === orgUuid)
+  }, [orgUuid, data?.data])
 
   const handleValueChange = (value: string) => {
-    navigate(`/organizations/new/${value}/project`, {
-      replace: true,
-    })
+    if (value !== '') {
+      const org = data?.data.find(
+        org => parseInt(org.id) === parseInt(value as string)
+      )
+      navigate(`/organizations/new/${org?.uuid}/project`, {
+        replace: true,
+      })
+    }
   }
 
   const handleCreateProject = (e: FormEvent<HTMLFormElement>) => {
@@ -68,7 +71,7 @@ const CreateProject = () => {
             <span>Organizaton</span>
             <Select
               name="orgId"
-              value={orgId}
+              value={selectedOrg?.id}
               onValueChange={handleValueChange}
               required
             >
@@ -78,7 +81,7 @@ const CreateProject = () => {
                   placeholder="Organization"
                 >
                   <Users className="inline mr-2 h-4 w-4" />
-                  <span>{selectedOrgName}</span>
+                  <span>{selectedOrg?.name}</span>
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>

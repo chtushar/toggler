@@ -10,13 +10,13 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
   const { dispatch } = useSidebarConfig()
 
   React.useEffect(() => {
-    if (isFetchUserOrgsSuccess && dispatch) {
+    if (isFetchUserOrgsSuccess && Array.isArray(userOrgs.data) && dispatch) {
       dispatch({
         type: 'ADD_ORGANIZATIONS',
         data: userOrgs.data.map(org => {
           return {
             as: 'a',
-            path: '/organizations/' + org.id,
+            path: '/organizations/' + org.uuid,
             label: org.name,
           }
         }),
