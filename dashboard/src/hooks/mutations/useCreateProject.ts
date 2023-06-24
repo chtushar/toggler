@@ -3,7 +3,6 @@ import { ApiResponse } from '@/types'
 import { Project } from '@/types/models'
 import axios from '@/utils/axios'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
 import useUser from '../queries/useUser'
 
 interface CreateProjectData {
@@ -14,7 +13,6 @@ interface CreateProjectData {
 const useCreateProject = () => {
   const client = useQueryClient()
   const { data: user } = useUser()
-  const navigate = useNavigate()
 
   return useMutation({
     mutationFn: async (data: CreateProjectData) => {

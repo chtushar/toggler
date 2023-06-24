@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
-import { useNavigate, useParams, useLocation } from 'react-router'
-import { LogOut, Settings } from 'lucide-react'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { useParams } from 'react-router'
+import { LogOut, ChevronsUpDown, Plus, UserCog } from 'lucide-react'
+import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -22,7 +22,6 @@ const DefaultTopbar = () => {
   const { mutate: logout } = useLogout()
   const { data: userOrgs } = useUserOrganizations()
   const { orgUuid } = useParams()
-  const navigate = useNavigate()
 
   const handleLogout = (e: Event) => {
     e.preventDefault()
@@ -34,28 +33,28 @@ const DefaultTopbar = () => {
   }, [orgUuid, userOrgs?.data])
 
   return (
-    <div className="py-2 flex justify-end">
+    <div className="flex">
       <DropdownMenu>
-        <DropdownMenuTrigger
-          asChild
-          className="outline-none border border-solid border-transparent focus:border-blue-400 rounded-full"
-        >
-          <button className="flex flex-col">
-            <span>{currentOrg?.name}</span>
-            <span>{user?.data.email}</span>
-          </button>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            role="combobox"
+            className="flex flex-col w-full h-fit items-start"
+          >
+            <span className="flex justify-between w-full items-center">
+              <span className="truncate line-clamp-1">{currentOrg?.name}</span>
+              <ChevronsUpDown className="ml-auto h-4 w-4 shrink-0 opacity-50" />
+            </span>
+            <span className="text-xs text-muted-foreground font-normal">
+              {user?.data.email}
+            </span>
+          </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56 pointer-events-auto">
-          {/* <DropdownMenuItem
-            onSelect={() => {
-              navigate('/setting')
-            }}
-          >
-            <Settings className="mr-2 h-4 w-4" />
-            Settings
-          </DropdownMenuItem> */}
           <DropdownMenuGroup>
-            <DropdownMenuLabel>{user?.data.email}</DropdownMenuLabel>
+            <DropdownMenuLabel className="text-muted-foreground font-medium">
+              Organizations
+            </DropdownMenuLabel>
             {userOrgs?.data.map(org => {
               return (
                 <DropdownMenuItem asChild key={`dropdown-${org.uuid}`}>
@@ -63,18 +62,34 @@ const DefaultTopbar = () => {
                 </DropdownMenuItem>
               )
             })}
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/organizations/new">
+                <Plus className="mr-2 h-4 w-4" />
+                <span>Create Organization</span>
+              </Link>
+            </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onSelect={handleLogout}
-            className="pointer-events-auto"
-            asChild
-          >
-            <button className="w-full">
+          <DropdownMenuGroup>
+            <DropdownMenuLabel className="text-muted-foreground font-medium">
+              Account
+            </DropdownMenuLabel>
+            <DropdownMenuItem
+              onSelect={handleLogout}
+              className="pointer-events-auto w-full"
+            >
+              <UserCog className="mr-2 h-4 w-4" />
+              Preference
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onSelect={handleLogout}
+              className="pointer-events-auto w-full"
+            >
               <LogOut className="mr-2 h-4 w-4" />
               Log out
-            </button>
-          </DropdownMenuItem>
+            </DropdownMenuItem>
+          </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

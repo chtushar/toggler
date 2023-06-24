@@ -1,29 +1,7 @@
 import React from 'react'
 import Sidebar from './sidebar'
 
-import useSidebarConfig from '@/context/SidebarConfigProvider/useSidebarConfig'
-import useUserOrganizations from '@/hooks/queries/useUserOrganizations'
-
 const Layout = ({ children }: { children: React.ReactNode }) => {
-  const { data: userOrgs, isSuccess: isFetchUserOrgsSuccess } =
-    useUserOrganizations()
-  const { dispatch } = useSidebarConfig()
-
-  React.useEffect(() => {
-    if (isFetchUserOrgsSuccess && Array.isArray(userOrgs.data) && dispatch) {
-      dispatch({
-        type: 'ADD_ORGANIZATIONS',
-        data: userOrgs.data.map(org => {
-          return {
-            as: 'a',
-            path: '/organizations/' + org.uuid,
-            label: org.name,
-          }
-        }),
-      })
-    }
-  }, [isFetchUserOrgsSuccess, userOrgs, dispatch])
-
   return (
     <div className="w-full h-full hidden md:flex">
       <Sidebar />
