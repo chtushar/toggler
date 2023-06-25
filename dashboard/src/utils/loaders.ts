@@ -40,7 +40,7 @@ export const rootLoader = (queryClient: QueryClient) => async () => {
     }
 
     if (userOrgs.data.length > 0) {
-      return redirect(`/organizations/${userOrgs.data[0].uuid}`)
+      return redirect(`/${userOrgs.data[0].uuid}`)
     }
   }
 

@@ -24,7 +24,7 @@ const router = createBrowserRouter([
     loader: rootLoader(queryClient),
     children: [
       {
-        path: '/organizations/:orgUuid',
+        path: '/:orgUuid',
         element: <Organization />,
       },
     ],

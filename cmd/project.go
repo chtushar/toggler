@@ -99,26 +99,27 @@ func handleGetOrgProjects(c echo.Context) error {
 		user = c.Get("user").(*jwt.Token)
 	)
 
-	orgIdParam := c.Param("orgID")
+	orgIdParam := c.Param("orgId")
 	orgId, err := strconv.Atoi(orgIdParam)
+
 	if err != nil {
+		app.log.Println(err)
 		c.JSON(http.StatusBadRequest, BadRequestResponse)
 		return err
 	}
-	userId := int64(user.Claims.(jwt.MapClaims)["id"].(float64))
 
+	userId := int64(user.Claims.(jwt.MapClaims)["id"].(float64))
 	projects, err := app.q.GetUserOrgProjects(c.Request().Context(), queries.GetUserOrgProjectsParams{
 		UserID: userId,
 		OrgID: int64(orgId),
 	})
 
 	if err != nil {
-		app.log.Println("Failed to get user projects")
+		app.log.Println("Failed to get user projects", err)
 		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 		return err
 	}
 
 	c.JSON(http.StatusOK, responseType{true, projects, nil})
-
 	return nil
 }

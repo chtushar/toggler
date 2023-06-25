@@ -4,7 +4,7 @@ import axios from '@/utils/axios'
 
 export const logout = (queryClient: QueryClient) => async () => {
   await axios.post('/api/v1/logout')
-  queryClient.removeQueries()
+  await queryClient.removeQueries()
 
   window.location.reload()
 }

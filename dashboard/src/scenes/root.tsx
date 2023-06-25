@@ -20,7 +20,7 @@ const Root = () => {
       Array.isArray(userOrgs?.data) &&
       userOrgs.data.length > 0
     ) {
-      navigate(`/organizations/${userOrgs.data[0].uuid}`, {
+      navigate(`/${userOrgs.data[0].uuid}`, {
         replace: true,
       })
     }

@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 import { useParams } from 'react-router'
 import { LogOut, ChevronsUpDown, Plus, UserCog } from 'lucide-react'
 import { Button } from '@/components/ui/button'
@@ -16,21 +16,47 @@ import useLogout from '@/hooks/mutations/useLogout'
 import useUser from '@/hooks/queries/useUser'
 import useUserOrganizations from '@/hooks/queries/useUserOrganizations'
 import { Link } from 'react-router-dom'
+import { useOrgProjects } from '@/hooks/queries/useOrgProjects'
+import { Organization } from '@/types/models'
+import useSidebarConfig from '@/context/SidebarConfigProvider/useSidebarConfig'
 
 const DefaultTopbar = () => {
   const { data: user } = useUser()
   const { mutate: logout } = useLogout()
   const { data: userOrgs } = useUserOrganizations()
   const { orgUuid } = useParams()
+  const { dispatch } = useSidebarConfig()
+
+  const currentOrg = useMemo(() => {
+    return userOrgs?.data.find(org => org.uuid === orgUuid)
+  }, [orgUuid, userOrgs?.data])
+
+  const { data: orgProjects } = useOrgProjects({
+    org: currentOrg as Organization,
+  })
+
+  useEffect(() => {
+    if (dispatch) {
+      dispatch({
+        type: 'ORG-PROJECTS',
+        data: {
+          orgUuid,
+          projects: orgProjects?.data.map(project => {
+            return {
+              as: 'a',
+              path: `/${orgUuid}/project/${project.uuid}`,
+              label: project.name,
+            }
+          }),
+        },
+      })
+    }
+  }, [orgProjects, orgUuid, dispatch])
 
   const handleLogout = (e: Event) => {
     e.preventDefault()
     logout()
   }
-
-  const currentOrg = useMemo(() => {
-    return userOrgs?.data.find(org => org.uuid === orgUuid)
-  }, [orgUuid, userOrgs?.data])
 
   return (
     <div className="flex">
@@ -58,7 +84,7 @@ const DefaultTopbar = () => {
             {userOrgs?.data.map(org => {
               return (
                 <DropdownMenuItem asChild key={`dropdown-${org.uuid}`}>
-                  <Link to={`/organizations/${org.uuid}`}>{org.name}</Link>
+                  <Link to={`/${org.uuid}`}>{org.name}</Link>
                 </DropdownMenuItem>
               )
             })}

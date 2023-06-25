@@ -8,7 +8,7 @@ import (
 
 	"github.com/chtushar/toggler/configs"
 	"github.com/chtushar/toggler/db/queries"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
 )
@@ -16,17 +16,17 @@ import (
 type App struct {
 	port   int
 	jwt    string
-	dbConn *pgx.Conn
+	dbConn *pgxpool.Pool
 	q      *queries.Queries
 	log    *log.Logger
 }
 
 var (
-	dbConn *pgx.Conn
+	dbConn *pgxpool.Pool
 	cfg    = configs.Get()
 )
 
-func getPGXConfig() (*pgx.ConnConfig, error) {
+func getPGXConfig() (*pgxpool.Config, error) {
 	sslMode := "prefer"
 
 	if cfg.DB.ForceTLS {
@@ -42,7 +42,7 @@ func getPGXConfig() (*pgx.ConnConfig, error) {
 		sslMode,
 	)
 
-	connConfig, err := pgx.ParseConfig(connString)
+	connConfig, err := pgxpool.ParseConfig(connString)
 
 	if err != nil {
 		log.Fatalln("Failed to parse config", err)
@@ -52,7 +52,7 @@ func getPGXConfig() (*pgx.ConnConfig, error) {
 	return connConfig, nil
 }
 
-func initDB() *pgx.Conn {
+func initDB() *pgxpool.Pool {
 	pgxConfig, err := getPGXConfig()
 
 	if err != nil {
@@ -60,13 +60,13 @@ func initDB() *pgx.Conn {
 		os.Exit(1)
 	}
 
-	conn, err := pgx.ConnectConfig(context.Background(), pgxConfig)
+	pool, err := pgxpool.ConnectConfig(context.Background(), pgxConfig)
 
 	if err != nil {
 		log.Fatal("Failed to connect to database", err)
 	}
 
-	return conn
+	return pool
 }
 
 func initHTTPServer(app *App) *echo.Echo {

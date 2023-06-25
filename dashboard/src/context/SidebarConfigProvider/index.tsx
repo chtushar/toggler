@@ -1,7 +1,8 @@
 import { Dispatch, createContext, useReducer } from 'react'
 import { produce } from 'immer'
 import { defaultSidebarConfig } from './sidebar-configs'
-import { PieChart, Users, Braces, Cog } from 'lucide-react'
+import { PieChart, Braces, Cog } from 'lucide-react'
+import { Project } from '@/types/models'
 
 interface ButtonItem {
   as: 'button'
@@ -35,7 +36,7 @@ export interface SidebarConfigType {
 }
 
 export interface SidebarConfigAction {
-  type: 'DEFAULT' | 'ORGANIZATION'
+  type: 'DEFAULT' | 'ORGANIZATION' | 'ORG-PROJECTS'
   data: unknown
 }
 
@@ -45,11 +46,15 @@ const SidebarConfigContext = createContext<{
 } | null>(null)
 
 const reducer = (state: SidebarConfigType, action: SidebarConfigAction) => {
+  const { orgUuid, projects } = action.data as {
+    orgUuid: string
+    projects: Array<AnchorItem | ButtonItem>
+  }
   switch (action.type) {
     case 'DEFAULT':
       return defaultSidebarConfig
     case 'ORGANIZATION':
-      return produce(defaultSidebarConfig, draft => {
+      return produce(state, draft => {
         draft.sections = [
           {
             id: 'misc',
@@ -57,19 +62,19 @@ const reducer = (state: SidebarConfigType, action: SidebarConfigAction) => {
               {
                 as: 'a',
                 label: 'Overview',
-                path: `/organizations`,
+                path: `/${orgUuid}/overview`,
                 icon: <PieChart className="mr-2 h-4 w-4" />,
               },
               {
                 as: 'a',
                 label: 'Tokens',
-                path: `/organizations`,
+                path: `/${orgUuid}/tokens`,
                 icon: <Braces className="mr-2 h-4 w-4" />,
               },
               {
                 as: 'a',
                 label: 'Settings',
-                path: `/organizations`,
+                path: `/${orgUuid}/settings`,
                 icon: <Cog className="mr-2 h-4 w-4" />,
               },
             ],
@@ -81,6 +86,21 @@ const reducer = (state: SidebarConfigType, action: SidebarConfigAction) => {
           },
         ]
         return draft
+      })
+    case 'ORG-PROJECTS':
+      return produce(state, draft => {
+        const draftProjects = draft.sections?.find(
+          section => section.id === 'projects'
+        )
+        if (typeof draftProjects === 'undefined') {
+          draft.sections?.splice(1, 0, {
+            id: 'projects',
+            label: 'Projects',
+            items: projects,
+          })
+        } else {
+          draftProjects.items = projects
+        }
       })
     default:
       return defaultSidebarConfig

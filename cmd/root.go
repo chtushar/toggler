@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -41,28 +40,28 @@ func Execute() {
 		log:    log.New(os.Stdout, "toggler: ", log.LstdFlags),
 	}
 
-	defer dbConn.Close(context.Background())
+	defer dbConn.Close()
 
 	// If the up-migration flag is set, run the up migration and exit
 	if *runUPMigrationPtr {
-		pgxConfig, err := getPGXConfig()
+		pgxPoolConfig, err := getPGXConfig()
 		if err != nil {
 			app.log.Fatal("Failed to get database config", err)
 			os.Exit(1)
 		}
 
-		db.RunUpMigrations(stdlib.OpenDB(*pgxConfig), app.log)
+		db.RunUpMigrations(stdlib.OpenDB(*pgxPoolConfig.ConnConfig), app.log)
 		os.Exit(0)
 	}
 
 	// If the down-migration flag is set, run the down migration and exit
 	if *runDownMigrationPtr {
-		pgxConfig, err := getPGXConfig()
+		pgxPoolConfig, err := getPGXConfig()
 		if err != nil {
 			app.log.Fatal("Failed to get database config", err)
 			os.Exit(1)
 		}
-		db.RunDownMigration(stdlib.OpenDB(*pgxConfig), app.log)
+		db.RunDownMigration(stdlib.OpenDB(*pgxPoolConfig.ConnConfig), app.log)
 		os.Exit(0)
 	}
 
