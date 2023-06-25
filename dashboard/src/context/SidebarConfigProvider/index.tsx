@@ -81,7 +81,7 @@ const reducer = (state: SidebarConfigType, action: SidebarConfigAction) => {
           {
             id: 'projects',
             label: 'Projects',
-            items: [],
+            items: projects ?? [],
           },
         ]
         return draft
