@@ -1,6 +1,7 @@
 import useSidebarConfig from '@/context/SidebarConfigProvider/useSidebarConfig'
 import { Button } from '@/components/ui/button'
 import { Link } from 'react-router-dom'
+import { CheckIcon } from 'lucide-react'
 
 const Sidebar = () => {
   const { config } = useSidebarConfig()
@@ -24,7 +25,7 @@ const Sidebar = () => {
                     <li key={`${item.label}-${index}`} className="w-full">
                       <Button
                         asChild={item.as === 'a'}
-                        variant="ghost"
+                        variant={item.selected ? 'secondary' : 'ghost'}
                         size="sm"
                         className="w-full justify-start"
                         onClick={item?.onClick}
@@ -32,12 +33,22 @@ const Sidebar = () => {
                         {item.as === 'a' ? (
                           <Link to={item.path}>
                             {item.icon}
-                            {item.label}
+                            <span className="flex w-full items-center justify-between">
+                              {item.label}
+                              {item.selected && (
+                                <CheckIcon className="mr-2 h-4 w-4" />
+                              )}
+                            </span>
                           </Link>
                         ) : (
                           <>
                             {item.icon}
-                            {item.label}
+                            <span className="flex w-full items-center justify-between">
+                              {item.label}
+                              {item.selected && (
+                                <CheckIcon className="mr-2 h-4 w-4" />
+                              )}
+                            </span>
                           </>
                         )}
                       </Button>
@@ -48,7 +59,7 @@ const Sidebar = () => {
               {section.sectionCTA && (
                 <Button
                   asChild={section.sectionCTA.as === 'a'}
-                  variant="secondary"
+                  variant="outline"
                   size="sm"
                   className="w-full"
                   onClick={section.sectionCTA?.onClick}

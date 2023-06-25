@@ -18,6 +18,7 @@ import Organization from './scenes/organization.tsx'
 import Overview from './components/organization/Overview.tsx'
 import Tokens from './components/organization/Tokens.tsx'
 import Settings from './components/organization/Settings.tsx'
+import Project from './components/project/index.tsx'
 
 const router = createBrowserRouter([
   {
@@ -41,6 +42,10 @@ const router = createBrowserRouter([
           {
             path: '/:orgUuid/settings',
             element: <Settings />,
+          },
+          {
+            path: '/:orgUuid/project/:projectUuid',
+            element: <Project />,
           },
         ],
       },

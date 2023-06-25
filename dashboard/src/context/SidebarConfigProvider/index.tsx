@@ -1,7 +1,7 @@
 import { Dispatch, createContext, useReducer } from 'react'
 import { produce } from 'immer'
 import { defaultSidebarConfig } from './sidebar-configs'
-import { PieChart, Braces, Cog } from 'lucide-react'
+import { PieChart, Braces, Cog, PlusIcon } from 'lucide-react'
 
 interface ButtonItem {
   as: 'button'
@@ -10,6 +10,7 @@ interface ButtonItem {
   onClick: () => void
   path?: never
   section?: string
+  selected?: boolean
 }
 
 interface AnchorItem {
@@ -19,6 +20,7 @@ interface AnchorItem {
   onClick?: never
   path: string
   section?: string
+  selected?: boolean
 }
 
 interface SectionItem {
@@ -82,6 +84,12 @@ const reducer = (state: SidebarConfigType, action: SidebarConfigAction) => {
             id: 'projects',
             label: 'Projects',
             items: projects ?? [],
+            sectionCTA: {
+              label: 'Add project',
+              as: 'a',
+              path: `/organizations/new/${orgUuid}/project`,
+              icon: <PlusIcon className="mr-2 h-4 w-4" />,
+            },
           },
         ]
         return draft

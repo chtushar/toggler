@@ -58,7 +58,7 @@ const DefaultTopbar = () => {
             {userOrgs?.data.map(org => {
               return (
                 <DropdownMenuItem asChild key={`dropdown-${org.uuid}`}>
-                  <Link to={`/${org.uuid}`}>{org.name}</Link>
+                  <Link to={`/${org.uuid}/overview`}>{org.name}</Link>
                 </DropdownMenuItem>
               )
             })}

@@ -1,13 +1,15 @@
 import { useEffect, useMemo } from 'react'
-import useSidebarConfig from '@/context/SidebarConfigProvider/useSidebarConfig'
 import { Outlet, useParams } from 'react-router-dom'
+import useSidebarConfig from '@/context/SidebarConfigProvider/useSidebarConfig'
+
 import useUserOrganizations from '@/hooks/queries/useUserOrganizations'
 import { useOrgProjects } from '@/hooks/queries/useOrgProjects'
+
 import { Organization as OrganizationModel } from '@/types/models'
 
 const Organization = () => {
   const { dispatch } = useSidebarConfig()
-  const { orgUuid } = useParams()
+  const { orgUuid, projectUuid } = useParams()
   const { data: userOrgs } = useUserOrganizations()
 
   const currentOrg = useMemo(() => {
@@ -29,12 +31,13 @@ const Organization = () => {
               as: 'a',
               path: `/${orgUuid}/project/${project.uuid}`,
               label: project.name,
+              selected: projectUuid === project.uuid,
             }
           }),
         },
       })
     }
-  }, [dispatch, orgUuid, orgProjects?.data])
+  }, [dispatch, orgUuid, orgProjects?.data, projectUuid])
 
   return (
     <div className="p-4">

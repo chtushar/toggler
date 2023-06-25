@@ -4,6 +4,7 @@ import { Project } from '@/types/models'
 import axios from '@/utils/axios'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import useUser from '../queries/useUser'
+import { useNavigate, useParams } from 'react-router-dom'
 
 interface CreateProjectData {
   name: string
@@ -13,6 +14,8 @@ interface CreateProjectData {
 const useCreateProject = () => {
   const client = useQueryClient()
   const { data: user } = useUser()
+  const { orgUuid } = useParams()
+  const navigate = useNavigate()
 
   return useMutation({
     mutationFn: async (data: CreateProjectData) => {
@@ -21,10 +24,13 @@ const useCreateProject = () => {
     },
     onSuccess: async (data: ApiResponse<Project>) => {
       if (data.success) {
-        client.setQueryData(
+        await client.setQueryData(
           queryKey.project(String(data.data.id), String(user?.data.id)),
           data
         )
+        if (data?.data?.uuid) {
+          navigate(`/${orgUuid}/project/${data.data.uuid}`)
+        }
       }
     },
   })
