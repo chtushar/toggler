@@ -38,10 +38,6 @@ export const rootLoader = (queryClient: QueryClient) => async () => {
     if (typeof userOrgs === 'undefined' || userOrgs.data === null) {
       return redirect('/organizations/new')
     }
-
-    if (userOrgs.data.length > 0) {
-      return redirect(`/${userOrgs.data[0].uuid}`)
-    }
   }
 
   return null

@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react'
 import useSidebarConfig from '@/context/SidebarConfigProvider/useSidebarConfig'
-import { useParams } from 'react-router-dom'
+import { Outlet, useParams } from 'react-router-dom'
 import useUserOrganizations from '@/hooks/queries/useUserOrganizations'
 import { useOrgProjects } from '@/hooks/queries/useOrgProjects'
 import { Organization as OrganizationModel } from '@/types/models'
@@ -36,7 +36,11 @@ const Organization = () => {
     }
   }, [dispatch, orgUuid, orgProjects?.data])
 
-  return <div className="p-4"></div>
+  return (
+    <div className="p-4">
+      <Outlet />
+    </div>
+  )
 }
 
 export default Organization
