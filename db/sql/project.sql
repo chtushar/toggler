@@ -9,8 +9,13 @@ VALUES ($1, $2);
 SELECT *
 FROM projects
 WHERE id = $1;
--- name: GetUserProjects :many
-SELECT p.*
+-- name: GetUserOrgProjects :many
+SELECT *
 FROM projects p
-    INNER JOIN project_members pm ON pm.project_id = p.id
-WHERE pm.user_id = $1;
+WHERE p.org_id = $2
+    AND EXISTS (
+        SELECT *
+        FROM organization_members
+        WHERE user_id = $1
+            AND org_id = $2
+    );

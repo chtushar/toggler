@@ -72,15 +72,25 @@ func (q *Queries) GetProject(ctx context.Context, id int32) (Project, error) {
 	return i, err
 }
 
-const getUserProjects = `-- name: GetUserProjects :many
-SELECT p.id, p.name, p.uuid, p.org_id, p.owner_id, p.created_at, p.updated_at
+const getUserOrgProjects = `-- name: GetUserOrgProjects :many
+SELECT id, name, uuid, org_id, owner_id, created_at, updated_at
 FROM projects p
-    INNER JOIN project_members pm ON pm.project_id = p.id
-WHERE pm.user_id = $1
+WHERE p.org_id = $2
+    AND EXISTS (
+        SELECT user_id, org_id, created_at, updated_at
+        FROM organization_members
+        WHERE user_id = $1
+            AND org_id = $2
+    )
 `
 
-func (q *Queries) GetUserProjects(ctx context.Context, userID int64) ([]Project, error) {
-	rows, err := q.db.Query(ctx, getUserProjects, userID)
+type GetUserOrgProjectsParams struct {
+	UserID int64 `json:"user_id"`
+	OrgID  int64 `json:"org_id"`
+}
+
+func (q *Queries) GetUserOrgProjects(ctx context.Context, arg GetUserOrgProjectsParams) ([]Project, error) {
+	rows, err := q.db.Query(ctx, getUserOrgProjects, arg.UserID, arg.OrgID)
 	if err != nil {
 		return nil, err
 	}

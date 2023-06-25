@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/golang-jwt/jwt/v4"
@@ -92,18 +93,27 @@ func handleCreateProject(c echo.Context) error {
 	return nil
 }
 
-func handleGetUserProjects(c echo.Context) error {
+func handleGetOrgProjects(c echo.Context) error {
 	var (
 		app  = c.Get("app").(*App)
 		user = c.Get("user").(*jwt.Token)
 	)
 
+	orgIdParam := c.Param("orgID")
+	orgId, err := strconv.Atoi(orgIdParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, BadRequestResponse)
+		return err
+	}
 	userId := int64(user.Claims.(jwt.MapClaims)["id"].(float64))
 
-	projects, err := app.q.GetUserProjects(c.Request().Context(), userId)
+	projects, err := app.q.GetUserOrgProjects(c.Request().Context(), queries.GetUserOrgProjectsParams{
+		UserID: userId,
+		OrgID: int64(orgId),
+	})
 
 	if err != nil {
-		app.log.Println("Failed to get user projects", err)
+		app.log.Println("Failed to get user projects")
 		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 		return err
 	}

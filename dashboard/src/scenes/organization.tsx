@@ -1,7 +1,17 @@
-// import { useEffect } from 'react'
+import useSidebarConfig from '@/context/SidebarConfigProvider/useSidebarConfig'
+import { useEffect } from 'react'
 
 const Organization = () => {
-  // useEffect(() => {}, [])
+  const { dispatch } = useSidebarConfig()
+  useEffect(() => {
+    if (dispatch) {
+      dispatch({
+        type: 'ORGANIZATION',
+        data: null,
+      })
+    }
+  }, [dispatch])
+
   return <div className="p-4"></div>
 }
 
