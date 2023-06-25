@@ -2,7 +2,6 @@ import { Dispatch, createContext, useReducer } from 'react'
 import { produce } from 'immer'
 import { defaultSidebarConfig } from './sidebar-configs'
 import { PieChart, Braces, Cog } from 'lucide-react'
-import { Project } from '@/types/models'
 
 interface ButtonItem {
   as: 'button'
