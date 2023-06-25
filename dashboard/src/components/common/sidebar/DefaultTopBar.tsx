@@ -75,12 +75,11 @@ const DefaultTopbar = () => {
             <DropdownMenuLabel className="text-muted-foreground font-medium">
               Account
             </DropdownMenuLabel>
-            <DropdownMenuItem
-              onSelect={handleLogout}
-              className="pointer-events-auto w-full"
-            >
-              <UserCog className="mr-2 h-4 w-4" />
-              Preference
+            <DropdownMenuItem className="pointer-events-auto w-full" asChild>
+              <Link to="/preferences">
+                <UserCog className="mr-2 h-4 w-4" />
+                Preference
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuItem
               onSelect={handleLogout}

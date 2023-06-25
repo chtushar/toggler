@@ -86,7 +86,7 @@ const CreateProject = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  {data?.data.map(org => {
+                  {data?.data?.map(org => {
                     return (
                       <SelectItem key={org.id} value={org.id}>
                         {org.name}

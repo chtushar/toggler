@@ -12,6 +12,7 @@ import (
 func generateToken(Id int32, Uuid uuid.NullUUID, Email sql.NullString, Name string, Role queries.UserRole) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":    Id,
+		"uuid":  Uuid,
 		"email": Email.String,
 		"name":  Name,
 		"role":  Role,

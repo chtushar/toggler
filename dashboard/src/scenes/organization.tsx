@@ -1,17 +1,8 @@
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
+// import { useEffect } from 'react'
 
 const Organization = () => {
-  return (
-    <div className="p-4">
-      <Tabs defaultValue="projects">
-        <TabsList>
-          <TabsTrigger value="projects">Projects</TabsTrigger>
-          <TabsTrigger value="members">Team</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
-        </TabsList>
-      </Tabs>
-    </div>
-  )
+  // useEffect(() => {}, [])
+  return <div className="p-4"></div>
 }
 
 export default Organization
