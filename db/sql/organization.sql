@@ -14,3 +14,8 @@ SELECT o.*
 FROM organizations o
     INNER JOIN organization_members om ON om.org_id = o.id
 WHERE om.user_id = $1;
+-- name: UpdateOrganization :one
+UPDATE organizations
+set name = $2
+WHERE id = $1
+RETURNING *;

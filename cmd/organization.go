@@ -100,3 +100,41 @@ func handleGetUserOrganizations (c echo.Context) error {
 
 	return nil
 }
+
+func handleUpdateOrganization (c echo.Context) error {
+	var (
+		app  = c.Get("app").(*App)
+		req = &struct {
+			Name string `json:"name"`;
+			OrgId	int32 `json:"orgId"`  
+		}{}
+	)
+
+	if err := c.Bind(req); err != nil {
+		c.JSON(http.StatusBadRequest, responseType{
+			Success: false,
+			Data: nil,
+			Error: &errorWrap{
+				Code: http.StatusBadGateway,
+				Data: nil,
+				Message: "Bad Request. Please check the payload.",	
+			},
+		})
+		return err
+	}
+
+	org, err := app.q.UpdateOrganization(c.Request().Context(), queries.UpdateOrganizationParams{
+		ID: req.OrgId,
+		Name: req.Name,
+	})
+
+	if err != nil {
+		app.log.Println("Failed to update the organization", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
+	c.JSON(http.StatusOK, responseType{true, org, nil})
+
+	return nil
+}

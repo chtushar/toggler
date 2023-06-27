@@ -94,3 +94,28 @@ func (q *Queries) GetUserOrganizations(ctx context.Context, userID int64) ([]Org
 	}
 	return items, nil
 }
+
+const updateOrganization = `-- name: UpdateOrganization :one
+UPDATE organizations
+set name = $2
+WHERE id = $1
+RETURNING id, uuid, name, created_at, updated_at
+`
+
+type UpdateOrganizationParams struct {
+	ID   int32  `json:"id"`
+	Name string `json:"name"`
+}
+
+func (q *Queries) UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) (Organization, error) {
+	row := q.db.QueryRow(ctx, updateOrganization, arg.ID, arg.Name)
+	var i Organization
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.Name,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

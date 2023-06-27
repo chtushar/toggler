@@ -63,21 +63,6 @@ func handleAddAdmin(c echo.Context) error {
 		return err
 	}
 
-	// Check if there are any users in the database
-	count, err := app.q.CountUsers(c.Request().Context())
-
-	if err != nil {
-		app.log.Println("Failed to count users", err)
-		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
-		return err
-	}
-
-	// If there are any users, then we can't add an admin
-	if count > 0 {
-		c.JSON(http.StatusForbidden, ForbiddenResponse)
-		return nil
-	}
-
 	// Hash the password
 	hash, err := utils.HashPassword(req.Password)
 

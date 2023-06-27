@@ -68,12 +68,6 @@ const reducer = (state: SidebarConfigType, action: SidebarConfigAction) => {
               },
               {
                 as: 'a',
-                label: 'Tokens',
-                path: `/${orgUuid}/tokens`,
-                icon: <Braces className="mr-2 h-4 w-4" />,
-              },
-              {
-                as: 'a',
                 label: 'Settings',
                 path: `/${orgUuid}/settings`,
                 icon: <Cog className="mr-2 h-4 w-4" />,

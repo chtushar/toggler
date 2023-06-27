@@ -11,7 +11,8 @@ import (
 
 const addProdAndDevProjectEnviornments = `-- name: AddProdAndDevProjectEnviornments :exec
 INSERT INTO project_enviornments(project_id, environment_id)
-VALUES ($1, $2), ($1, $3)
+VALUES ($1, $2),
+    ($1, $3)
 `
 
 type AddProdAndDevProjectEnviornmentsParams struct {
@@ -61,7 +62,8 @@ func (q *Queries) CreateEnvironment(ctx context.Context, name string) (Environme
 
 const createProdAndDevEnvironments = `-- name: CreateProdAndDevEnvironments :many
 INSERT INTO environments(name)
-VALUES ('production'), ('development')
+VALUES ('production'),
+    ('development')
 RETURNING id, name, uuid, created_at, updated_at
 `
 
