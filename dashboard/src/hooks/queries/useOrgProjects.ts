@@ -15,10 +15,12 @@ export const getOrgProjects =
     }
   }
 
-export const useOrgProjects = ({ org }: { org: Organization }) => {
+const useOrgProjects = ({ org }: { org: Organization }) => {
   return useQuery<ApiResponse<Array<Project>>>({
     queryKey: queryKey.projects(org.uuid),
     queryFn: getOrgProjects({ orgId: org.id }),
     enabled: typeof org !== 'undefined',
   })
 }
+
+export default useOrgProjects

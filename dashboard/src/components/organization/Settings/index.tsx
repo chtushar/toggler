@@ -4,7 +4,7 @@ import Team from './Team'
 
 const Settings = () => {
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full p-4">
       <Tabs defaultValue="general">
         <TabsList>
           <TabsTrigger value="general">General</TabsTrigger>

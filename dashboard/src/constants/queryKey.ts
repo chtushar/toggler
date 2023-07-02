@@ -9,4 +9,7 @@ export const queryKey = {
   // Projects
   project: (orgId: string, userId: string) => ['PROJECT', orgId, userId],
   projects: (orgId: string) => ['PROJECTS', orgId],
+
+  // Environments
+  environments: (projectId: string) => ['ENVIRONMENTS', projectId],
 }

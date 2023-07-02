@@ -66,4 +66,7 @@ func initHTTPHandler(e *echo.Echo, app *App) {
 	// Projects
 	v1_protected.POST("/create_project", handleCreateProject)
 	v1_protected.GET("/get_org_projects/:orgId", handleGetOrgProjects)
+
+	// Enviornments
+	v1_protected.GET("/get_project_environments/:projectId", handleGetProjectEnvironments)
 }

@@ -92,3 +92,36 @@ func (q *Queries) CreateProdAndDevEnvironments(ctx context.Context) ([]Environme
 	}
 	return items, nil
 }
+
+const getProjectEnviornments = `-- name: GetProjectEnviornments :many
+SELECT e.id, e.name, e.uuid, e.created_at, e.updated_at
+FROM environments e
+    INNER JOIN project_enviornments pe ON pe.environment_id = e.id
+WHERE pe.project_id = $1
+`
+
+func (q *Queries) GetProjectEnviornments(ctx context.Context, projectID int64) ([]Environment, error) {
+	rows, err := q.db.Query(ctx, getProjectEnviornments, projectID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Environment
+	for rows.Next() {
+		var i Environment
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Uuid,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}

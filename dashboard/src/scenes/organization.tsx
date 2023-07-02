@@ -1,21 +1,16 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { Outlet, useParams } from 'react-router-dom'
 import useSidebarConfig from '@/context/SidebarConfigProvider/useSidebarConfig'
 
-import useUserOrganizations from '@/hooks/queries/useUserOrganizations'
-import { useOrgProjects } from '@/hooks/queries/useOrgProjects'
+import useOrgProjects from '@/hooks/queries/useOrgProjects'
 
 import { Organization as OrganizationModel } from '@/types/models'
+import useCurrentOrganization from '@/hooks/queries/useCurrentOrganization'
 
 const Organization = () => {
   const { dispatch } = useSidebarConfig()
-  const { orgUuid, projectUuid } = useParams()
-  const { data: userOrgs } = useUserOrganizations()
-
-  const currentOrg = useMemo(() => {
-    return userOrgs?.data.find(org => org.uuid === orgUuid)
-  }, [orgUuid, userOrgs?.data])
-
+  const { projectUuid } = useParams()
+  const currentOrg = useCurrentOrganization()
   const { data: orgProjects } = useOrgProjects({
     org: currentOrg as OrganizationModel,
   })
@@ -25,11 +20,11 @@ const Organization = () => {
       dispatch({
         type: 'ORGANIZATION',
         data: {
-          orgUuid,
+          orgUuid: currentOrg?.uuid,
           projects: orgProjects?.data.map(project => {
             return {
               as: 'a',
-              path: `/${orgUuid}/project/${project.uuid}`,
+              path: `/${currentOrg?.uuid}/project/${project.uuid}`,
               label: project.name,
               selected: projectUuid === project.uuid,
             }
@@ -37,10 +32,10 @@ const Organization = () => {
         },
       })
     }
-  }, [dispatch, orgUuid, orgProjects?.data, projectUuid])
+  }, [dispatch, currentOrg?.uuid, orgProjects?.data, projectUuid])
 
   return (
-    <div className="p-4">
+    <div>
       <Outlet />
     </div>
   )

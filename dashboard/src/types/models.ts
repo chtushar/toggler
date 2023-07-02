@@ -31,3 +31,11 @@ export interface Project {
   created_at: string
   updated_at: string
 }
+
+export interface Environment {
+  id: string
+  name: string
+  uuid: string
+  created_at: string
+  updated_at: string
+}
