@@ -56,18 +56,11 @@ CREATE TABLE IF NOT EXISTS project_enviornments (
     updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (project_id, environment_id)
 );
-CREATE TABLE IF NOT EXISTS project_features (
-    project_id BIGINT NOT NULL,
-    feature_flag_id BIGINT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (project_id, feature_flag_id)
-);
 CREATE TABLE IF NOT EXISTS feature_flags (
     id SERIAL PRIMARY KEY,
     project_id BIGINT NOT NULL,
     uuid UUID UNIQUE DEFAULT gen_random_uuid(),
-    type feature_flag_type NOT NULL DEFAULT 'boolean'::feature_flag_type,
+    flag_type feature_flag_type NOT NULL DEFAULT 'boolean'::feature_flag_type,
     name VARCHAR(255) NOT NULL
 );
 CREATE TABLE IF NOT EXISTS feature_states (

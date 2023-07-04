@@ -1,3 +1,4 @@
+import { FeatureFlagType } from '@/types/models'
 import * as z from 'zod'
 
 export const basicAuthSignUpSchema = z
@@ -29,3 +30,8 @@ export const orgGeneralSettings = z
     name: z.string(),
   })
   .required()
+
+export const createFeatureFlagSchema = z.object({
+  name: z.string().min(3),
+  type: z.enum(['boolean']),
+})

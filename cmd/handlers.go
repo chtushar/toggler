@@ -69,4 +69,7 @@ func initHTTPHandler(e *echo.Echo, app *App) {
 
 	// Enviornments
 	v1_protected.GET("/get_project_environments/:projectId", handleGetProjectEnvironments)
+
+	// Feature Flags
+	v1_protected.POST("/create_feature_flag", handleCreateFeatureFlag)
 }

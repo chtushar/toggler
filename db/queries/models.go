@@ -109,7 +109,7 @@ type FeatureFlag struct {
 	ID        int32           `json:"id"`
 	ProjectID int64           `json:"project_id"`
 	Uuid      uuid.NullUUID   `json:"uuid"`
-	Type      FeatureFlagType `json:"type"`
+	FlagType  FeatureFlagType `json:"flag_type"`
 	Name      string          `json:"name"`
 }
 
@@ -157,13 +157,6 @@ type Project struct {
 type ProjectEnviornment struct {
 	ProjectID     int64     `json:"project_id"`
 	EnvironmentID int64     `json:"environment_id"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
-}
-
-type ProjectFeature struct {
-	ProjectID     int64     `json:"project_id"`
-	FeatureFlagID int64     `json:"feature_flag_id"`
 	CreatedAt     time.Time `json:"created_at"`
 	UpdatedAt     time.Time `json:"updated_at"`
 }
