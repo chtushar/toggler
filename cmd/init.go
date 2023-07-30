@@ -52,6 +52,16 @@ func getPGXConfig() (*pgxpool.Config, error) {
 	return connConfig, nil
 }
 
+// type qLogger struct {
+// }
+
+// func (l *qLogger) Log(ctx context.Context, level pgx.LogLevel, msg string, data map[string]interface{}) {
+//   if level == pgx.LogLevelInfo && msg == "Query" {
+//     fmt.Printf("SQL:\n%s\nARGS:%v\n", data["sql"], data["args"])
+//   }
+// }
+
+
 func initDB() *pgxpool.Pool {
 	pgxConfig, err := getPGXConfig()
 
@@ -60,6 +70,7 @@ func initDB() *pgxpool.Pool {
 		os.Exit(1)
 	}
 
+	// pgxConfig.ConnConfig.Logger = &qLogger{}
 	pool, err := pgxpool.ConnectConfig(context.Background(), pgxConfig)
 
 	if err != nil {

@@ -186,17 +186,17 @@ func handleGetFlags (c echo.Context) error {
 		return fmt.Errorf("there was an error")	
 	}
 
-	tx, err := app.dbConn.Begin(c.Request().Context())
+	// tx, err := app.dbConn.Begin(c.Request().Context())
 
-	if err != nil {
-		app.log.Println("Failed to create tx", err)
-		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
-		return err
-	}
+	// if err != nil {
+	// 	app.log.Println("Failed to create tx", err)
+	// 	c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+	// 	return err
+	// }
 
-	defer tx.Rollback(c.Request().Context())
+	// defer tx.Rollback(c.Request().Context())
 
-	qtx := app.q.WithTx(tx)
+	// qtx := app.q.WithTx(tx)
 
 	uuidBytes, err := uuid.Parse(projectUuid)
 	if err != nil {
@@ -204,11 +204,12 @@ func handleGetFlags (c echo.Context) error {
 		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 	}
 
-	ffs, err := qtx.GetFeatureFlags(c.Request().Context(), queries.GetFeatureFlagsParams{
+	ffs, err := app.q.GetFeatureFlags(c.Request().Context(), queries.GetFeatureFlagsParams{
 		Uuid: uuid.NullUUID{
 			UUID: uuid.Must(uuid.FromBytes(uuidBytes[:])),
+			Valid: true,
 		},
-		ApiKeys: []string{apiKey},
+		Column2: apiKey,
 	})
 
 	if err != nil {
@@ -217,7 +218,7 @@ func handleGetFlags (c echo.Context) error {
 		return err
 	}
 
-	tx.Commit(c.Request().Context())
+	// tx.Commit(c.Request().Context())
 
 	c.JSON(http.StatusOK, responseType{
 		Success: true,
