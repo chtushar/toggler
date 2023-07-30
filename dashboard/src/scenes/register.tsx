@@ -10,13 +10,14 @@ import {
 } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import useRegisterAdmin from '@/hooks/mutations/useRegisterAdmin'
+import useRegister from '@/hooks/mutations/useRegister'
 import { Loader2 } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { basicAuthSignUpSchema } from '@/lib/formValidators'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useNavigate } from 'react-router-dom'
 
-const RegisterAdmin = () => {
+const Register = () => {
   const form = useForm<z.infer<typeof basicAuthSignUpSchema>>({
     resolver: zodResolver(basicAuthSignUpSchema),
     defaultValues: {
@@ -26,7 +27,8 @@ const RegisterAdmin = () => {
       confirmPassword: '',
     },
   })
-  const { mutate, isLoading } = useRegisterAdmin()
+  const { mutate, isLoading } = useRegister()
+  const navigate = useNavigate()
 
   const handleSubmit: SubmitHandler<{
     name: string
@@ -34,11 +36,18 @@ const RegisterAdmin = () => {
     password: string
     confirmPassword: string
   }> = data => {
-    mutate({
-      email: data.email,
-      name: data.name,
-      password: data.password,
-    })
+    mutate(
+      {
+        email: data.email,
+        name: data.name,
+        password: data.password,
+      },
+      {
+        onSuccess: () => {
+          navigate('/organizations/new')
+        },
+      }
+    )
   }
 
   return (
@@ -102,7 +111,7 @@ const RegisterAdmin = () => {
           />
           <Button type="submit" disabled={isLoading}>
             {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            Register Admin
+            Register
           </Button>
         </form>
       </Form>
@@ -110,4 +119,4 @@ const RegisterAdmin = () => {
   )
 }
 
-export default RegisterAdmin
+export default Register

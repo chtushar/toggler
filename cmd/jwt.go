@@ -4,18 +4,16 @@ import (
 	"database/sql"
 	"time"
 
-	"github.com/chtushar/toggler/db/queries"
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 )
 
-func generateToken(Id int32, Uuid uuid.NullUUID, Email sql.NullString, Name string, Role queries.UserRole) (string, error) {
+func generateToken(Id int32, Uuid uuid.NullUUID, Email sql.NullString, Name string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":    Id,
 		"uuid":  Uuid,
 		"email": Email.String,
 		"name":  Name,
-		"role":  Role,
 		"exp":   time.Now().Add(time.Hour * 24).Unix(),
 	})
 

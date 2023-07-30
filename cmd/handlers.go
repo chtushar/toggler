@@ -29,16 +29,12 @@ func initHTTPHandler(e *echo.Echo, app *App) {
 	}))
 	
 	v1 := e.Group("/api/v1")
-
-	// Check if the admin exists
-	// If not, redirect to /register-admin
-
+	
 	// ...
 	v1.GET("/healthcheck", handleHealthCheck)
-	v1.GET("/has_admin", handleHasAdmin)
 
 	// Auth
-	v1.POST("/add_admin", handleAddAdmin)
+	v1.POST("/add_user", handleAddUser)
 	v1.POST("/login", handleLogin)
 
 	// Echo group for protected routes

@@ -1,6 +1,6 @@
 -- name: CreateUser :one
-INSERT INTO users(name, email, email_verified, password, role)
-VALUES ($1, $2, $3, $4, $5)
+INSERT INTO users(name, email, email_verified, password)
+VALUES ($1, $2, $3, $4)
 RETURNING *;
 -- name: CountUsers :one
 SELECT COUNT(*)
@@ -21,9 +21,8 @@ WHERE email = $1;
 UPDATE users
 SET name = $1,
     email = $2,
-    role = $3,
-    email_verified = $4
-WHERE id = $5
+    email_verified = $3
+WHERE id = $4
 RETURNING *;
 -- name: UpdateUserPassword :one
 UPDATE users

@@ -5,9 +5,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import useCreateOrganization from '@/hooks/mutations/useCreateOrganization'
 import { useNavigate } from 'react-router-dom'
+import useUserOrganizations from '@/hooks/queries/useUserOrganizations'
 
 const CreateOrg = () => {
   const navigate = useNavigate()
+  const { data } = useUserOrganizations()
   const { mutate, isLoading } = useCreateOrganization()
   const formRef = useRef<HTMLFormElement>(null)
 
@@ -46,7 +48,7 @@ const CreateOrg = () => {
             type="button"
             variant="ghost"
             size="sm"
-            disabled={isLoading}
+            disabled={isLoading || !data?.data}
           >
             Cancel
           </Button>

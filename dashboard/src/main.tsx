@@ -6,7 +6,7 @@ import { queryClient } from './utils/queryClient'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
 import Root from './scenes/root.tsx'
-import RegisterAdmin from './scenes/register-admin.tsx'
+import Register from './scenes/register.tsx'
 import Login from './scenes/login.tsx'
 
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -73,7 +73,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/register',
-    element: <RegisterAdmin />,
+    element: <Register />,
   },
 ])
 

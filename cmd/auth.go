@@ -21,24 +21,7 @@ func writeAuthTokenToCookie(c echo.Context, token string) {
 	c.SetCookie(cookie)
 }
 
-func handleHasAdmin(c echo.Context) error {
-	var (
-		app = c.Get("app").(*App)
-	)
-
-	count, err := app.q.CountUsers(c.Request().Context())
-
-	if err != nil {
-		app.log.Println("Failed to count users", err)
-		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
-		return err
-	}
-
-	c.JSON(http.StatusOK, responseType{true, count > 0, nil})
-	return nil
-}
-
-func handleAddAdmin(c echo.Context) error {
+func handleAddUser(c echo.Context) error {
 	var (
 		app = c.Get("app").(*App)
 		req = &struct {
@@ -55,7 +38,6 @@ func handleAddAdmin(c echo.Context) error {
 		Name          string           `json:"name"`
 		Email         string  `json:"email"`
 		EmailVerified bool             `json:"email_verified"`
-		Role          queries.UserRole `json:"role"`
 	}
 
 	if err := c.Bind(req); err != nil {
@@ -72,13 +54,12 @@ func handleAddAdmin(c echo.Context) error {
 		return err
 	}
 
-	// Create the user with admin role
+	// Create the user
 	user, err := app.q.CreateUser(c.Request().Context(), queries.CreateUserParams{
 		Name:          req.Name,
 		Email:         sql.NullString{ String: req.Email, Valid: true},
 		EmailVerified: true,
 		Password:      hash,
-		Role:          queries.UserRoleAdmin,
 	})
 
 	if err != nil {
@@ -88,7 +69,7 @@ func handleAddAdmin(c echo.Context) error {
 	}
 
 	// Generate JWT token
-	token, err := generateToken(user.ID, user.Uuid, user.Email, user.Name, user.Role)
+	token, err := generateToken(user.ID, user.Uuid, user.Email, user.Name)
 
 	if err != nil {
 		app.log.Println("Failed to generate token", err)
@@ -104,7 +85,6 @@ func handleAddAdmin(c echo.Context) error {
 		Name:          user.Name,
 		Email:         user.Email.String,
 		EmailVerified: user.EmailVerified,
-		Role:          user.Role,
 	}
 
 	c.JSON(http.StatusOK, responseType{true, response, nil})
@@ -126,7 +106,6 @@ func handleLogin(c echo.Context) error {
 		Name          string           `json:"name"`
 		Email         string   		   `json:"email"`
 		EmailVerified bool             `json:"email_verified"`
-		Role          queries.UserRole `json:"role"`
 	}
 
 	if err := c.Bind(req); err != nil {
@@ -148,7 +127,7 @@ func handleLogin(c echo.Context) error {
 		return nil
 	}
 
-	token, err := generateToken(user.ID, user.Uuid, user.Email, user.Name, user.Role)
+	token, err := generateToken(user.ID, user.Uuid, user.Email, user.Name)
 
 	if err != nil {
 		app.log.Println("Failed to generate token", err)
@@ -164,7 +143,6 @@ func handleLogin(c echo.Context) error {
 		Name:          user.Name,
 		Email:         user.Email.String,
 		EmailVerified: user.EmailVerified,
-		Role:          user.Role,
 	}
 
 	c.JSON(http.StatusOK, responseType{true, response, nil})

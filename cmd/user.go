@@ -28,7 +28,6 @@ func handleGetAllUsers(c echo.Context) error {
 		Name          string           `json:"name"`
 		Email         sql.NullString   `json:"email"`
 		EmailVerified bool             `json:"email_verified"`
-		Role          queries.UserRole `json:"role"`
 	}
 
 	users, err := app.q.GetAllUsers(c.Request().Context())
@@ -47,7 +46,6 @@ func handleGetAllUsers(c echo.Context) error {
 			Name:          user.Name,
 			Email:         user.Email,
 			EmailVerified: user.EmailVerified,
-			Role:          user.Role,
 		}
 	}
 
@@ -72,7 +70,6 @@ func handleCreateUser(c echo.Context) error {
 			Name     string           `json:"name"`
 			Email    sql.NullString           `json:"email"`
 			Password string           `json:"password"`
-			Role     queries.UserRole `json:"role"`
 		}{}
 	)
 
@@ -81,7 +78,6 @@ func handleCreateUser(c echo.Context) error {
 		Name          string           `json:"name"`
 		Email         sql.NullString           `json:"email"`
 		EmailVerified bool             `json:"email_verified"`
-		Role          queries.UserRole `json:"role"`
 	}
 
 	if err := c.Bind(req); err != nil {
@@ -93,7 +89,6 @@ func handleCreateUser(c echo.Context) error {
 		Name:     req.Name,
 		Email:    req.Email,
 		Password: req.Password,
-		Role:     req.Role,
 	})
 
 	if err != nil {
@@ -107,7 +102,6 @@ func handleCreateUser(c echo.Context) error {
 		Name:          user.Name,
 		Email:         user.Email,
 		EmailVerified: user.EmailVerified,
-		Role:          user.Role,
 	}
 
 	c.JSON(http.StatusOK, responseType{true, response, nil})

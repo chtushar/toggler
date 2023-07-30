@@ -17,8 +17,9 @@ export const getUserOrganizations = async () => {
 const useUserOrganizations = () => {
   const { data } = useUser()
   return useQuery<ApiResponse<Array<Organization>>>({
-    queryKey: queryKey.userOrganizations(data?.data.uuid as string),
+    queryKey: queryKey.userOrganizations(data?.data?.uuid as string),
     queryFn: getUserOrganizations,
+    enabled: !!data?.data,
   })
 }
 

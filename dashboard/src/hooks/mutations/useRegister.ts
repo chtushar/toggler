@@ -3,13 +3,13 @@ import { ApiResponse } from '@/types'
 import axios from '@/utils/axios'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-interface RegisterAdminData {
+interface RegisterData {
   name: string
   email: string
   password: string
 }
 
-interface RegisterAdminResponseData {
+interface RegisterResponseData {
   id: number
   name: string
   email: string
@@ -17,17 +17,17 @@ interface RegisterAdminResponseData {
   role: string
 }
 
-const useRegisterAdmin = () => {
+const useRegister = () => {
   const client = useQueryClient()
 
   return useMutation({
-    mutationFn: async (data: RegisterAdminData) => {
-      const response = await axios.post('/api/v1/add_admin', data)
+    mutationFn: async (data: RegisterData) => {
+      const response = await axios.post('/api/v1/add_user', data)
       return response.data
     },
-    onSuccess: async (data: ApiResponse<RegisterAdminResponseData>) => {
+    onSuccess: async (data: ApiResponse<RegisterResponseData>) => {
       if (data.success) {
-        await client.setQueryData<RegisterAdminResponseData>(
+        await client.setQueryData<RegisterResponseData>(
           queryKey.user(),
           data.data
         )
@@ -36,4 +36,4 @@ const useRegisterAdmin = () => {
   })
 }
 
-export default useRegisterAdmin
+export default useRegister
