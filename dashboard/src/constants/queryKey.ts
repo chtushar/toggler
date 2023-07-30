@@ -12,4 +12,11 @@ export const queryKey = {
 
   // Environments
   environments: (projectId: string) => ['ENVIRONMENTS', projectId],
+
+  // Feature Flags
+  featureFlags: (projectId: string, environmentId: string) => [
+    'FEATURE_FLAGS',
+    projectId,
+    environmentId,
+  ],
 }

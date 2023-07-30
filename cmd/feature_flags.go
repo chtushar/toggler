@@ -1,10 +1,14 @@
 package cmd
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/chtushar/toggler/utils"
+	"github.com/google/uuid"
+	"github.com/jackc/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
@@ -55,7 +59,7 @@ func handleCreateFeatureFlag (c echo.Context) error {
 		return err
 	}
 
-	envs, err := qtx.GetProjectEnviornments(c.Request().Context(), int64(req.ProjectId))
+	envs, err := qtx.GetProjectEnvironments(c.Request().Context(), int64(req.ProjectId))
 	
 	if err != nil {
 		app.log.Println("Failed to get project envs", err)
@@ -83,5 +87,142 @@ func handleCreateFeatureFlag (c echo.Context) error {
 	tx.Commit(c.Request().Context())
 
 	c.JSON(http.StatusOK, responseType{true, ff, nil})
+	return nil
+}
+
+func handleGetProjectFeatureFlags (c echo.Context) error {
+	var (
+		app  = c.Get("app").(*App)
+	)
+
+	type resType struct {
+		ID        int32           `json:"id"`
+		Uuid      uuid.NullUUID   `json:"uuid"`
+		Name      string          `json:"name"`
+		FlagType  queries.FeatureFlagType `json:"flag_type"`
+		Enabled   bool    `json:"enabled"`
+		Value     pgtype.JSONB    `json:"value"`
+		UpdatedAt string    `json:"updated_at"`
+	}
+
+	projectIdParam := c.Param("projectId")
+	environmentIdParam := c.Param("environmentId")
+	
+	projectId, err := strconv.Atoi(projectIdParam)
+	
+	if err != nil {
+		app.log.Println("Failed to parse project id", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err	
+	}
+
+	environmentId, err := strconv.Atoi(environmentIdParam)
+
+	if err != nil {
+		app.log.Println("Failed to parse project id", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err	
+	}
+
+	tx, err := app.dbConn.Begin(c.Request().Context())
+
+	if err != nil {
+		app.log.Println("Failed to create tx", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
+	defer tx.Rollback(c.Request().Context())
+
+	qtx := app.q.WithTx(tx)
+
+	ffs, err := qtx.GetProjectFeatureFlags(c.Request().Context(), queries.GetProjectFeatureFlagsParams{
+		ProjectID: int64(projectId),
+		EnvironmentID: int64(environmentId),
+	})
+
+	if err != nil {
+		app.log.Println("Failed to get project feature flags", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
+	tx.Commit(c.Request().Context())
+
+	res := make([]resType, 0)
+
+	for _, f := range ffs {
+		res = append(res, resType{
+			ID: f.ID,
+			Uuid: f.Uuid,
+			Name: f.Name,
+			FlagType: f.FlagType,
+			Enabled: f.Enabled.Bool,
+			Value: f.Value,
+			UpdatedAt: f.Uuid.UUID.String(),
+		})
+	}
+
+	c.JSON(http.StatusOK, responseType{
+		Success: true,
+		Data: res,
+		Error: nil,
+	})
+
+	return nil
+}
+
+func handleGetFlags (c echo.Context) error {
+	var (
+		app  = c.Get("app").(*App)
+	)
+
+	projectUuid := c.Request().Header.Get("X-project-uuid")
+	apiKey := c.Request().Header.Get("X-api-key")
+
+	if apiKey == "" || projectUuid == "" {
+		app.log.Println("Check for the headers")
+		c.JSON(http.StatusBadRequest, BadRequestResponse)
+		return fmt.Errorf("there was an error")	
+	}
+
+	tx, err := app.dbConn.Begin(c.Request().Context())
+
+	if err != nil {
+		app.log.Println("Failed to create tx", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
+	defer tx.Rollback(c.Request().Context())
+
+	qtx := app.q.WithTx(tx)
+
+	uuidBytes, err := uuid.Parse(projectUuid)
+	if err != nil {
+		app.log.Println("Failed to parse project uuid", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+	}
+
+	ffs, err := qtx.GetFeatureFlags(c.Request().Context(), queries.GetFeatureFlagsParams{
+		Uuid: uuid.NullUUID{
+			UUID: uuid.Must(uuid.FromBytes(uuidBytes[:])),
+		},
+		ApiKeys: []string{apiKey},
+	})
+
+	if err != nil {
+		app.log.Println("Failed to get the feature flags", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
+	tx.Commit(c.Request().Context())
+
+	c.JSON(http.StatusOK, responseType{
+		Success: true,
+		Data: ffs,
+		Error: nil,
+	})
 	return nil
 }

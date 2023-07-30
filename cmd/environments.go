@@ -21,10 +21,10 @@ func handleGetProjectEnvironments (c echo.Context) error {
 		return err
 	}
 
-	envs, err := app.q.GetProjectEnviornments(c.Request().Context(), int64(projectId))
+	envs, err := app.q.GetProjectEnvironments(c.Request().Context(), int64(projectId))
 
 	if err != nil {
-		app.log.Println("Failed to get project enviornments")
+		app.log.Println("Failed to get project environments")
 		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 		return err
 	}

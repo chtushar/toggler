@@ -10,7 +10,10 @@ SELECT *
 FROM projects
 WHERE id = $1;
 -- name: GetUserOrgProjects :many
-SELECT *
+SELECT id,
+    name,
+    uuid,
+    org_id
 FROM projects p
 WHERE p.org_id = $2
     AND EXISTS (

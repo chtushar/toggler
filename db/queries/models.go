@@ -100,6 +100,7 @@ func (ns NullUserRole) Value() (driver.Value, error) {
 type Environment struct {
 	ID        int32         `json:"id"`
 	Name      string        `json:"name"`
+	ApiKeys   []string      `json:"api_keys"`
 	Uuid      uuid.NullUUID `json:"uuid"`
 	CreatedAt time.Time     `json:"created_at"`
 	UpdatedAt time.Time     `json:"updated_at"`
@@ -154,7 +155,7 @@ type Project struct {
 	UpdatedAt time.Time     `json:"updated_at"`
 }
 
-type ProjectEnviornment struct {
+type ProjectEnvironment struct {
 	ProjectID     int64     `json:"project_id"`
 	EnvironmentID int64     `json:"environment_id"`
 	CreatedAt     time.Time `json:"created_at"`

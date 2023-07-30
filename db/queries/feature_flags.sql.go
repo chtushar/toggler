@@ -7,7 +7,9 @@ package queries
 
 import (
 	"context"
+	"database/sql"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgtype"
 )
 
@@ -68,4 +70,125 @@ func (q *Queries) CreateFeatureState(ctx context.Context, arg CreateFeatureState
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getFeatureFlags = `-- name: GetFeatureFlags :many
+SELECT DISTINCT ff.id AS feature_flag_id,
+    ff.uuid AS feature_flag_uuid,
+    ff.flag_type AS feature_flag_type,
+    ff.name AS feature_flag_name,
+    fs.id AS feature_state_id,
+    fs.uuid AS feature_state_uuid,
+    fs.enabled AS feature_state_enabled,
+    fs.value AS feature_state_value
+FROM feature_flags ff
+    JOIN project_environments pe ON ff.project_id = pe.project_id
+    JOIN environments env ON pe.environment_id = env.id
+    JOIN projects p ON pe.project_id = p.id
+    LEFT JOIN feature_states fs ON fs.environment_id = env.id
+    AND fs.feature_flag_id = ff.id
+WHERE p.uuid = $1
+    AND $2 = ANY(env.api_keys)
+`
+
+type GetFeatureFlagsParams struct {
+	Uuid    uuid.NullUUID `json:"uuid"`
+	ApiKeys []string      `json:"api_keys"`
+}
+
+type GetFeatureFlagsRow struct {
+	FeatureFlagID       int32           `json:"feature_flag_id"`
+	FeatureFlagUuid     uuid.NullUUID   `json:"feature_flag_uuid"`
+	FeatureFlagType     FeatureFlagType `json:"feature_flag_type"`
+	FeatureFlagName     string          `json:"feature_flag_name"`
+	FeatureStateID      sql.NullInt32   `json:"feature_state_id"`
+	FeatureStateUuid    uuid.NullUUID   `json:"feature_state_uuid"`
+	FeatureStateEnabled sql.NullBool    `json:"feature_state_enabled"`
+	FeatureStateValue   pgtype.JSONB    `json:"feature_state_value"`
+}
+
+func (q *Queries) GetFeatureFlags(ctx context.Context, arg GetFeatureFlagsParams) ([]GetFeatureFlagsRow, error) {
+	rows, err := q.db.Query(ctx, getFeatureFlags, arg.Uuid, arg.ApiKeys)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetFeatureFlagsRow
+	for rows.Next() {
+		var i GetFeatureFlagsRow
+		if err := rows.Scan(
+			&i.FeatureFlagID,
+			&i.FeatureFlagUuid,
+			&i.FeatureFlagType,
+			&i.FeatureFlagName,
+			&i.FeatureStateID,
+			&i.FeatureStateUuid,
+			&i.FeatureStateEnabled,
+			&i.FeatureStateValue,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getProjectFeatureFlags = `-- name: GetProjectFeatureFlags :many
+SELECT ff.id,
+    ff.uuid,
+    ff.name,
+    ff.flag_type,
+    fs.enabled,
+    fs.value,
+    fs.updated_at
+FROM feature_flags ff
+    LEFT JOIN feature_states fs ON ff.id = fs.feature_flag_id
+    AND fs.environment_id = $2
+WHERE ff.project_id = $1
+`
+
+type GetProjectFeatureFlagsParams struct {
+	ProjectID     int64 `json:"project_id"`
+	EnvironmentID int64 `json:"environment_id"`
+}
+
+type GetProjectFeatureFlagsRow struct {
+	ID        int32           `json:"id"`
+	Uuid      uuid.NullUUID   `json:"uuid"`
+	Name      string          `json:"name"`
+	FlagType  FeatureFlagType `json:"flag_type"`
+	Enabled   sql.NullBool    `json:"enabled"`
+	Value     pgtype.JSONB    `json:"value"`
+	UpdatedAt sql.NullTime    `json:"updated_at"`
+}
+
+func (q *Queries) GetProjectFeatureFlags(ctx context.Context, arg GetProjectFeatureFlagsParams) ([]GetProjectFeatureFlagsRow, error) {
+	rows, err := q.db.Query(ctx, getProjectFeatureFlags, arg.ProjectID, arg.EnvironmentID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetProjectFeatureFlagsRow
+	for rows.Next() {
+		var i GetProjectFeatureFlagsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Uuid,
+			&i.Name,
+			&i.FlagType,
+			&i.Enabled,
+			&i.Value,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

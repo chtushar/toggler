@@ -35,8 +35,19 @@ export interface Project {
 export interface Environment {
   id: string
   name: string
+  api_keys: Array<string>
   uuid: string
   created_at: string
+  updated_at: string
+}
+
+export interface FeatureFlag {
+  id: string
+  name: string
+  uuid: string
+  flag_type: FeatureFlagType
+  enabled: boolean
+  value: object
   updated_at: string
 }
 

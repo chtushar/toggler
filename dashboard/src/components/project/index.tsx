@@ -2,6 +2,7 @@ import ProjectEnvironmentProvider from '@/context/ProjectEnvironmentProvider'
 import Header from './header'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs'
 import FeatureFlags from '../feature-flags'
+import Tokens from '../organization/Tokens'
 
 const Project = () => {
   return (
@@ -12,11 +13,15 @@ const Project = () => {
           <Tabs defaultValue="feature-flags">
             <TabsList>
               <TabsTrigger value="feature-flags">Feature Flags</TabsTrigger>
+              <TabsTrigger value="tokens">Tokens</TabsTrigger>
               <TabsTrigger value="settings">Project Settings</TabsTrigger>
             </TabsList>
             <div className="mt-6">
               <TabsContent value="feature-flags">
                 <FeatureFlags />
+              </TabsContent>
+              <TabsContent value="tokens">
+                <Tokens />
               </TabsContent>
               <TabsContent value="settings">Settings</TabsContent>
             </div>

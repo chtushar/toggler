@@ -1,5 +1,15 @@
+import useProjectEnvironmentContext from '@/context/ProjectEnvironmentProvider/useProjectEnvironmentContext'
+
 const Tokens = () => {
-  return <div>Tokens</div>
+  const { currentEnvironment } = useProjectEnvironmentContext()
+
+  return (
+    <div>
+      {currentEnvironment?.api_keys.map(key => {
+        return <div>{key}</div>
+      })}
+    </div>
+  )
 }
 
 export default Tokens

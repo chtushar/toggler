@@ -1,7 +1,7 @@
 import { Dispatch, createContext, useReducer } from 'react'
 import { produce } from 'immer'
 import { defaultSidebarConfig } from './sidebar-configs'
-import { PieChart, Braces, Cog, PlusIcon } from 'lucide-react'
+import { PieChart, Cog, PlusIcon } from 'lucide-react'
 
 interface ButtonItem {
   as: 'button'

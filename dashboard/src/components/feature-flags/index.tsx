@@ -3,8 +3,12 @@ import { Button } from '../ui/button'
 import { Table, TableBody, TableCell, TableHead, TableRow } from '../ui/table'
 import CreateFeatureFlagDialog from './CreateFeatureFlagDialog'
 import { TableHeader } from '../ui/table'
+import useProjectFeatureFlags from '@/hooks/queries/useProjectFeatureFlags'
+import { Switch } from '../ui/switch'
 
 const FeatureFlags = () => {
+  const { data, isLoading } = useProjectFeatureFlags()
+
   return (
     <div className="w-full flex flex-col max-w-7xl">
       <div className="w-full flex flex-col gap-6">
@@ -22,12 +26,20 @@ const FeatureFlags = () => {
               <TableHead>Name</TableHead>
               <TableHead>Enabled</TableHead>
             </TableRow>
-            <TableBody>
-              <TableRow>
-                <TableCell>Dark Mode</TableCell>
-              </TableRow>
-            </TableBody>
           </TableHeader>
+          <TableBody>
+            {!isLoading &&
+              data?.data.map(ff => {
+                return (
+                  <TableRow>
+                    <TableCell>{ff.name}</TableCell>
+                    <TableCell>
+                      <Switch checked={ff.enabled} />
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+          </TableBody>
         </Table>
       </div>
     </div>

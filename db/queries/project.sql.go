@@ -7,6 +7,8 @@ package queries
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 const addProjectMember = `-- name: AddProjectMember :exec
@@ -73,7 +75,10 @@ func (q *Queries) GetProject(ctx context.Context, id int32) (Project, error) {
 }
 
 const getUserOrgProjects = `-- name: GetUserOrgProjects :many
-SELECT id, name, uuid, org_id, owner_id, created_at, updated_at
+SELECT id,
+    name,
+    uuid,
+    org_id
 FROM projects p
 WHERE p.org_id = $2
     AND EXISTS (
@@ -89,23 +94,27 @@ type GetUserOrgProjectsParams struct {
 	OrgID  int64 `json:"org_id"`
 }
 
-func (q *Queries) GetUserOrgProjects(ctx context.Context, arg GetUserOrgProjectsParams) ([]Project, error) {
+type GetUserOrgProjectsRow struct {
+	ID    int32         `json:"id"`
+	Name  string        `json:"name"`
+	Uuid  uuid.NullUUID `json:"uuid"`
+	OrgID int64         `json:"org_id"`
+}
+
+func (q *Queries) GetUserOrgProjects(ctx context.Context, arg GetUserOrgProjectsParams) ([]GetUserOrgProjectsRow, error) {
 	rows, err := q.db.Query(ctx, getUserOrgProjects, arg.UserID, arg.OrgID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Project
+	var items []GetUserOrgProjectsRow
 	for rows.Next() {
-		var i Project
+		var i GetUserOrgProjectsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
 			&i.Uuid,
 			&i.OrgID,
-			&i.OwnerID,
-			&i.CreatedAt,
-			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}

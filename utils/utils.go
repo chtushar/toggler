@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 
@@ -27,4 +29,19 @@ func CreateEmptyJSONB() pgtype.JSONB {
 	}
 
 	return *jsonb
+}
+
+func GenerateAPIKey () (string, error) {
+	const apiKeyLength = 28 // The desired length of the API key in bytes
+	const prefix = "tog_"
+	apiKeyBytes := make([]byte, apiKeyLength)
+
+	_, err := rand.Read(apiKeyBytes)
+	if err != nil {
+		return "", err
+	}
+
+	apiKey := base64.URLEncoding.EncodeToString(apiKeyBytes)
+
+	return prefix + apiKey, nil
 }

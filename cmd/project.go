@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/chtushar/toggler/db/queries"
+	"github.com/chtushar/toggler/utils"
 	"github.com/golang-jwt/jwt/v4"
 	"github.com/labstack/echo/v4"
 )
@@ -65,8 +66,14 @@ func handleCreateProject(c echo.Context) error {
 		return err
 	}
 
+	apiKey1, _ := utils.GenerateAPIKey()
+	apiKey2, _ := utils.GenerateAPIKey()
+
 	// add default environments
-	envs, err := qtx.CreateProdAndDevEnvironments(c.Request().Context())
+	envs, err := qtx.CreateProdAndDevEnvironments(c.Request().Context(), queries.CreateProdAndDevEnvironmentsParams{
+		ApiKeys: []string{apiKey1},
+		ApiKeys_2: []string{apiKey2},
+	})
 
 	if err != nil {
 		app.log.Println("Failed to create environments", err)
@@ -75,7 +82,7 @@ func handleCreateProject(c echo.Context) error {
 	}
 
 	// add environments to project
-	err = qtx.AddProdAndDevProjectEnviornments(c.Request().Context(), queries.AddProdAndDevProjectEnviornmentsParams{
+	err = qtx.AddProdAndDevProjectEnvironments(c.Request().Context(), queries.AddProdAndDevProjectEnvironmentsParams{
 		ProjectID:       int64(project.ID),
 		EnvironmentID:   int64(envs[0].ID),
 		EnvironmentID_2: int64(envs[1].ID),

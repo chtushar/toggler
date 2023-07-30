@@ -1,4 +1,3 @@
-import { FeatureFlagType } from '@/types/models'
 import * as z from 'zod'
 
 export const basicAuthSignUpSchema = z
