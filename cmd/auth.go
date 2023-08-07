@@ -2,12 +2,15 @@ package cmd
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"net/http"
 
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/chtushar/toggler/utils"
 	"github.com/google/uuid"
+	"github.com/jackc/pgconn"
+	"github.com/jackc/pgerrcode"
 	"github.com/labstack/echo/v4"
 )
 
@@ -63,6 +66,20 @@ func handleAddUser(c echo.Context) error {
 	})
 
 	if err != nil {
+		var pgErr *pgconn.PgError
+		errors.As(err, &pgErr)
+		
+		app.log.Println("Failed to create user", err)
+
+		if pgErr.Code == pgerrcode.UniqueViolation {
+			c.JSON(http.StatusNotAcceptable, responseType{false, nil, &errorWrap{
+				"User already exists",
+				http.StatusNotAcceptable,
+				nil,
+			}})
+			return err	
+		}
+
 		app.log.Println("Failed to create user", err)
 		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 		return err

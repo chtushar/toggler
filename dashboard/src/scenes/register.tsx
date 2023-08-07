@@ -16,8 +16,10 @@ import { useForm } from 'react-hook-form'
 import { basicAuthSignUpSchema } from '@/lib/formValidators'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from 'react-router-dom'
+import axios from 'axios'
 
 const Register = () => {
+  const { mutate, isLoading } = useRegister()
   const form = useForm<z.infer<typeof basicAuthSignUpSchema>>({
     resolver: zodResolver(basicAuthSignUpSchema),
     defaultValues: {
@@ -27,7 +29,6 @@ const Register = () => {
       confirmPassword: '',
     },
   })
-  const { mutate, isLoading } = useRegister()
   const navigate = useNavigate()
 
   const handleSubmit: SubmitHandler<{
@@ -45,6 +46,13 @@ const Register = () => {
       {
         onSuccess: () => {
           navigate('/organizations/new')
+        },
+        onError: (err: any) => {
+          if (err.response.status === axios.HttpStatusCode.NotAcceptable) {
+            form.setError('email', {
+              message: err.response.data.error.message,
+            })
+          }
         },
       }
     )
