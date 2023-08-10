@@ -14,6 +14,13 @@ SELECT o.*
 FROM organizations o
     INNER JOIN organization_members om ON om.org_id = o.id
 WHERE om.user_id = $1;
+-- name: DoesUserBelongToOrg :one
+SELECT EXISTS (
+        SELECT 1
+        FROM organization_members
+        WHERE user_id = $1
+            AND org_id = $2
+    ) AS user_belongs_to_organization;
 -- name: UpdateOrganization :one
 UPDATE organizations
 set name = $2

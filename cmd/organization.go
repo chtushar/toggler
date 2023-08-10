@@ -138,3 +138,7 @@ func handleUpdateOrganization (c echo.Context) error {
 
 	return nil
 }
+
+func handleGetOrganizationMembers (c echo.Context) error {
+	return nil
+}

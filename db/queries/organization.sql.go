@@ -43,6 +43,27 @@ func (q *Queries) CreateOrganization(ctx context.Context, name string) (Organiza
 	return i, err
 }
 
+const doesUserBelongToOrg = `-- name: DoesUserBelongToOrg :one
+SELECT EXISTS (
+        SELECT 1
+        FROM organization_members
+        WHERE user_id = $1
+            AND org_id = $2
+    ) AS user_belongs_to_organization
+`
+
+type DoesUserBelongToOrgParams struct {
+	UserID int64 `json:"user_id"`
+	OrgID  int64 `json:"org_id"`
+}
+
+func (q *Queries) DoesUserBelongToOrg(ctx context.Context, arg DoesUserBelongToOrgParams) (bool, error) {
+	row := q.db.QueryRow(ctx, doesUserBelongToOrg, arg.UserID, arg.OrgID)
+	var user_belongs_to_organization bool
+	err := row.Scan(&user_belongs_to_organization)
+	return user_belongs_to_organization, err
+}
+
 const getOrganization = `-- name: GetOrganization :one
 SELECT id, uuid, name, created_at, updated_at
 FROM organizations

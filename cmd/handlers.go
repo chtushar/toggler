@@ -2,8 +2,11 @@ package cmd
 
 import (
 	"net/http"
+	"strconv"
 
 	"github.com/chtushar/toggler/dashboard"
+	"github.com/chtushar/toggler/db/queries"
+	"github.com/golang-jwt/jwt/v4"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -47,10 +50,49 @@ func initHTTPHandler(e *echo.Echo, app *App) {
 		},
 	}))
 
+	v1_org_access := v1_protected.Group("")
+	v1_org_access.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			var  (
+				app  = c.Get("app").(*App)
+				user = c.Get("user").(*jwt.Token)
+		)
+			claims := user.Claims.(jwt.MapClaims)
+			orgIdParam := c.Param("orgId")
+			orgId, err := strconv.Atoi(orgIdParam)
+			if err != nil {
+				c.JSON(http.StatusBadRequest, BadRequestResponse)
+				app.log.Println("Coulnd't get the org id")
+				return err
+			}			
+			userId := int64(claims["id"].(float64))
+
+			ok, err := app.q.DoesUserBelongToOrg(c.Request().Context(), queries.DoesUserBelongToOrgParams{
+				OrgID: int64(orgId),
+				UserID: userId,
+			})
+
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+				app.log.Println("Failed to check the access of the org", err)
+				return err
+			}
+			
+			if !ok {
+				c.JSON(http.StatusUnauthorized, UnauthorizedResponse)
+			}
+			
+			c.Set("orgId", orgId)
+			
+			return next(c)
+		}
+	})
+
 	// Organizations
 	v1_protected.POST("/create_organization", handleCreateOrganization)
 	v1_protected.GET("/get_user_organizations", handleGetUserOrganizations)
 	v1_protected.POST("/update_organization", handleUpdateOrganization)
+	v1_org_access.GET("/get_team_members/:orgId", handleGetOrganizationMembers)
 
 	// Auth
 	v1_protected.POST("/logout", handleLogout)
@@ -60,7 +102,7 @@ func initHTTPHandler(e *echo.Echo, app *App) {
 
 	// Projects
 	v1_protected.POST("/create_project", handleCreateProject)
-	v1_protected.GET("/get_org_projects/:orgId", handleGetOrgProjects)
+	v1_org_access.GET("/get_org_projects/:orgId", handleGetOrgProjects)
 
 	// Environments
 	v1_protected.GET("/get_project_environments/:projectId", handleGetProjectEnvironments)

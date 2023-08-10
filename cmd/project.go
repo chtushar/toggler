@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/chtushar/toggler/utils"
@@ -104,16 +103,8 @@ func handleGetOrgProjects(c echo.Context) error {
 	var (
 		app  = c.Get("app").(*App)
 		user = c.Get("user").(*jwt.Token)
+		orgId = c.Get("orgId").(int)
 	)
-
-	orgIdParam := c.Param("orgId")
-	orgId, err := strconv.Atoi(orgIdParam)
-
-	if err != nil {
-		app.log.Println(err)
-		c.JSON(http.StatusBadRequest, BadRequestResponse)
-		return err
-	}
 
 	userId := int64(user.Claims.(jwt.MapClaims)["id"].(float64))
 	projects, err := app.q.GetUserOrgProjects(c.Request().Context(), queries.GetUserOrgProjectsParams{
