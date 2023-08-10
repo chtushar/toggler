@@ -1,5 +1,96 @@
+import * as z from 'zod'
+import { Button } from '@/components/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from '@/components/ui/dialog'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import useCurrentOrganization from '@/hooks/queries/useCurrentOrganization'
+import { useForm } from 'react-hook-form'
+import { addTeamMember } from '@/lib/formValidators'
+import { zodResolver } from '@hookform/resolvers/zod'
+
+const AddMemberModal = ({ children }: { children: React.ReactNode }) => {
+  const form = useForm<z.infer<typeof addTeamMember>>({
+    resolver: zodResolver(addTeamMember),
+    defaultValues: {
+      email: '',
+    },
+  })
+  const currentOrg = useCurrentOrganization()
+  const handleSubmit = (values: { email: string }) => {
+    console.log(values.email)
+  }
+
+  return (
+    <Dialog>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Add a new member</DialogTitle>
+          <DialogDescription>
+            Add a new team member to the{' '}
+            <strong className="text-primary">{currentOrg?.name}</strong>{' '}
+            organization
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(handleSubmit)}
+            className="w-full flex flex-col space-y-4"
+          >
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button type="submit">Create</Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 const Team = () => {
-  return <div>Team</div>
+  return (
+    <div className="border gap-8 bg-white border-solid flex flex-col border-muted-background rounded-lg w-full max-w-lg">
+      <div className="px-6 pt-6">
+        <h4 className="font-semibold text-lg">Team Members</h4>
+        <p className="text-xs text-muted-foreground">Manage your team</p>
+      </div>
+      <div className="pb-6 px-6">
+        <div className="flex justify-end w-full">
+          <AddMemberModal>
+            <Button size="sm">Add Member</Button>
+          </AddMemberModal>
+        </div>
+      </div>
+    </div>
+  )
 }
 
 export default Team

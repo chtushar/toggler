@@ -34,3 +34,7 @@ export const createFeatureFlagSchema = z.object({
   name: z.string().min(3),
   type: z.enum(['boolean']),
 })
+
+export const addTeamMember = z.object({
+  email: z.string().email(),
+})
