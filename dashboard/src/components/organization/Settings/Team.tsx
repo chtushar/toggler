@@ -22,6 +22,8 @@ import useCurrentOrganization from '@/hooks/queries/useCurrentOrganization'
 import { useForm } from 'react-hook-form'
 import { addTeamMember } from '@/lib/formValidators'
 import { zodResolver } from '@hookform/resolvers/zod'
+import useOrganizationMembers from '@/hooks/queries/useOrganizationMembers'
+import clsx from 'clsx'
 
 const AddMemberModal = ({ children }: { children: React.ReactNode }) => {
   const form = useForm<z.infer<typeof addTeamMember>>({
@@ -76,18 +78,43 @@ const AddMemberModal = ({ children }: { children: React.ReactNode }) => {
 }
 
 const Team = () => {
+  const { data } = useOrganizationMembers()
   return (
-    <div className="border gap-8 bg-white border-solid flex flex-col border-muted-background rounded-lg w-full max-w-lg">
+    <div className="border gap-6 bg-white border-solid flex flex-col border-muted-background rounded-lg w-full max-w-lg">
       <div className="px-6 pt-6">
         <h4 className="font-semibold text-lg">Team Members</h4>
         <p className="text-xs text-muted-foreground">Manage your team</p>
       </div>
-      <div className="pb-6 px-6">
+      <div className="pb-6 px-6 flex flex-col gap-4">
         <div className="flex justify-end w-full">
           <AddMemberModal>
             <Button size="sm">Add Member</Button>
           </AddMemberModal>
         </div>
+        <ul className="w-full flex flex-col items-stretch">
+          {data?.data.map(user => {
+            return (
+              <li className="py-2 flex justify-between" key={user.uuid}>
+                <div className="flex flex-col">
+                  <span className="text-base leading-5">
+                    {user?.name ?? '*'}
+                  </span>
+                  <span className="text-xs text-neutral-500 leading-4">
+                    {user.email}
+                  </span>
+                </div>
+                <span
+                  className={clsx(
+                    user.email_verified && 'text-emerald-700',
+                    !user.email_verified && 'text-red-700'
+                  )}
+                >
+                  {user.email_verified ? 'Active' : 'Inactive'}
+                </span>
+              </li>
+            )
+          })}
+        </ul>
       </div>
     </div>
   )

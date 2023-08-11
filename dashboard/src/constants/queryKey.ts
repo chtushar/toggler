@@ -4,6 +4,7 @@ export const queryKey = {
   // Organizations
   organization: (orgId: string) => ['ORGANIZATION', orgId],
   userOrganizations: (userId: string) => ['ORGANIZATIONS', userId],
+  organizationMembers: (orgId: string) => ['MEMBERS', orgId],
 
   // Projects
   project: (orgId: string, userId: string) => ['PROJECT', orgId, userId],

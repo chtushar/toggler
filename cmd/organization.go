@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"net/http"
+	"time"
 
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -140,5 +142,45 @@ func handleUpdateOrganization (c echo.Context) error {
 }
 
 func handleGetOrganizationMembers (c echo.Context) error {
+	var (
+		app  = c.Get("app").(*App)
+		orgId = c.Get("orgId").(int)
+	)
+
+	type member struct {
+		Id            int32            	`json:"id"`
+		Uuid		  uuid.NullUUID	   	`json:"uuid"`
+		Name          string           	`json:"name"`
+		Email         string  			`json:"email"`
+		EmailVerified bool              `json:"email_verified"`
+		CreatedAt     time.Time      	`json:"created_at"`
+	}
+
+	members, err := app.q.GetOrganizationMembers(c.Request().Context(), int64(orgId))
+
+	if err != nil {
+		app.log.Println("Failed to get organization members", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
+	var res []member
+
+	for _, m := range members {
+		res = append(res, member{
+			Id: m.ID,
+			Name: m.Name,
+			Email: m.Email.String,
+			EmailVerified: m.EmailVerified,
+			CreatedAt: m.CreatedAt,
+		})
+	}
+
+	c.JSON(http.StatusOK, responseType{
+		true,
+		res,
+		nil,
+	})
+
 	return nil
 }

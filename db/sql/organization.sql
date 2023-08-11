@@ -26,3 +26,13 @@ UPDATE organizations
 set name = $2
 WHERE id = $1
 RETURNING *;
+-- name: GetOrganizationMembers :many
+SELECT u.id AS id,
+    u.name AS name,
+    u.uuid AS uuid,
+    u.email AS email,
+    u.email_verified AS email_verified,
+    u.created_at AS created_at
+FROM organization_members om
+    JOIN users u ON om.user_id = u.id
+WHERE om.org_id = $1;

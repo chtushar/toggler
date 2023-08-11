@@ -7,6 +7,10 @@ package queries
 
 import (
 	"context"
+	"database/sql"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 const addOrganizationMember = `-- name: AddOrganizationMember :exec
@@ -81,6 +85,54 @@ func (q *Queries) GetOrganization(ctx context.Context, id int32) (Organization, 
 		&i.UpdatedAt,
 	)
 	return i, err
+}
+
+const getOrganizationMembers = `-- name: GetOrganizationMembers :many
+SELECT u.id AS id,
+    u.name AS name,
+    u.uuid AS uuid,
+    u.email AS email,
+    u.email_verified AS email_verified,
+    u.created_at AS created_at
+FROM organization_members om
+    JOIN users u ON om.user_id = u.id
+WHERE om.org_id = $1
+`
+
+type GetOrganizationMembersRow struct {
+	ID            int32          `json:"id"`
+	Name          string         `json:"name"`
+	Uuid          uuid.NullUUID  `json:"uuid"`
+	Email         sql.NullString `json:"email"`
+	EmailVerified bool           `json:"email_verified"`
+	CreatedAt     time.Time      `json:"created_at"`
+}
+
+func (q *Queries) GetOrganizationMembers(ctx context.Context, orgID int64) ([]GetOrganizationMembersRow, error) {
+	rows, err := q.db.Query(ctx, getOrganizationMembers, orgID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetOrganizationMembersRow
+	for rows.Next() {
+		var i GetOrganizationMembersRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.Uuid,
+			&i.Email,
+			&i.EmailVerified,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getUserOrganizations = `-- name: GetUserOrganizations :many
