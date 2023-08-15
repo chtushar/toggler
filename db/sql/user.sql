@@ -32,3 +32,9 @@ RETURNING *;
 -- name: DeleteUser :exec
 DELETE FROM users
 WHERE id = $1;
+-- name: CheckIfUserExists :one
+SELECT EXISTS (
+        SELECT 1
+        FROM users
+        WHERE email = $1
+    );

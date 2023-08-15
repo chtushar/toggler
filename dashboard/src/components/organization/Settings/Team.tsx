@@ -105,8 +105,9 @@ const Team = () => {
                 </div>
                 <span
                   className={clsx(
-                    user.email_verified && 'text-emerald-700',
-                    !user.email_verified && 'text-red-700'
+                    'test-sm',
+                    user.email_verified && 'text-emerald-500',
+                    !user.email_verified && 'text-red-500'
                   )}
                 >
                   {user.email_verified ? 'Active' : 'Inactive'}

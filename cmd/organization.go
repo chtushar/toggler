@@ -169,8 +169,8 @@ func handleGetOrganizationMembers (c echo.Context) error {
 	for _, m := range members {
 		res = append(res, member{
 			Id: m.ID,
-			Name: m.Name,
-			Email: m.Email.String,
+			Name: *m.Name,
+			Email: *m.Email,
 			EmailVerified: m.EmailVerified,
 			CreatedAt: m.CreatedAt,
 		})
@@ -180,6 +180,79 @@ func handleGetOrganizationMembers (c echo.Context) error {
 		true,
 		res,
 		nil,
+	})
+
+	return nil
+}
+
+func handleAddTeamMember(c echo.Context) error {
+	var (
+		app  = c.Get("app").(*App)
+		orgId = c.Get("orgId").(int)
+		req = &struct {
+			Email string `json:"email"`;  
+		}{}
+	)
+
+	tx, err := app.dbConn.Begin(c.Request().Context())
+
+	if err != nil {
+		app.log.Println("Failed to add member", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
+	defer tx.Rollback(c.Request().Context())
+	qtx := app.q.WithTx(tx)
+
+	// Check if the email-id already exists
+	ok, err := qtx.CheckIfUserExists(c.Request().Context(), &req.Email)
+
+	if err != nil {
+		app.log.Println("Failed to add member", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
+	if ok {
+		// If yes add the user as an organization member
+		user, err := qtx.GetUserByEmail(c.Request().Context(), &req.Email)
+
+		if err != nil {
+			app.log.Println("Failed to add member", err)
+			c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+			return err
+		}
+
+		qtx.AddOrganizationMember(c.Request().Context(), queries.AddOrganizationMemberParams{
+			OrgID: int64(orgId),
+			UserID: int64(user.ID),
+		})
+	} else {
+		// If not create an account with just the email, email_veridfied=false
+		user, err := qtx.CreateUser(c.Request().Context(), queries.CreateUserParams{
+			Email: &req.Email,
+			EmailVerified: false,
+		})
+
+		if err != nil {
+			app.log.Println("Failed to add member", err)
+			c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+			return err
+		}
+
+		qtx.AddOrganizationMember(c.Request().Context(), queries.AddOrganizationMemberParams{
+			UserID: int64(user.ID),
+			OrgID: int64(orgId),
+		})
+	}
+
+	tx.Commit(c.Request().Context())
+
+	c.JSON(http.StatusOK, responseType{
+		Success: true,
+		Data: nil,
+		Error: nil,
 	})
 
 	return nil

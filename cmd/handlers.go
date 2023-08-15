@@ -93,6 +93,7 @@ func initHTTPHandler(e *echo.Echo, app *App) {
 	v1_protected.GET("/get_user_organizations", handleGetUserOrganizations)
 	v1_protected.POST("/update_organization", handleUpdateOrganization)
 	v1_org_access.GET("/get_team_members/:orgId", handleGetOrganizationMembers)
+	v1_org_access.GET("/add_team_member/:orgId", handleAddTeamMember)
 
 	// Auth
 	v1_protected.POST("/logout", handleLogout)

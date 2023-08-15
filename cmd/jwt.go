@@ -1,18 +1,16 @@
 package cmd
 
 import (
-	"database/sql"
 	"time"
 
 	"github.com/golang-jwt/jwt"
-	"github.com/google/uuid"
 )
 
-func generateToken(Id int32, Uuid uuid.NullUUID, Email sql.NullString, Name string) (string, error) {
+func generateToken(Id int32, Uuid string, Email string, Name string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"id":    Id,
 		"uuid":  Uuid,
-		"email": Email.String,
+		"email": Email,
 		"name":  Name,
 		"exp":   time.Now().Add(time.Hour * 24).Unix(),
 	})

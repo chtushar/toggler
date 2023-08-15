@@ -97,7 +97,7 @@ func handleGetProjectFeatureFlags (c echo.Context) error {
 
 	type resType struct {
 		ID        int32           `json:"id"`
-		Uuid      uuid.NullUUID   `json:"uuid"`
+		Uuid      string   `json:"uuid"`
 		Name      string          `json:"name"`
 		FlagType  queries.FeatureFlagType `json:"flag_type"`
 		Enabled   bool    `json:"enabled"`
@@ -154,12 +154,12 @@ func handleGetProjectFeatureFlags (c echo.Context) error {
 	for _, f := range ffs {
 		res = append(res, resType{
 			ID: f.ID,
-			Uuid: f.Uuid,
+			Uuid: f.Uuid.String(),
 			Name: f.Name,
 			FlagType: f.FlagType,
-			Enabled: f.Enabled.Bool,
+			Enabled: *f.Enabled,
 			Value: f.Value,
-			UpdatedAt: f.Uuid.UUID.String(),
+			UpdatedAt: f.UpdatedAt.String(),
 		})
 	}
 
@@ -205,10 +205,7 @@ func handleGetFlags (c echo.Context) error {
 	}
 
 	ffs, err := app.q.GetFeatureFlags(c.Request().Context(), queries.GetFeatureFlagsParams{
-		Uuid: uuid.NullUUID{
-			UUID: uuid.Must(uuid.FromBytes(uuidBytes[:])),
-			Valid: true,
-		},
+		Uuid: &uuidBytes,
 		Column2: apiKey,
 	})
 

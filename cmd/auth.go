@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -59,10 +58,10 @@ func handleAddUser(c echo.Context) error {
 
 	// Create the user
 	user, err := app.q.CreateUser(c.Request().Context(), queries.CreateUserParams{
-		Name:          req.Name,
-		Email:         sql.NullString{ String: req.Email, Valid: true},
+		Name:          &req.Name,
+		Email:         &req.Email,
 		EmailVerified: true,
-		Password:      hash,
+		Password:      &hash,
 	})
 
 	if err != nil {
@@ -86,7 +85,7 @@ func handleAddUser(c echo.Context) error {
 	}
 
 	// Generate JWT token
-	token, err := generateToken(user.ID, user.Uuid, user.Email, user.Name)
+	token, err := generateToken(user.ID, user.Uuid.String(), *user.Email, *user.Name)
 
 	if err != nil {
 		app.log.Println("Failed to generate token", err)
@@ -99,8 +98,8 @@ func handleAddUser(c echo.Context) error {
 
 	response := resType{
 		Id:            user.ID,
-		Name:          user.Name,
-		Email:         user.Email.String,
+		Name:          *user.Name,
+		Email:         *user.Email,
 		EmailVerified: user.EmailVerified,
 	}
 
@@ -119,7 +118,7 @@ func handleLogin(c echo.Context) error {
 
 	type resType struct {
 		Id            int32            `json:"id"`
-		Uuid		  uuid.NullUUID	   `json:"uuid"`
+		Uuid		  string   			`json:"uuid"`
 		Name          string           `json:"name"`
 		Email         string   		   `json:"email"`
 		EmailVerified bool             `json:"email_verified"`
@@ -131,7 +130,7 @@ func handleLogin(c echo.Context) error {
 		return err
 	}
 
-	user, err := app.q.GetUserByEmail(c.Request().Context(), sql.NullString{String: req.Email, Valid: true })
+	user, err := app.q.GetUserByEmail(c.Request().Context(), &req.Email)
 
 	if err != nil {
 		app.log.Println("Failed to get user", err)
@@ -139,12 +138,12 @@ func handleLogin(c echo.Context) error {
 		return err
 	}
 
-	if !utils.CheckPasswordHash(req.Password, user.Password) {
+	if !utils.CheckPasswordHash(req.Password, *user.Password) {
 		c.JSON(http.StatusUnauthorized, UnauthorizedResponse)
 		return nil
 	}
 
-	token, err := generateToken(user.ID, user.Uuid, user.Email, user.Name)
+	token, err := generateToken(user.ID, user.Uuid.String(), *user.Email, *user.Name)
 
 	if err != nil {
 		app.log.Println("Failed to generate token", err)
@@ -156,9 +155,9 @@ func handleLogin(c echo.Context) error {
 
 	response := resType{
 		Id:            user.ID,
-		Uuid: 		   user.Uuid,
-		Name:          user.Name,
-		Email:         user.Email.String,
+		Uuid: 		   user.Uuid.String(),
+		Name:          *user.Name,
+		Email:         *user.Email,
 		EmailVerified: user.EmailVerified,
 	}
 
