@@ -24,8 +24,10 @@ import { addTeamMember } from '@/lib/formValidators'
 import { zodResolver } from '@hookform/resolvers/zod'
 import useOrganizationMembers from '@/hooks/queries/useOrganizationMembers'
 import clsx from 'clsx'
+import useAddOrganizationMember from '@/hooks/mutations/useAddOrganizationMember'
 
 const AddMemberModal = ({ children }: { children: React.ReactNode }) => {
+  const { mutate: addOrganizationMember } = useAddOrganizationMember()
   const form = useForm<z.infer<typeof addTeamMember>>({
     resolver: zodResolver(addTeamMember),
     defaultValues: {
@@ -34,7 +36,7 @@ const AddMemberModal = ({ children }: { children: React.ReactNode }) => {
   })
   const currentOrg = useCurrentOrganization()
   const handleSubmit = (values: { email: string }) => {
-    console.log(values.email)
+    addOrganizationMember(values)
   }
 
   return (
@@ -105,7 +107,7 @@ const Team = () => {
                 </div>
                 <span
                   className={clsx(
-                    'test-sm',
+                    'text-sm',
                     user.email_verified && 'text-emerald-500',
                     !user.email_verified && 'text-red-500'
                   )}

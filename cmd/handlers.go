@@ -60,6 +60,7 @@ func initHTTPHandler(e *echo.Echo, app *App) {
 			claims := user.Claims.(jwt.MapClaims)
 			orgIdParam := c.Param("orgId")
 			orgId, err := strconv.Atoi(orgIdParam)
+
 			if err != nil {
 				c.JSON(http.StatusBadRequest, BadRequestResponse)
 				app.log.Println("Coulnd't get the org id")
@@ -93,7 +94,7 @@ func initHTTPHandler(e *echo.Echo, app *App) {
 	v1_protected.GET("/get_user_organizations", handleGetUserOrganizations)
 	v1_protected.POST("/update_organization", handleUpdateOrganization)
 	v1_org_access.GET("/get_team_members/:orgId", handleGetOrganizationMembers)
-	v1_org_access.GET("/add_team_member/:orgId", handleAddTeamMember)
+	v1_org_access.POST("/add_team_member/:orgId", handleAddTeamMember)
 
 	// Auth
 	v1_protected.POST("/logout", handleLogout)

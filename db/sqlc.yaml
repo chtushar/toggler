@@ -1,8 +1,11 @@
 version: "2"
-plugins:
-  - name: "ts"
-    process:
-      cmd: "sqlc-ts"
+overrides:
+  go:
+    overrides:
+      - db_type: "uuid"
+        engine: "postgresql"
+        go_type:
+          type: "string"
 sql:
   - engine: "postgresql"
     queries: "./sql"

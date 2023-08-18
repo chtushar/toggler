@@ -2,11 +2,10 @@ package cmd
 
 import (
 	"net/http"
-	"time"
+	"strconv"
 
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -147,15 +146,6 @@ func handleGetOrganizationMembers (c echo.Context) error {
 		orgId = c.Get("orgId").(int)
 	)
 
-	type member struct {
-		Id            int32            	`json:"id"`
-		Uuid		  uuid.NullUUID	   	`json:"uuid"`
-		Name          string           	`json:"name"`
-		Email         string  			`json:"email"`
-		EmailVerified bool              `json:"email_verified"`
-		CreatedAt     time.Time      	`json:"created_at"`
-	}
-
 	members, err := app.q.GetOrganizationMembers(c.Request().Context(), int64(orgId))
 
 	if err != nil {
@@ -164,21 +154,9 @@ func handleGetOrganizationMembers (c echo.Context) error {
 		return err
 	}
 
-	var res []member
-
-	for _, m := range members {
-		res = append(res, member{
-			Id: m.ID,
-			Name: *m.Name,
-			Email: *m.Email,
-			EmailVerified: m.EmailVerified,
-			CreatedAt: m.CreatedAt,
-		})
-	}
-
 	c.JSON(http.StatusOK, responseType{
 		true,
-		res,
+		members,
 		nil,
 	})
 
@@ -188,11 +166,33 @@ func handleGetOrganizationMembers (c echo.Context) error {
 func handleAddTeamMember(c echo.Context) error {
 	var (
 		app  = c.Get("app").(*App)
-		orgId = c.Get("orgId").(int)
 		req = &struct {
 			Email string `json:"email"`;  
 		}{}
 	)
+
+	orgIdParam := c.Param("orgId")
+	orgId, err := strconv.Atoi(orgIdParam)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, BadRequestResponse)
+		app.log.Println("Coulnd't get the org id")
+		return err
+	}
+
+		if err := c.Bind(req); err != nil {
+		c.JSON(http.StatusBadRequest, responseType{
+			Success: false,
+			Data: nil,
+			Error: &errorWrap{
+				Code: http.StatusBadGateway,
+				Data: nil,
+				Message: "Bad Request. Please check the payload.",	
+			},
+		})
+		return err
+	}
+
 
 	tx, err := app.dbConn.Begin(c.Request().Context())
 
@@ -204,6 +204,7 @@ func handleAddTeamMember(c echo.Context) error {
 
 	defer tx.Rollback(c.Request().Context())
 	qtx := app.q.WithTx(tx)
+
 
 	// Check if the email-id already exists
 	ok, err := qtx.CheckIfUserExists(c.Request().Context(), &req.Email)

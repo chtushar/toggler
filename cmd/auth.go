@@ -35,17 +35,40 @@ func handleAddUser(c echo.Context) error {
 
 	// Response type
 	type resType struct {
-		Id            int32            `json:"id"`
-		Uuid		  uuid.NullUUID	`json:"uuid"`
-		Name          string           `json:"name"`
-		Email         string  `json:"email"`
-		EmailVerified bool             `json:"email_verified"`
+		Id            int32            	`json:"id"`
+		Uuid		  uuid.NullUUID		`json:"uuid"`
+		Name          string           	`json:"name"`
+		Email         string  			`json:"email"`
+		EmailVerified bool             	`json:"email_verified"`
 	}
 
 	if err := c.Bind(req); err != nil {
 		c.JSON(http.StatusBadRequest, BadRequestResponse)
 		return err
 	}
+
+	tx, err := app.dbConn.Begin(c.Request().Context())
+
+	if err != nil {
+		app.log.Println("Failed to add member", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
+	defer tx.Rollback(c.Request().Context())
+	qtx := app.q.WithTx(tx)
+
+	exists, err := qtx.CheckIfUserExists(c.Request().Context(), &req.Email)
+	
+	if err != nil {
+		app.log.Println("Failed to create user", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
+	// Create the user
+	var user queries.User;
+
 
 	// Hash the password
 	hash, err := utils.HashPassword(req.Password)
@@ -56,13 +79,54 @@ func handleAddUser(c echo.Context) error {
 		return err
 	}
 
-	// Create the user
-	user, err := app.q.CreateUser(c.Request().Context(), queries.CreateUserParams{
-		Name:          &req.Name,
-		Email:         &req.Email,
-		EmailVerified: true,
-		Password:      &hash,
-	})
+	if exists {
+		user, err := qtx.GetUserByEmail(c.Request().Context(), &req.Email)
+		
+		if err != nil {
+			app.log.Println("Failed to create user", err)
+			c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+			return err
+		}
+		
+		if user.EmailVerified {
+			app.log.Println("User already exists", err)
+			c.JSON(http.StatusUnauthorized, UnauthorizedResponse)
+			return fmt.Errorf("the user already exists")
+		}
+
+		user, err = qtx.UpdateUser(c.Request().Context(), queries.UpdateUserParams{
+			ID: int32(user.ID),
+			Name: &req.Name,
+			Email: &req.Email,
+			EmailVerified: true,
+		})
+
+		if err != nil {
+			app.log.Println("Failed to create user", err)
+			c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+			return err
+		}
+
+		qtx.UpdateUserPassword(c.Request().Context(), queries.UpdateUserPasswordParams{
+			ID: user.ID,
+			Password: &hash,	
+		})
+	} else {
+		user, err = qtx.CreateUser(c.Request().Context(), queries.CreateUserParams{
+			Name:          &req.Name,
+			Email:         &req.Email,
+			EmailVerified: true,
+			Password:      &hash,
+		})
+	}
+
+	if err != nil {
+		app.log.Println("Failed to create user", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
+	tx.Commit(c.Request().Context())
 
 	if err != nil {
 		var pgErr *pgconn.PgError
