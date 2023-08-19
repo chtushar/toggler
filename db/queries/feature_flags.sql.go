@@ -185,3 +185,26 @@ func (q *Queries) GetProjectFeatureFlags(ctx context.Context, arg GetProjectFeat
 	}
 	return items, nil
 }
+
+const toggleFeatureFlag = `-- name: ToggleFeatureFlag :one
+UPDATE feature_states
+SET enabled = NOT enabled
+WHERE feature_flag_id = $1
+RETURNING id, uuid, environment_id, feature_flag_id, enabled, value, created_at, updated_at
+`
+
+func (q *Queries) ToggleFeatureFlag(ctx context.Context, featureFlagID int64) (FeatureState, error) {
+	row := q.db.QueryRow(ctx, toggleFeatureFlag, featureFlagID)
+	var i FeatureState
+	err := row.Scan(
+		&i.ID,
+		&i.Uuid,
+		&i.EnvironmentID,
+		&i.FeatureFlagID,
+		&i.Enabled,
+		&i.Value,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}

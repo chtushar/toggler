@@ -33,3 +33,8 @@ FROM feature_flags ff
     AND fs.feature_flag_id = ff.id
 WHERE p.uuid = $1
     AND $2::text = ANY(env.api_keys);
+-- name: ToggleFeatureFlag :one
+UPDATE feature_states
+SET enabled = NOT enabled
+WHERE feature_flag_id = $1
+RETURNING *;
