@@ -112,5 +112,6 @@ func initHTTPHandler(e *echo.Echo, app *App) {
 	// Feature Flags
 	v1_protected.POST("/create_feature_flag", handleCreateFeatureFlag)
 	v1_protected.GET("/get_project_feature_flags/:projectId/:environmentId", handleGetProjectFeatureFlags)
+	v1_org_access.POST("/toggle_feature_flag/:orgId/:ffId", handleToggleFeatureFlag)
 	v1.GET("/get_flags", handleGetFlags)
 }

@@ -217,3 +217,33 @@ func handleGetFlags (c echo.Context) error {
 	})
 	return nil
 }
+
+func handleToggleFeatureFlag (c echo.Context) error {
+	var (
+		app  = c.Get("app").(*App)
+	)
+	ffIdParam := c.Param("ffId")
+	ffId, err := strconv.Atoi(ffIdParam)
+
+	if err != nil {
+		app.log.Println(err)
+		c.JSON(http.StatusBadRequest, BadRequestResponse)
+		return err
+	}
+
+	ff, err := app.q.ToggleFeatureFlag(c.Request().Context(), int64(ffId))
+
+	if err != nil {
+		app.log.Println("Failed to toggle the feature flag", err)
+		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
+		return err
+	}
+
+	c.JSON(http.StatusOK, responseType{
+		Success: true,
+		Data: ff,
+		Error: nil,
+	})
+
+	return nil
+}

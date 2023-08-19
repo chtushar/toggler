@@ -5,11 +5,13 @@ import { Table, TableBody, TableCell, TableHead, TableRow } from '../ui/table'
 import CreateFeatureFlagDialog from './CreateFeatureFlagDialog'
 import { TableHeader } from '../ui/table'
 import useProjectFeatureFlags from '@/hooks/queries/useProjectFeatureFlags'
+import useToggleFeatureFlag from '@/hooks/mutations/useToggleFeatureFlag'
 import { Switch } from '../ui/switch'
 
 const FeatureFlags = () => {
   const [openModal, setOpenModal] = useState(false)
   const { data, isLoading } = useProjectFeatureFlags()
+  const { mutate: toggleFeatureFlag } = useToggleFeatureFlag()
 
   return (
     <div className="w-full flex flex-col max-w-7xl">
@@ -36,7 +38,12 @@ const FeatureFlags = () => {
                   <TableRow>
                     <TableCell>{ff.name}</TableCell>
                     <TableCell>
-                      <Switch checked={ff.enabled} />
+                      <Switch
+                        checked={ff.enabled}
+                        onClick={() => {
+                          toggleFeatureFlag(ff.id)
+                        }}
+                      />
                     </TableCell>
                   </TableRow>
                 )
