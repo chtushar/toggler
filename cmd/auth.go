@@ -149,7 +149,7 @@ func handleAddUser(c echo.Context) error {
 	}
 
 	// Generate JWT token
-	token, err := generateToken(user.ID, user.Uuid.String(), *user.Email, *user.Name)
+	token, err := generateToken(user.ID, user.Uuid, *user.Email, *user.Name)
 
 	if err != nil {
 		app.log.Println("Failed to generate token", err)
@@ -160,14 +160,7 @@ func handleAddUser(c echo.Context) error {
 	// Write token to cookie
 	writeAuthTokenToCookie(c, token)
 
-	response := resType{
-		Id:            user.ID,
-		Name:          *user.Name,
-		Email:         *user.Email,
-		EmailVerified: user.EmailVerified,
-	}
-
-	c.JSON(http.StatusOK, responseType{true, response, nil})
+	c.JSON(http.StatusOK, responseType{true, user, nil})
 	return nil
 }
 
@@ -207,7 +200,7 @@ func handleLogin(c echo.Context) error {
 		return nil
 	}
 
-	token, err := generateToken(user.ID, user.Uuid.String(), *user.Email, *user.Name)
+	token, err := generateToken(user.ID, user.Uuid, *user.Email, *user.Name)
 
 	if err != nil {
 		app.log.Println("Failed to generate token", err)
@@ -219,7 +212,7 @@ func handleLogin(c echo.Context) error {
 
 	response := resType{
 		Id:            user.ID,
-		Uuid: 		   user.Uuid.String(),
+		Uuid: 		   user.Uuid,
 		Name:          *user.Name,
 		Email:         *user.Email,
 		EmailVerified: user.EmailVerified,

@@ -19,15 +19,22 @@ const useCreateProject = () => {
 
   return useMutation({
     mutationFn: async (data: CreateProjectData) => {
-      const response = await axios.post('/api/v1/create_project', data)
+      const response = await axios.post(
+        `/api/v1/create_project/${data.orgId}`,
+        {
+          name: data.name,
+        }
+      )
       return response.data
     },
     onSuccess: async (data: ApiResponse<Project>) => {
       if (data.success) {
-        await client.setQueryData(
-          queryKey.project(String(data.data.id), String(user?.data.id)),
-          data
-        )
+        client.invalidateQueries({
+          queryKey: queryKey.project(
+            String(data.data.id),
+            String(user?.data.id)
+          ),
+        })
         if (data?.data?.uuid) {
           navigate(`/${orgUuid}/project/${data.data.uuid}`)
         }

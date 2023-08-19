@@ -7,7 +7,6 @@ import (
 
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/chtushar/toggler/utils"
-	"github.com/google/uuid"
 	"github.com/jackc/pgtype"
 	"github.com/labstack/echo/v4"
 )
@@ -154,7 +153,7 @@ func handleGetProjectFeatureFlags (c echo.Context) error {
 	for _, f := range ffs {
 		res = append(res, resType{
 			ID: f.ID,
-			Uuid: f.Uuid.String(),
+			Uuid: f.Uuid,
 			Name: f.Name,
 			FlagType: f.FlagType,
 			Enabled: *f.Enabled,
@@ -198,14 +197,8 @@ func handleGetFlags (c echo.Context) error {
 
 	// qtx := app.q.WithTx(tx)
 
-	uuidBytes, err := uuid.Parse(projectUuid)
-	if err != nil {
-		app.log.Println("Failed to parse project uuid", err)
-		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
-	}
-
 	ffs, err := app.q.GetFeatureFlags(c.Request().Context(), queries.GetFeatureFlagsParams{
-		Uuid: &uuidBytes,
+		Uuid: projectUuid,
 		Column2: apiKey,
 	})
 

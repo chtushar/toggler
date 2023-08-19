@@ -25,16 +25,21 @@ import { createFeatureFlagSchema } from '@/lib/formValidators'
 import { Select, SelectContent, SelectItem, SelectTrigger } from '../ui/select'
 import { Button } from '../ui/button'
 import useCreateFeatureFlag from '@/hooks/mutations/useCreateFeatureFlag'
+import { Loader2 } from 'lucide-react'
 
 export interface CreateFeatureFlagDialogProps {
   children: React.ReactNode
+  open: boolean
+  setOpen: (o: boolean) => void
 }
 
 const CreateFeatureFlagDialog = ({
   children,
+  open,
+  setOpen,
 }: CreateFeatureFlagDialogProps) => {
   const currentProject = useCurrentProject()
-  const { mutate: createFeatureFlag } = useCreateFeatureFlag()
+  const { mutate: createFeatureFlag, isLoading } = useCreateFeatureFlag()
   const form = useForm<z.infer<typeof createFeatureFlagSchema>>({
     resolver: zodResolver(createFeatureFlagSchema),
     defaultValues: {
@@ -44,14 +49,21 @@ const CreateFeatureFlagDialog = ({
   })
 
   const handleSubmit = (values: { name: string; type: 'boolean' }) => {
-    createFeatureFlag({
-      name: values.name,
-      flag_type: values.type,
-      project_id: parseInt(currentProject?.id as string),
-    })
+    createFeatureFlag(
+      {
+        name: values.name,
+        flag_type: values.type,
+        project_id: parseInt(currentProject?.id as string),
+      },
+      {
+        onSuccess: () => {
+          setOpen(false)
+        },
+      }
+    )
   }
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -74,7 +86,7 @@ const CreateFeatureFlagDialog = ({
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Input {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -87,7 +99,7 @@ const CreateFeatureFlagDialog = ({
                 <FormItem>
                   <FormLabel>Type</FormLabel>
                   <FormControl>
-                    <Select {...field}>
+                    <Select {...field} disabled={isLoading}>
                       <SelectTrigger value="boolean">Boolean</SelectTrigger>
                       <SelectContent>
                         <SelectItem value="boolean">Boolean</SelectItem>
@@ -99,7 +111,12 @@ const CreateFeatureFlagDialog = ({
               )}
             />
             <DialogFooter>
-              <Button type="submit">Create</Button>
+              <Button type="submit" disabled={isLoading}>
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : null}
+                Create
+              </Button>
             </DialogFooter>
           </form>
         </Form>

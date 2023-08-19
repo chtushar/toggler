@@ -13,9 +13,9 @@ func handleCreateProject(c echo.Context) error {
 	var (
 		app  = c.Get("app").(*App)
 		user = c.Get("user").(*jwt.Token)
+		orgId = c.Get("orgId").(int)
 		req  = &struct {
 			Name string `json:"name"`
-			OrgId int32 `json:"orgId"`
 		}{}
 	)
 
@@ -44,7 +44,7 @@ func handleCreateProject(c echo.Context) error {
 	project, err := qtx.CreateProject(c.Request().Context(), queries.CreateProjectParams{
 		Name:    req.Name,
 		OwnerID: ownerId,
-		OrgID: int64(req.OrgId),
+		OrgID: int64(orgId),
 	})
 
 	if err != nil {
