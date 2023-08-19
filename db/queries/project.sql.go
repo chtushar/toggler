@@ -7,8 +7,6 @@ package queries
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
 const addProjectMember = `-- name: AddProjectMember :exec
@@ -95,10 +93,10 @@ type GetUserOrgProjectsParams struct {
 }
 
 type GetUserOrgProjectsRow struct {
-	ID    int32      `json:"id"`
-	Name  string     `json:"name"`
-	Uuid  *uuid.UUID `json:"uuid"`
-	OrgID int64      `json:"org_id"`
+	ID    int32  `json:"id"`
+	Name  string `json:"name"`
+	Uuid  string `json:"uuid"`
+	OrgID int64  `json:"org_id"`
 }
 
 func (q *Queries) GetUserOrgProjects(ctx context.Context, arg GetUserOrgProjectsParams) ([]GetUserOrgProjectsRow, error) {

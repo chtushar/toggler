@@ -9,7 +9,6 @@ import (
 	"context"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgtype"
 )
 
@@ -90,13 +89,13 @@ WHERE p.uuid = $1
 `
 
 type GetFeatureFlagsParams struct {
-	Uuid    *uuid.UUID `json:"uuid"`
-	Column2 string     `json:"column_2"`
+	Uuid    string `json:"uuid"`
+	Column2 string `json:"column_2"`
 }
 
 type GetFeatureFlagsRow struct {
 	ID       int32           `json:"id"`
-	Uuid     *uuid.UUID      `json:"uuid"`
+	Uuid     string          `json:"uuid"`
 	FlagType FeatureFlagType `json:"flag_type"`
 	Name     string          `json:"name"`
 	Enabled  *bool           `json:"enabled"`
@@ -151,7 +150,7 @@ type GetProjectFeatureFlagsParams struct {
 
 type GetProjectFeatureFlagsRow struct {
 	ID        int32           `json:"id"`
-	Uuid      *uuid.UUID      `json:"uuid"`
+	Uuid      string          `json:"uuid"`
 	Name      string          `json:"name"`
 	FlagType  FeatureFlagType `json:"flag_type"`
 	Enabled   *bool           `json:"enabled"`

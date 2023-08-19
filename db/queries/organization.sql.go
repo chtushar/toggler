@@ -8,8 +8,6 @@ package queries
 import (
 	"context"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 const addOrganizationMember = `-- name: AddOrganizationMember :exec
@@ -99,12 +97,12 @@ WHERE om.org_id = $1
 `
 
 type GetOrganizationMembersRow struct {
-	ID            int32      `json:"id"`
-	Name          *string    `json:"name"`
-	Uuid          *uuid.UUID `json:"uuid"`
-	Email         *string    `json:"email"`
-	EmailVerified bool       `json:"email_verified"`
-	CreatedAt     time.Time  `json:"created_at"`
+	ID            int32     `json:"id"`
+	Name          *string   `json:"name"`
+	Uuid          string    `json:"uuid"`
+	Email         *string   `json:"email"`
+	EmailVerified bool      `json:"email_verified"`
+	CreatedAt     time.Time `json:"created_at"`
 }
 
 func (q *Queries) GetOrganizationMembers(ctx context.Context, orgID int64) ([]GetOrganizationMembersRow, error) {
