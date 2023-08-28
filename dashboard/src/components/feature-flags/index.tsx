@@ -33,9 +33,9 @@ const FeatureFlags = () => {
           </TableHeader>
           <TableBody>
             {!isLoading &&
-              data?.data.map(ff => {
+              data?.data?.map(ff => {
                 return (
-                  <TableRow>
+                  <TableRow key={ff.uuid}>
                     <TableCell>{ff.name}</TableCell>
                     <TableCell>
                       <Switch

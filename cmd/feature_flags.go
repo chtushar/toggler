@@ -7,7 +7,6 @@ import (
 
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/chtushar/toggler/utils"
-	"github.com/jackc/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
@@ -94,16 +93,6 @@ func handleGetProjectFeatureFlags (c echo.Context) error {
 		app  = c.Get("app").(*App)
 	)
 
-	type resType struct {
-		ID        int32           `json:"id"`
-		Uuid      string   `json:"uuid"`
-		Name      string          `json:"name"`
-		FlagType  queries.FeatureFlagType `json:"flag_type"`
-		Enabled   bool    `json:"enabled"`
-		Value     pgtype.JSONB    `json:"value"`
-		UpdatedAt string    `json:"updated_at"`
-	}
-
 	projectIdParam := c.Param("projectId")
 	environmentIdParam := c.Param("environmentId")
 	
@@ -148,23 +137,9 @@ func handleGetProjectFeatureFlags (c echo.Context) error {
 
 	tx.Commit(c.Request().Context())
 
-	res := make([]resType, 0)
-
-	for _, f := range ffs {
-		res = append(res, resType{
-			ID: f.ID,
-			Uuid: f.Uuid,
-			Name: f.Name,
-			FlagType: f.FlagType,
-			Enabled: *f.Enabled,
-			Value: f.Value,
-			UpdatedAt: f.UpdatedAt.String(),
-		})
-	}
-
 	c.JSON(http.StatusOK, responseType{
 		Success: true,
-		Data: res,
+		Data: ffs,
 		Error: nil,
 	})
 

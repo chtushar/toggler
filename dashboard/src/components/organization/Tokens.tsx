@@ -6,7 +6,7 @@ const Tokens = () => {
   return (
     <div>
       {currentEnvironment?.api_keys.map(key => {
-        return <div>{key}</div>
+        return <div key={key}>{key}</div>
       })}
     </div>
   )

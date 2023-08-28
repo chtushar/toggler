@@ -32,13 +32,19 @@ const Organization = () => {
           }),
         },
       })
-    }
-  }, [dispatch, currentOrg?.uuid, orgProjects?.data, projectUuid])
 
-  if (typeof projectUuid === 'undefined' && orgProjects?.success) {
-    navigate(`/${currentOrg?.uuid}/project/${orgProjects.data[0].uuid}`)
-    return <></>
-  }
+      if (typeof projectUuid === 'undefined' && orgProjects?.success) {
+        navigate(`/${currentOrg?.uuid}/project/${orgProjects.data[0].uuid}`)
+      }
+    }
+  }, [
+    dispatch,
+    currentOrg?.uuid,
+    orgProjects?.data,
+    projectUuid,
+    orgProjects,
+    navigate,
+  ])
 
   return (
     <div>
