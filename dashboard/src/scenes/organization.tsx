@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Outlet, useParams } from 'react-router-dom'
+import { Outlet, useNavigate, useParams } from 'react-router-dom'
 import useSidebarConfig from '@/context/SidebarConfigProvider/useSidebarConfig'
 
 import useOrgProjects from '@/hooks/queries/useOrgProjects'
@@ -14,6 +14,7 @@ const Organization = () => {
   const { data: orgProjects } = useOrgProjects({
     org: currentOrg as OrganizationModel,
   })
+  const navigate = useNavigate()
 
   useEffect(() => {
     if (dispatch) {
@@ -33,6 +34,11 @@ const Organization = () => {
       })
     }
   }, [dispatch, currentOrg?.uuid, orgProjects?.data, projectUuid])
+
+  if (typeof projectUuid === 'undefined' && orgProjects?.success) {
+    navigate(`/${currentOrg?.uuid}/project/${orgProjects.data[0].uuid}`)
+    return <></>
+  }
 
   return (
     <div>

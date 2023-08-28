@@ -58,23 +58,6 @@ const reducer = (state: SidebarConfigType, action: SidebarConfigAction) => {
       return produce(state, draft => {
         draft.sections = [
           {
-            id: 'misc',
-            items: [
-              {
-                as: 'a',
-                label: 'Overview',
-                path: `/${orgUuid}/overview`,
-                icon: <PieChart className="mr-2 h-4 w-4" />,
-              },
-              {
-                as: 'a',
-                label: 'Settings',
-                path: `/${orgUuid}/settings`,
-                icon: <Cog className="mr-2 h-4 w-4" />,
-              },
-            ],
-          },
-          {
             id: 'projects',
             label: 'Projects',
             items: projects ?? [],
@@ -84,6 +67,17 @@ const reducer = (state: SidebarConfigType, action: SidebarConfigAction) => {
               path: `/organizations/new/${orgUuid}/project`,
               icon: <PlusIcon className="mr-2 h-4 w-4" />,
             },
+          },
+          {
+            id: 'misc',
+            items: [
+              {
+                as: 'a',
+                label: 'Settings',
+                path: `/${orgUuid}/settings`,
+                icon: <Cog className="mr-2 h-4 w-4" />,
+              },
+            ],
           },
         ]
         return draft

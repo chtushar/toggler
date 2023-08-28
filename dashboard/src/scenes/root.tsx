@@ -11,7 +11,7 @@ const Root = () => {
 
   useEffect(() => {
     if (location.pathname === '/') {
-      navigate(`/${userOrgs?.data[0].uuid}/overview`)
+      navigate(`/${userOrgs?.data[0].uuid}/`)
     }
   }, [location.pathname, navigate, userOrgs?.data])
 
