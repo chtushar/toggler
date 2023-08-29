@@ -13,6 +13,8 @@ const FeatureFlags = () => {
   const { data, isLoading } = useProjectFeatureFlags()
   const { mutate: toggleFeatureFlag } = useToggleFeatureFlag()
 
+  console.log(data)
+
   return (
     <div className="w-full flex flex-col max-w-7xl">
       <div className="w-full flex flex-col gap-6">

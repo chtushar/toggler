@@ -9,8 +9,8 @@ import useUserOrganizations from '@/hooks/queries/useUserOrganizations'
 
 const CreateOrg = () => {
   const navigate = useNavigate()
-  const { data } = useUserOrganizations()
   const { mutate, isLoading } = useCreateOrganization()
+  const { data } = useUserOrganizations()
   const formRef = useRef<HTMLFormElement>(null)
 
   const handleCreateOrganization = (e: FormEvent<HTMLFormElement>) => {

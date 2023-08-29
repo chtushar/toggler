@@ -5,6 +5,7 @@ import (
 	"os"
 	"sync"
 
+	"github.com/chtushar/toggler/utils"
 	"github.com/spf13/viper"
 )
 
@@ -46,7 +47,15 @@ func readConfig() {
 	viper.AddConfigPath(homeDir)
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Fatal("Failed to read config file")
+		log.Println("Failed to read config.yaml file")
+		y := utils.YesNoPrompt("Do you want to create a config file?", false)
+
+		if y {
+			NewConfig()
+			os.Exit(0)
+		} else {
+			os.Exit(1)
+		}
 	}
 }
 

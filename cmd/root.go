@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/chtushar/toggler/configs"
 	"github.com/chtushar/toggler/db"
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/jackc/pgx/v4/stdlib"
@@ -21,7 +22,7 @@ func Execute() {
 
 	// If the init-config flag is set, create a config file and exit
 	if *initConfigPtr {
-		err := newConfig()
+		err := configs.NewConfig()
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
@@ -29,6 +30,8 @@ func Execute() {
 		os.Exit(0)
 	}
 
+	getConfigFromFile()
+	
 	// Initialize the database
 	dbConn = initDB()
 

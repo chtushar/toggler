@@ -22,7 +22,7 @@ const Organization = () => {
         type: 'ORGANIZATION',
         data: {
           orgUuid: currentOrg?.uuid,
-          projects: orgProjects?.data.map(project => {
+          projects: orgProjects?.data?.map(project => {
             return {
               as: 'a',
               path: `/${currentOrg?.uuid}/project/${project.uuid}`,
@@ -33,8 +33,12 @@ const Organization = () => {
         },
       })
 
-      if (typeof projectUuid === 'undefined' && orgProjects?.success) {
-        navigate(`/${currentOrg?.uuid}/project/${orgProjects.data[0].uuid}`)
+      if (
+        typeof projectUuid === 'undefined' &&
+        orgProjects?.success &&
+        Array.isArray(orgProjects?.data)
+      ) {
+        navigate(`/${currentOrg?.uuid}/project/${orgProjects.data?.[0].uuid}`)
       }
     }
   }, [

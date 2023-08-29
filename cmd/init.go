@@ -23,8 +23,12 @@ type App struct {
 
 var (
 	dbConn *pgxpool.Pool
-	cfg    = configs.Get()
+	cfg    *configs.Config
 )
+
+func getConfigFromFile() {
+	cfg = configs.Get()
+}
 
 func getPGXConfig() (*pgxpool.Config, error) {
 	sslMode := "prefer"
