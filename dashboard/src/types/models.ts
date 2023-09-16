@@ -29,6 +29,7 @@ export interface Project {
 export interface Environment {
   id: string
   name: string
+  project_id: string
   api_keys: Array<string>
   uuid: string
   created_at: string

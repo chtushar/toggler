@@ -27,9 +27,9 @@ const useRegister = () => {
     },
     onSuccess: async (data: ApiResponse<RegisterResponseData>) => {
       if (data.success) {
-        await client.setQueryData<RegisterResponseData>(
+        await client.setQueryData<ApiResponse<RegisterResponseData>>(
           queryKey.user(),
-          data.data
+          data
         )
       }
     },

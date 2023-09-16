@@ -9,21 +9,6 @@ import (
 	"context"
 )
 
-const addProjectMember = `-- name: AddProjectMember :exec
-INSERT INTO project_members(user_id, project_id)
-VALUES ($1, $2)
-`
-
-type AddProjectMemberParams struct {
-	UserID    int64 `json:"user_id"`
-	ProjectID int64 `json:"project_id"`
-}
-
-func (q *Queries) AddProjectMember(ctx context.Context, arg AddProjectMemberParams) error {
-	_, err := q.db.Exec(ctx, addProjectMember, arg.UserID, arg.ProjectID)
-	return err
-}
-
 const createProject = `-- name: CreateProject :one
 INSERT INTO projects(name, owner_id, org_id)
 VALUES ($1, $2, $3)

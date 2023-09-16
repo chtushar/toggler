@@ -31,12 +31,12 @@ const useCreateProject = () => {
       if (data.success) {
         client.invalidateQueries({
           queryKey: queryKey.project(
-            String(data.data.id),
-            String(user?.data.id)
+            String(data?.data?.id),
+            String(user?.data?.id)
           ),
         })
         if (data?.data?.uuid) {
-          navigate(`/${orgUuid}/project/${data.data.uuid}`)
+          navigate(`/${orgUuid}`)
         }
       }
     },

@@ -1,12 +1,9 @@
-DROP TABLE IF EXISTS organization_onboarding;
 DROP TABLE IF EXISTS organization_members;
 DROP TABLE IF EXISTS organizations;
-DROP TABLE IF EXISTS project_members;
 DROP TABLE IF EXISTS feature_flags;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS projects;
 DROP TABLE IF EXISTS environments;
-DROP TABLE IF EXISTS project_enviornments;
 DROP TABLE IF EXISTS project_features;
 DROP TABLE IF EXISTS feature_states;
 DROP TYPE IF EXISTS user_role CASCADE;

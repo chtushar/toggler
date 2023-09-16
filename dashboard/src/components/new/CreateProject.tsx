@@ -29,7 +29,7 @@ const CreateProject = () => {
 
   const handleValueChange = (value: string) => {
     if (value !== '') {
-      const org = data?.data.find(
+      const org = data?.data?.find(
         org => parseInt(org.id) === parseInt(value as string)
       )
       navigate(`/organizations/new/${org?.uuid}/project`, {
@@ -47,10 +47,7 @@ const CreateProject = () => {
       orgId: parseInt(formData.get('orgId') as string),
     }
 
-    createProject(data, {
-      onError: () => formRef.current?.reset(),
-      onSuccess: () => formRef.current?.reset(),
-    })
+    createProject(data)
   }
 
   return (

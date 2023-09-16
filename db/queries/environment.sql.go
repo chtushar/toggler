@@ -9,50 +9,25 @@ import (
 	"context"
 )
 
-const addProdAndDevProjectEnvironments = `-- name: AddProdAndDevProjectEnvironments :exec
-INSERT INTO project_environments(project_id, environment_id)
-VALUES ($1, $2),
-    ($1, $3)
-`
-
-type AddProdAndDevProjectEnvironmentsParams struct {
-	ProjectID       int64 `json:"project_id"`
-	EnvironmentID   int64 `json:"environment_id"`
-	EnvironmentID_2 int64 `json:"environment_id_2"`
-}
-
-func (q *Queries) AddProdAndDevProjectEnvironments(ctx context.Context, arg AddProdAndDevProjectEnvironmentsParams) error {
-	_, err := q.db.Exec(ctx, addProdAndDevProjectEnvironments, arg.ProjectID, arg.EnvironmentID, arg.EnvironmentID_2)
-	return err
-}
-
-const addProjectEnvironment = `-- name: AddProjectEnvironment :exec
-INSERT INTO project_environments(project_id, environment_id)
-VALUES ($1, $2)
-`
-
-type AddProjectEnvironmentParams struct {
-	ProjectID     int64 `json:"project_id"`
-	EnvironmentID int64 `json:"environment_id"`
-}
-
-func (q *Queries) AddProjectEnvironment(ctx context.Context, arg AddProjectEnvironmentParams) error {
-	_, err := q.db.Exec(ctx, addProjectEnvironment, arg.ProjectID, arg.EnvironmentID)
-	return err
-}
-
 const createEnvironment = `-- name: CreateEnvironment :one
-INSERT INTO environments(name)
-VALUES ($1)
-RETURNING id, name, api_keys, uuid, created_at, updated_at
+INSERT INTO environments(name, project_id, api_keys)
+VALUES ($1, $2, $3)
+RETURNING id, name, project_id, api_keys, uuid, created_at, updated_at
 `
 
-func (q *Queries) CreateEnvironment(ctx context.Context, name string) (Environment, error) {
-	row := q.db.QueryRow(ctx, createEnvironment, name)
+type CreateEnvironmentParams struct {
+	Name      string   `json:"name"`
+	ProjectID int64    `json:"project_id"`
+	ApiKeys   []string `json:"api_keys"`
+}
+
+func (q *Queries) CreateEnvironment(ctx context.Context, arg CreateEnvironmentParams) (Environment, error) {
+	row := q.db.QueryRow(ctx, createEnvironment, arg.Name, arg.ProjectID, arg.ApiKeys)
 	var i Environment
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
+		&i.ProjectID,
 		&i.ApiKeys,
 		&i.Uuid,
 		&i.CreatedAt,
@@ -61,50 +36,10 @@ func (q *Queries) CreateEnvironment(ctx context.Context, name string) (Environme
 	return i, err
 }
 
-const createProdAndDevEnvironments = `-- name: CreateProdAndDevEnvironments :many
-INSERT INTO environments(name, api_keys)
-VALUES ('production', $1),
-    ('development', $2)
-RETURNING id, name, api_keys, uuid, created_at, updated_at
-`
-
-type CreateProdAndDevEnvironmentsParams struct {
-	ApiKeys   []string `json:"api_keys"`
-	ApiKeys_2 []string `json:"api_keys_2"`
-}
-
-func (q *Queries) CreateProdAndDevEnvironments(ctx context.Context, arg CreateProdAndDevEnvironmentsParams) ([]Environment, error) {
-	rows, err := q.db.Query(ctx, createProdAndDevEnvironments, arg.ApiKeys, arg.ApiKeys_2)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Environment
-	for rows.Next() {
-		var i Environment
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.ApiKeys,
-			&i.Uuid,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getProjectEnvironments = `-- name: GetProjectEnvironments :many
-SELECT e.id, e.name, e.api_keys, e.uuid, e.created_at, e.updated_at
-FROM environments e
-    INNER JOIN project_environments pe ON pe.environment_id = e.id
-WHERE pe.project_id = $1
+SELECT id, name, project_id, api_keys, uuid, created_at, updated_at
+FROM environments
+WHERE project_id = $1
 `
 
 func (q *Queries) GetProjectEnvironments(ctx context.Context, projectID int64) ([]Environment, error) {
@@ -119,6 +54,7 @@ func (q *Queries) GetProjectEnvironments(ctx context.Context, projectID int64) (
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
+			&i.ProjectID,
 			&i.ApiKeys,
 			&i.Uuid,
 			&i.CreatedAt,

@@ -23,7 +23,7 @@ const router = createBrowserRouter([
   {
     path: '/',
     element: <Root />,
-    errorElement: <div>Something went wrong</div>,
+    errorElement: <div>Here went wrong</div>,
     loader: rootLoader(queryClient),
     children: [
       {

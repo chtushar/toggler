@@ -2,9 +2,6 @@
 INSERT INTO projects(name, owner_id, org_id)
 VALUES ($1, $2, $3)
 RETURNING *;
--- name: AddProjectMember :exec
-INSERT INTO project_members(user_id, project_id)
-VALUES ($1, $2);
 -- name: GetProject :one
 SELECT *
 FROM projects

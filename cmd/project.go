@@ -28,10 +28,11 @@ func handleCreateProject(c echo.Context) error {
 	claims := user.Claims.(jwt.MapClaims)
 	ownerId := int64(claims["id"].(float64))
 
+	// Create Project transaction
 	tx, err := app.dbConn.Begin(c.Request().Context())
 
 	if err != nil {
-		app.log.Println("Failed to create project", err)
+		app.log.Println("Failed to create tx", err)
 		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 		return err
 	}
@@ -40,9 +41,8 @@ func handleCreateProject(c echo.Context) error {
 
 	qtx := app.q.WithTx(tx)
 
-	// create project
-	project, err := qtx.CreateProject(c.Request().Context(), queries.CreateProjectParams{
-		Name:    req.Name,
+	p, err := qtx.CreateProject(c.Request().Context(), queries.CreateProjectParams{
+		Name: req.Name,
 		OwnerID: ownerId,
 		OrgID: int64(orgId),
 	})
@@ -52,50 +52,38 @@ func handleCreateProject(c echo.Context) error {
 		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 		return err
 	}
+	
+	apiKeyProd, _ := utils.GenerateAPIKey()
+	apiKeyDev, _ := utils.GenerateAPIKey()
 
-	// add to project_members table
-	err = qtx.AddProjectMember(c.Request().Context(), queries.AddProjectMemberParams{
-		UserID:    ownerId,
-		ProjectID: int64(project.ID),
+
+	_, err = qtx.CreateEnvironment(c.Request().Context(), queries.CreateEnvironmentParams{
+		Name: "Production",
+		ProjectID: int64(p.ID),
+		ApiKeys: []string{apiKeyProd},
 	})
 
 	if err != nil {
-		app.log.Println("Failed to add project member", err)
+		app.log.Println("Failed to create Prod env", err)
 		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 		return err
 	}
 
-	apiKey1, _ := utils.GenerateAPIKey()
-	apiKey2, _ := utils.GenerateAPIKey()
-
-	// add default environments
-	envs, err := qtx.CreateProdAndDevEnvironments(c.Request().Context(), queries.CreateProdAndDevEnvironmentsParams{
-		ApiKeys: []string{apiKey1},
-		ApiKeys_2: []string{apiKey2},
+	_, err = qtx.CreateEnvironment(c.Request().Context(), queries.CreateEnvironmentParams{
+		Name: "Development",
+		ProjectID: int64(p.ID),
+		ApiKeys: []string{apiKeyDev},
 	})
 
 	if err != nil {
-		app.log.Println("Failed to create environments", err)
-		c.JSON(500, InternalServerErrorResponse)
-		return err
-	}
-
-	// add environments to project
-	err = qtx.AddProdAndDevProjectEnvironments(c.Request().Context(), queries.AddProdAndDevProjectEnvironmentsParams{
-		ProjectID:       int64(project.ID),
-		EnvironmentID:   int64(envs[0].ID),
-		EnvironmentID_2: int64(envs[1].ID),
-	})
-
-	if err != nil {
-		app.log.Println("Failed to add environments to project", err)
+		app.log.Println("Failed to create Dev env", err)
 		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 		return err
 	}
 
 	tx.Commit(c.Request().Context())
 
-	c.JSON(http.StatusOK, responseType{true, project, nil})
+	c.JSON(http.StatusOK, responseType{true, p, nil})
 	return nil
 }
 

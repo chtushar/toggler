@@ -56,6 +56,7 @@ func (ns NullFeatureFlagType) Value() (driver.Value, error) {
 type Environment struct {
 	ID        int32     `json:"id"`
 	Name      string    `json:"name"`
+	ProjectID int64     `json:"project_id"`
 	ApiKeys   []string  `json:"api_keys"`
 	Uuid      string    `json:"uuid"`
 	CreatedAt time.Time `json:"created_at"`
@@ -96,31 +97,12 @@ type OrganizationMember struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-type OrganizationOnboarding struct {
-	OrgID         int64 `json:"org_id"`
-	CreateProject *bool `json:"create_project"`
-}
-
 type Project struct {
 	ID        int32     `json:"id"`
 	Name      string    `json:"name"`
 	Uuid      string    `json:"uuid"`
 	OrgID     int64     `json:"org_id"`
 	OwnerID   int64     `json:"owner_id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
-
-type ProjectEnvironment struct {
-	ProjectID     int64     `json:"project_id"`
-	EnvironmentID int64     `json:"environment_id"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
-}
-
-type ProjectMember struct {
-	UserID    int64     `json:"user_id"`
-	ProjectID int64     `json:"project_id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
