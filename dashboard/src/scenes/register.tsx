@@ -45,7 +45,7 @@ const Register = () => {
       },
       {
         onSuccess: () => {
-          navigate('/organizations/new')
+          navigate('/')
         },
         onError: (err: any) => {
           if (err.response.status === axios.HttpStatusCode.NotAcceptable) {

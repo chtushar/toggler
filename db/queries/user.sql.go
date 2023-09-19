@@ -162,9 +162,8 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email *string) (User, erro
 const updateUser = `-- name: UpdateUser :one
 UPDATE users
 SET name = $1,
-    email = $2,
     email_verified = $3
-WHERE id = $4
+WHERE email = $2
 RETURNING id, name, uuid, password, email, email_verified, created_at, updated_at
 `
 
@@ -172,16 +171,10 @@ type UpdateUserParams struct {
 	Name          *string `json:"name"`
 	Email         *string `json:"email"`
 	EmailVerified bool    `json:"email_verified"`
-	ID            int32   `json:"id"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, updateUser,
-		arg.Name,
-		arg.Email,
-		arg.EmailVerified,
-		arg.ID,
-	)
+	row := q.db.QueryRow(ctx, updateUser, arg.Name, arg.Email, arg.EmailVerified)
 	var i User
 	err := row.Scan(
 		&i.ID,

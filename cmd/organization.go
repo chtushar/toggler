@@ -230,7 +230,7 @@ func handleAddTeamMember(c echo.Context) error {
 			UserID: int64(user.ID),
 		})
 	} else {
-		// If not create an account with just the email, email_veridfied=false
+		// If not create an account with just the email, email_verified=false
 		user, err := qtx.CreateUser(c.Request().Context(), queries.CreateUserParams{
 			Email: &req.Email,
 			EmailVerified: false,

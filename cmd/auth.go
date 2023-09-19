@@ -80,8 +80,6 @@ func handleAddUser(c echo.Context) error {
 	}
 
 	if exists {
-		user, err := qtx.GetUserByEmail(c.Request().Context(), &req.Email)
-		
 		if err != nil {
 			app.log.Println("Failed to create user", err)
 			c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
@@ -95,7 +93,6 @@ func handleAddUser(c echo.Context) error {
 		}
 
 		user, err = qtx.UpdateUser(c.Request().Context(), queries.UpdateUserParams{
-			ID: int32(user.ID),
 			Name: &req.Name,
 			Email: &req.Email,
 			EmailVerified: true,

@@ -20,9 +20,8 @@ WHERE email = $1;
 -- name: UpdateUser :one
 UPDATE users
 SET name = $1,
-    email = $2,
     email_verified = $3
-WHERE id = $4
+WHERE email = $2
 RETURNING *;
 -- name: UpdateUserPassword :one
 UPDATE users
