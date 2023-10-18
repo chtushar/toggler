@@ -5,6 +5,8 @@ import (
 
 	"github.com/chtushar/toggler/api/auth"
 	"github.com/chtushar/toggler/api/environment"
+	"github.com/chtushar/toggler/api/flagsgroup"
+	"github.com/chtushar/toggler/api/folder"
 	"github.com/chtushar/toggler/api/organization"
 	"github.com/chtushar/toggler/api/user"
 	"github.com/chtushar/toggler/dashboard"
@@ -42,5 +44,15 @@ func initHTTPHandler(e *echo.Echo) {
 	auth.AuthRoutes(v1)
 	user.UserRoutes(v1_protected)
 	org := organization.OrganizationRoutes(v1_protected)
+	
+	// Org access middleware
+	org.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			// Code to check org access
+			return next(c)
+		}
+	})
 	environment.EnvironmentRoutes(org)
+	folder.FolderRoutes(org)
+	flagsgroup.FlagGroupsRoutes(org)
 }

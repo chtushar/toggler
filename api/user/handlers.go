@@ -6,3 +6,6 @@ func handleGetUser(c echo.Context) error {
 	return nil
 }
 
+func handleUpdateUser (c echo.Context) error {
+	return nil
+}
