@@ -3,7 +3,7 @@ package api
 import (
 	"fmt"
 
-	"github.com/chtushar/toggler/app"
+	"github.com/chtushar/toggler/api/app"
 	"github.com/chtushar/toggler/configs"
 	"github.com/labstack/echo/v4"
 )

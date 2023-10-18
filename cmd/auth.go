@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/chtushar/toggler/app"
+	"github.com/chtushar/toggler/api/app"
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/chtushar/toggler/utils"
 	"github.com/google/uuid"

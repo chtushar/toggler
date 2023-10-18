@@ -8,6 +8,7 @@ import (
 	"github.com/chtushar/toggler/api/flagsgroup"
 	"github.com/chtushar/toggler/api/folder"
 	"github.com/chtushar/toggler/api/organization"
+	"github.com/chtushar/toggler/api/responses"
 	"github.com/chtushar/toggler/api/user"
 	"github.com/chtushar/toggler/dashboard"
 	echojwt "github.com/labstack/echo-jwt/v4"
@@ -37,7 +38,7 @@ func initHTTPHandler(e *echo.Echo) {
 		SigningKey:  []byte(cfg.JWTSecret),
 		TokenLookup: "cookie:auth_token",
 		ErrorHandler: func(c echo.Context, err error) error {
-			return c.JSON(http.StatusUnauthorized, UnauthorizedResponse)
+			return c.JSON(http.StatusUnauthorized, responses.UnauthorizedResponse)
 		},
 	}))
 

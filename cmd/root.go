@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/chtushar/toggler/api"
-	"github.com/chtushar/toggler/app"
+	"github.com/chtushar/toggler/api/app"
 	"github.com/chtushar/toggler/configs"
 	"github.com/chtushar/toggler/db"
 	"github.com/chtushar/toggler/db/queries"
