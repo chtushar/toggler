@@ -1,63 +1,57 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-DROP TYPE IF EXISTS feature_flag_type CASCADE;
-CREATE TYPE feature_flag_type AS ENUM ('boolean');
-CREATE TABLE IF NOT EXISTS organizations (
-    id SERIAL PRIMARY KEY,
-    uuid UUID UNIQUE DEFAULT gen_random_uuid() NOT NULL,
+-- Organization table
+CREATE TABLE IF NOT EXISTS organization (
+    uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
 );
-CREATE TABLE IF NOT EXISTS organization_members (
-    user_id BIGINT NOT NULL,
-    org_id BIGINT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id, org_id)
-);
-CREATE TABLE IF NOT EXISTS projects (
-    id SERIAL PRIMARY KEY,
+-- User table
+CREATE TABLE IF NOT EXISTS user (
+    uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    uuid UUID UNIQUE DEFAULT gen_random_uuid() NOT NULL,
-    org_id BIGINT NOT NULL,
-    owner_id BIGINT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    email VARCHAR(255) NOT NULL UNIQUE,
+    org_uuid UUID REFERENCES organization(uuid),
 );
-CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255),
-    uuid UUID UNIQUE DEFAULT gen_random_uuid() NOT NULL,
-    password VARCHAR(255),
-    email VARCHAR(255) UNIQUE,
-    email_verified BOOLEAN NOT NULL DEFAULT false,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-CREATE TABLE IF NOT EXISTS environments (
-    id SERIAL PRIMARY KEY,
+-- Folder table
+CREATE TABLE IF NOT EXISTS folder (
+    uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    project_id BIGINT NOT NULL,
-    api_keys VARCHAR [] NOT NULL,
-    uuid UUID UNIQUE DEFAULT gen_random_uuid() NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    org_uuid UUID REFERENCES organization(uuid),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
 );
-CREATE TABLE IF NOT EXISTS feature_flags (
-    id SERIAL PRIMARY KEY,
-    project_id BIGINT NOT NULL,
-    uuid UUID UNIQUE DEFAULT gen_random_uuid() NOT NULL,
-    flag_type feature_flag_type NOT NULL DEFAULT 'boolean'::feature_flag_type,
-    name VARCHAR(255) NOT NULL
+-- Environment table
+CREATE TABLE IF NOT EXISTS environment (
+    uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    org_uuid UUID REFERENCES organization(uuid),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
 );
-CREATE TABLE IF NOT EXISTS feature_states (
-    id SERIAL PRIMARY KEY,
-    uuid UUID UNIQUE DEFAULT gen_random_uuid() NOT NULL,
-    environment_id BIGINT NOT NULL,
-    feature_flag_id BIGINT NOT NULL,
-    enabled BOOLEAN NOT NULL DEFAULT false,
-    value JSONB NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (environment_id, feature_flag_id, id)
+-- Flags Group State table
+CREATE TABLE IF NOT EXISTS flags_group_state (
+    uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    version INT,
+    code TEXT DEFAULT '{}',
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+);
+-- Flags Group table
+CREATE TABLE IF NOT EXISTS flags_group (
+    uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    org_uuid UUID REFERENCES organization(uuid),
+    folder_uuid UUID REFERENCES folder(uuid),
+    current_version UUID REFERENCES flags_group_state(uuid),
+    environment_uuid UUID REFERENCES environment(uuid),
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(
+        uuid,
+        org_uuid,
+        folder_uuid,
+        current_version,
+        environment_uuid
+    )
 );

@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/chtushar/toggler/api"
 	"github.com/chtushar/toggler/configs"
 	"github.com/chtushar/toggler/db"
 	"github.com/chtushar/toggler/db/queries"
@@ -35,13 +36,13 @@ func Execute() {
 	// Initialize the database
 	dbConn = initDB()
 
-	app := &App{
-		port:   cfg.Port,
-		dbConn: dbConn,
-		jwt:    cfg.JWTSecret,
-		q:      queries.New(dbConn),
-		log:    log.New(os.Stdout, "toggler: ", log.LstdFlags),
-	}
+	app := &api.App{
+		Port:   cfg.Port,
+		DbConn: dbConn,
+		Jwt:    cfg.JWTSecret,
+		Q:      queries.New(dbConn),
+		Log:    log.New(os.Stdout, "toggler: ", log.LstdFlags),
+	};
 
 	defer dbConn.Close()
 
@@ -49,11 +50,11 @@ func Execute() {
 	if *runUPMigrationPtr {
 		pgxPoolConfig, err := getPGXConfig()
 		if err != nil {
-			app.log.Fatal("Failed to get database config", err)
+			app.Log.Fatal("Failed to get database config", err)
 			os.Exit(1)
 		}
 
-		db.RunUpMigrations(stdlib.OpenDB(*pgxPoolConfig.ConnConfig), app.log)
+		db.RunUpMigrations(stdlib.OpenDB(*pgxPoolConfig.ConnConfig), app.Log)
 		os.Exit(0)
 	}
 
@@ -61,13 +62,13 @@ func Execute() {
 	if *runDownMigrationPtr {
 		pgxPoolConfig, err := getPGXConfig()
 		if err != nil {
-			app.log.Fatal("Failed to get database config", err)
+			app.Log.Fatal("Failed to get database config", err)
 			os.Exit(1)
 		}
-		db.RunDownMigration(stdlib.OpenDB(*pgxPoolConfig.ConnConfig), app.log)
+		db.RunDownMigration(stdlib.OpenDB(*pgxPoolConfig.ConnConfig), app.Log)
 		os.Exit(0)
 	}
 
 	// Initialize the HTTP server
-	initHTTPServer(app)
+	api.InitHTTPServer(app)
 }

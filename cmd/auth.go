@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/chtushar/toggler/api"
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/chtushar/toggler/utils"
 	"github.com/google/uuid"
@@ -25,7 +26,7 @@ func writeAuthTokenToCookie(c echo.Context, token string) {
 
 func handleAddUser(c echo.Context) error {
 	var (
-		app = c.Get("app").(*App)
+		app = c.Get("app").(*api.App)
 		req = &struct {
 			Email    string `json:"email"`
 			Password string `json:"password"`
@@ -47,21 +48,21 @@ func handleAddUser(c echo.Context) error {
 		return err
 	}
 
-	tx, err := app.dbConn.Begin(c.Request().Context())
+	tx, err := app.DbConn.Begin(c.Request().Context())
 
 	if err != nil {
-		app.log.Println("Failed to add member", err)
+		app.Log.Println("Failed to add member", err)
 		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 		return err
 	}
 
 	defer tx.Rollback(c.Request().Context())
-	qtx := app.q.WithTx(tx)
+	qtx := app.Q.WithTx(tx)
 
 	exists, err := qtx.CheckIfUserExists(c.Request().Context(), &req.Email)
 	
 	if err != nil {
-		app.log.Println("Failed to create user", err)
+		app.Log.Println("Failed to create user", err)
 		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 		return err
 	}
@@ -74,20 +75,20 @@ func handleAddUser(c echo.Context) error {
 	hash, err := utils.HashPassword(req.Password)
 
 	if err != nil {
-		app.log.Println("Failed to hash password", err)
+		app.Log.Println("Failed to hash password", err)
 		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 		return err
 	}
 
 	if exists {
 		if err != nil {
-			app.log.Println("Failed to create user", err)
+			app.Log.Println("Failed to create user", err)
 			c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 			return err
 		}
 		
 		if user.EmailVerified {
-			app.log.Println("User already exists", err)
+			app.Log.Println("User already exists", err)
 			c.JSON(http.StatusUnauthorized, UnauthorizedResponse)
 			return fmt.Errorf("the user already exists")
 		}
@@ -99,7 +100,7 @@ func handleAddUser(c echo.Context) error {
 		})
 
 		if err != nil {
-			app.log.Println("Failed to create user", err)
+			app.Log.Println("Failed to create user", err)
 			c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 			return err
 		}
@@ -118,7 +119,7 @@ func handleAddUser(c echo.Context) error {
 	}
 
 	if err != nil {
-		app.log.Println("Failed to create user", err)
+		app.Log.Println("Failed to create user", err)
 		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 		return err
 	}
@@ -129,7 +130,7 @@ func handleAddUser(c echo.Context) error {
 		var pgErr *pgconn.PgError
 		errors.As(err, &pgErr)
 		
-		app.log.Println("Failed to create user", err)
+		app.Log.Println("Failed to create user", err)
 
 		if pgErr.Code == pgerrcode.UniqueViolation {
 			c.JSON(http.StatusNotAcceptable, responseType{false, nil, &errorWrap{
@@ -140,7 +141,7 @@ func handleAddUser(c echo.Context) error {
 			return err	
 		}
 
-		app.log.Println("Failed to create user", err)
+		app.Log.Println("Failed to create user", err)
 		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 		return err
 	}
@@ -149,7 +150,7 @@ func handleAddUser(c echo.Context) error {
 	token, err := generateToken(user.ID, user.Uuid, *user.Email, *user.Name)
 
 	if err != nil {
-		app.log.Println("Failed to generate token", err)
+		app.Log.Println("Failed to generate token", err)
 		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 		return err
 	}
@@ -163,7 +164,7 @@ func handleAddUser(c echo.Context) error {
 
 func handleLogin(c echo.Context) error {
 	var (
-		app = c.Get("app").(*App)
+		app = c.Get("app").(*api.App)
 		req = &struct {
 			Email    string `json:"email"`
 			Password string `json:"password"`
@@ -184,10 +185,10 @@ func handleLogin(c echo.Context) error {
 		return err
 	}
 
-	user, err := app.q.GetUserByEmail(c.Request().Context(), &req.Email)
+	user, err := app.Q.GetUserByEmail(c.Request().Context(), &req.Email)
 
 	if err != nil {
-		app.log.Println("Failed to get user", err)
+		app.Log.Println("Failed to get user", err)
 		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 		return err
 	}
@@ -200,7 +201,7 @@ func handleLogin(c echo.Context) error {
 	token, err := generateToken(user.ID, user.Uuid, *user.Email, *user.Name)
 
 	if err != nil {
-		app.log.Println("Failed to generate token", err)
+		app.Log.Println("Failed to generate token", err)
 		c.JSON(http.StatusInternalServerError, InternalServerErrorResponse)
 		return err
 	}
