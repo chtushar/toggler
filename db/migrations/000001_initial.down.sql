@@ -1,7 +1,8 @@
-DROP TABLE IF EXISTS flags_group;
-DROP TABLE IF EXISTS flags_group_state;
-DROP TABLE IF EXISTS folder;
-DROP TABLE IF EXISTS environment;
-DROP TABLE IF EXISTS user;
-DROP TABLE IF EXISTS organization;
+DROP TABLE IF EXISTS flags_groups;
+DROP TABLE IF EXISTS flags_group_states;
+DROP TABLE IF EXISTS folders;
+DROP TABLE IF EXISTS environments;
+DROP TABLE IF EXISTS organization_members;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS organizations;
 DROP EXTENSION IF EXISTS "uuid-ossp";

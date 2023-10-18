@@ -3,6 +3,10 @@ package api
 import (
 	"net/http"
 
+	"github.com/chtushar/toggler/api/auth"
+	"github.com/chtushar/toggler/api/environment"
+	"github.com/chtushar/toggler/api/organization"
+	"github.com/chtushar/toggler/api/user"
 	"github.com/chtushar/toggler/dashboard"
 	echojwt "github.com/labstack/echo-jwt/v4"
 	"github.com/labstack/echo/v4"
@@ -35,4 +39,8 @@ func initHTTPHandler(e *echo.Echo) {
 		},
 	}))
 
+	auth.AuthRoutes(v1)
+	user.UserRoutes(v1_protected)
+	org := organization.OrganizationRoutes(v1_protected)
+	environment.EnvironmentRoutes(org)
 }
