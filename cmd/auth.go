@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/chtushar/toggler/api"
+	"github.com/chtushar/toggler/app"
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/chtushar/toggler/utils"
 	"github.com/google/uuid"
@@ -26,7 +26,7 @@ func writeAuthTokenToCookie(c echo.Context, token string) {
 
 func handleAddUser(c echo.Context) error {
 	var (
-		app = c.Get("app").(*api.App)
+		app = c.Get("app").(*app.App)
 		req = &struct {
 			Email    string `json:"email"`
 			Password string `json:"password"`
@@ -164,7 +164,7 @@ func handleAddUser(c echo.Context) error {
 
 func handleLogin(c echo.Context) error {
 	var (
-		app = c.Get("app").(*api.App)
+		app = c.Get("app").(*app.App)
 		req = &struct {
 			Email    string `json:"email"`
 			Password string `json:"password"`

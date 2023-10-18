@@ -7,6 +7,7 @@ import (
 	"os"
 
 	"github.com/chtushar/toggler/api"
+	"github.com/chtushar/toggler/app"
 	"github.com/chtushar/toggler/configs"
 	"github.com/chtushar/toggler/db"
 	"github.com/chtushar/toggler/db/queries"
@@ -36,7 +37,7 @@ func Execute() {
 	// Initialize the database
 	dbConn = initDB()
 
-	app := &api.App{
+	app := &app.App{
 		Port:   cfg.Port,
 		DbConn: dbConn,
 		Jwt:    cfg.JWTSecret,

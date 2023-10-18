@@ -2,28 +2,18 @@ package api
 
 import (
 	"fmt"
-	"log"
 
+	"github.com/chtushar/toggler/app"
 	"github.com/chtushar/toggler/configs"
-	"github.com/chtushar/toggler/db/queries"
-	"github.com/jackc/pgx/v4/pgxpool"
 	"github.com/labstack/echo/v4"
 )
-
-type App struct {
-	Port   int
-	Jwt    string
-	DbConn *pgxpool.Pool
-	Q      *queries.Queries
-	Log    *log.Logger
-}
 
 var (
 	cfg *configs.Config
 )
 
 
-func InitHTTPServer(app *App) *echo.Echo {
+func InitHTTPServer(app *app.App) *echo.Echo {
 	srv := echo.New()
 
 	// Passing the app instance to all the handlers
