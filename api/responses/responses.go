@@ -3,13 +3,13 @@ package responses
 import "net/http"
 
 type (
-	responseType struct {
+	ResponseType struct {
 		Success bool        `json:"success"`
 		Data    interface{} `json:"data"`
-		Error   *errorWrap  `json:"error"`
+		Error   *ErrorWrap  `json:"error"`
 	}
 
-	errorWrap struct {
+	ErrorWrap struct {
 		Message string      `json:"message"`
 		Code    int         `json:"code"`
 		Data    interface{} `json:"data"`
@@ -18,9 +18,19 @@ type (
 	defaultErr struct{}
 )
 
+
+
 var (
-	ForbiddenResponse           = responseType{false, nil, &errorWrap{"Forbidden", http.StatusForbidden, nil}}
-	UnauthorizedResponse        = responseType{false, nil, &errorWrap{"Unauthorized", http.StatusUnauthorized, nil}}
-	InternalServerErrorResponse = responseType{false, nil, &errorWrap{"Internal Server Error", http.StatusInternalServerError, nil}}
-	BadRequestResponse          = responseType{false, nil, &errorWrap{"Bad Request", http.StatusBadRequest, nil}}
+	ForbiddenResponse           = ResponseType{false, nil, &ErrorWrap{"Forbidden", http.StatusForbidden, nil}}
+	UnauthorizedResponse        = ResponseType{false, nil, &ErrorWrap{"Unauthorized", http.StatusUnauthorized, nil}}
+	InternalServerErrorResponse = ResponseType{false, nil, &ErrorWrap{"Internal Server Error", http.StatusInternalServerError, nil}}
+	BadRequestResponse          = ResponseType{false, nil, &ErrorWrap{"Bad Request", http.StatusBadRequest, nil}}
 )
+
+func ErrorResponse (code int, message string) ResponseType {
+	return ResponseType{false, nil, &ErrorWrap{
+		Code: code,
+		Data: nil,
+		Message: message,
+	}}
+}

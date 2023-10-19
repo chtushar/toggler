@@ -25,6 +25,7 @@ func InitHTTPServer(app *app.App) *echo.Echo {
 		}
 	})
 
+	cfg = configs.Get()
 	// Initialize all the API handlers
 	initHTTPHandler(srv)
 	srv.Logger.Fatal(srv.Start(fmt.Sprintf(":%d", app.Port)))
