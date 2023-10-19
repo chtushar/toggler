@@ -6,6 +6,7 @@ overrides:
         engine: "postgresql"
         go_type:
           type: "string"
+
 sql:
   - engine: "postgresql"
     queries: "./sql"
