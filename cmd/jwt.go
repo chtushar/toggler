@@ -3,7 +3,7 @@ package cmd
 import (
 	"time"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v4"
 )
 
 func generateToken(Id int32, Uuid string, Email string, Name string) (string, error) {

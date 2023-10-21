@@ -2,7 +2,6 @@ package auth
 
 import (
 	"errors"
-	"fmt"
 	"net/http"
 	"time"
 
@@ -10,9 +9,10 @@ import (
 	j "github.com/chtushar/toggler/api/jwt"
 	"github.com/chtushar/toggler/api/responses"
 	u "github.com/chtushar/toggler/api/user"
+	"github.com/chtushar/toggler/db"
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/chtushar/toggler/utils"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v4"
 	"github.com/jackc/pgconn"
 	"github.com/jackc/pgerrcode"
 	"github.com/labstack/echo/v4"
@@ -22,14 +22,17 @@ func handleRegisterUser (c echo.Context) error {
 	var (
 		app = c.Get("app").(*app.App)
 		req = &struct {
-			Email    string `json:"email"`
-			Password string `json:"password"`
-			Name     string `json:"name"`
+			Email    string `json:"email" validate:"required,email"`
+			Password string `json:"password" validate:"required,min=5"`
+			Name     string `json:"name" validate:"required,min=2"`
 		}{}
 	)
 
 	if err := c.Bind(req); err != nil {
-		c.JSON(http.StatusBadRequest, responses.BadRequestResponse)
+		return echo.NewHTTPError(http.StatusBadRequest, responses.BadRequestResponse)
+	}
+
+	if err := c.Validate(req); err != nil {
 		return err
 	}
 
@@ -37,42 +40,32 @@ func handleRegisterUser (c echo.Context) error {
 
 	if err != nil {
 		app.Log.Println("Failed to hash password", err)
-		c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse)
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
 	}
 
+	user, err := db.WithDBTransaction[queries.User](app, c.Request().Context(), func(q *queries.Queries) (*queries.User, error) {
+		user, err := q.CreateActiveUser(c.Request().Context(), queries.CreateActiveUserParams{
+			Name: req.Name,
+			Email: req.Email,
+			Password: hash,
+		})
 
-	tx, err := app.DbConn.Begin(c.Request().Context())
+		if err != nil {
+			var pgErr *pgconn.PgError
+			if errors.As(err, &pgErr) {
+				if pgErr.Code == pgerrcode.UniqueViolation {
+					return nil, echo.NewHTTPError(http.StatusBadRequest, responses.ErrorResponse(http.StatusBadRequest, "Email already exists"))
+				}
+			}
+			return nil, echo.NewHTTPError(http.StatusBadRequest, responses.BadRequestResponse)
+		}
 
-	if err != nil {
-		app.Log.Println("Failed to add member", err)
-		c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse)
-		return err
-	}
-
-	defer tx.Rollback(c.Request().Context())
-
-	qtx := app.Q.WithTx(tx)
-
-	user , err := qtx.CreateActiveUser(c.Request().Context(), queries.CreateActiveUserParams{
-		Email: req.Email,
-		Password: hash,
-		Name: req.Name,
+		return &user, nil
 	})
 
 	if err != nil {
-		var pgErr *pgconn.PgError
-		if errors.As(err, &pgErr) {
-			if pgErr.Code == pgerrcode.UniqueViolation {
-				c.JSON(http.StatusBadRequest, responses.ErrorResponse(http.StatusBadRequest, "Email already exists"))
-				return err
-			}
-		}
-		c.JSON(http.StatusBadRequest, responses.InternalServerErrorResponse)
 		return err
 	}
-
-	tx.Commit(c.Request().Context())
 
 	token, err := j.GenerateToken(jwt.MapClaims{
 		"uuid":  user.Uuid,
@@ -114,23 +107,19 @@ func handleSignIn (c echo.Context) error {
 	)
 
 	if err := c.Bind(req); err != nil {
-		fmt.Println(err)
-		c.JSON(http.StatusBadRequest, responses.BadRequestResponse)
-		return err
+		return echo.NewHTTPError(http.StatusBadRequest, responses.BadRequestResponse)
 	}
 
 	user, err := app.Q.GetUserByEmail(c.Request().Context(), req.Email)
 
 	if err != nil {
-		c.JSON(http.StatusForbidden, responses.ErrorResponse(http.StatusForbidden, "Incorrect Credentials"))
-		return err
+		return echo.NewHTTPError(http.StatusForbidden, responses.ErrorResponse(http.StatusForbidden, "Incorrect Credentials"))
 	}
 
 	ok := utils.CheckPasswordHash(req.Password, user.Password)
 
 	if !ok {
-		c.JSON(http.StatusForbidden, responses.ErrorResponse(http.StatusForbidden, "Incorrect Credentials"))
-		return err
+		return echo.NewHTTPError(http.StatusForbidden, responses.ErrorResponse(http.StatusForbidden, "Incorrect Credentials"))
 	}
 
 	token, err := j.GenerateToken(jwt.MapClaims{
@@ -141,8 +130,7 @@ func handleSignIn (c echo.Context) error {
 	}, app.Jwt)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, responses.InternalServerErrorResponse)
-		return err
+		return echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
 	}
 
 	writeAuthTokenToCookie(c, token)
