@@ -77,20 +77,16 @@ func handleCreateOrganization (c echo.Context) error {
 func handleAddOrganizationMembers (c echo.Context) error {
 	var (
 		app = c.Get("app").(*app.App)
-		orgUUID = c.Param("orgUUID")
+		orgUUIDStr = c.Param("orgUUID")
 		req = &struct{
 			Emails []string `json:"emails" validate:"required,dive,email"`
 		}{}
 	)
 
-	ok, err := utils.IsValidUUID(orgUUID)
-	
-	if !ok {
-		return echo.NewHTTPError(http.StatusBadRequest, responses.BadRequestResponse)
-	}
+	orgUUID, err := uuid.Parse(orgUUIDStr)
 	
 	if err != nil {
-		app.Log.Println("Failed to parse the uuid", err, orgUUID)
+		app.Log.Println("Failed to parse the uuid", err, orgUUIDStr)
 		return echo.NewHTTPError(http.StatusBadRequest, responses.BadRequestResponse)
 	}
 
@@ -102,17 +98,45 @@ func handleAddOrganizationMembers (c echo.Context) error {
 		return err
 	}
 
-	// db.WithDBTransaction[bool](app, c.Request().Context(), func(q *queries.Queries) (*bool, error){
-	// 	for _, e := range req.Emails {
-	// 		q.AddOrganizationMember(c.Request().Context(), queries.AddOrganizationMemberParams{
-	// 			OrgUuid: uuid.Parse(orgUUID),
-	// 			,
-	// 		})
-	// 	}
-	// 	ok := true
-	// 	return &ok, nil
-	// })
+	if err != nil {
+		app.Log.Println("Failed to parse the uuid", err, orgUUIDStr)
+		return echo.NewHTTPError(http.StatusBadRequest, responses.BadRequestResponse)
+	}
 
+	_, err = db.WithDBTransaction[bool](app, c.Request().Context(), func(q *queries.Queries) (*bool, error){
+		for _, e := range req.Emails {
+			u, err := q.GetUserByEmail(c.Request().Context(), e)
+			if err != nil {
+				app.Log.Println("Can't find user with email", e)
+				continue
+			}
+			userUUID, err := uuid.Parse(u.Uuid)
+			if err != nil {
+				app.Log.Println("Can't parse user uuid", u.Uuid)
+				continue
+			}
+			err = q.AddOrganizationMember(c.Request().Context(), queries.AddOrganizationMemberParams{
+				OrgUuid: &orgUUID,
+				UserUuid: &userUUID,
+			})
+			if err != nil {
+				return nil, echo.NewHTTPError(http.StatusBadRequest, responses.BadRequestResponse)
+			}
+		}
+		ok := true
+		return &ok, nil
+	})
+
+	if err != nil {
+		app.Log.Println("Unable to add members", err)
+		return err
+	}
+
+	c.JSON(http.StatusOK, responses.ResponseType{
+		Success: true,
+		Data: "Members added",
+		Error: nil,
+	})
 	return nil
 }
 
