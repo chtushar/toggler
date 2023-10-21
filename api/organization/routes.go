@@ -5,6 +5,7 @@ import "github.com/labstack/echo/v4"
 func OrganizationRoutes(g *echo.Group) *echo.Group {
 	org := g.Group("/organization")
 
+	org.GET("/", handleGetUserOrganizations)
 	org.POST("/create", handleCreateOrganization)
 
 	org_access := org.Group("")

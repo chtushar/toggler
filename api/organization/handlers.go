@@ -15,7 +15,7 @@ import (
 
 func handleCreateOrganization (c echo.Context) error {
 	var (
-		user = c.Get("user").(*jwt.Token)
+		token = c.Get("user").(*jwt.Token)
 		app = c.Get("app").(*app.App)
 		req = &struct{
 			Name string `json:"name" validate:"required,min=3"`
@@ -30,7 +30,7 @@ func handleCreateOrganization (c echo.Context) error {
 		return err
 	}
 
-	userUuidStr := user.Claims.(jwt.MapClaims)["uuid"].(string)
+	userUuidStr := token.Claims.(jwt.MapClaims)["uuid"].(string)
 	userUuid, err := uuid.Parse(userUuidStr)
 
 	if err != nil {
@@ -167,6 +167,33 @@ func handleGetOrganization (c echo.Context) error {
 	c.JSON(http.StatusOK, responses.ResponseType{
 		Success: true,
 		Data: org,
+		Error: nil,
+	})
+	return nil
+}
+
+func handleGetUserOrganizations(c echo.Context) error {
+	var (
+		app = c.Get("app").(*app.App)
+		token = c.Get("user").(*jwt.Token)
+	)
+
+	userUuid := token.Claims.(jwt.MapClaims)["uuid"].(string)
+	ok, _ := utils.IsValidUUID(userUuid)
+	
+	if !ok {
+		return echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
+	}
+
+	orgs, err := app.Q.GetUserOrganizations(c.Request().Context(), userUuid)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
+	}
+
+	c.JSON(http.StatusOK, responses.ResponseType{
+		Success: true,
+		Data: orgs,
 		Error: nil,
 	})
 	return nil
