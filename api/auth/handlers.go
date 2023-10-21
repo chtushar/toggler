@@ -71,6 +71,7 @@ func handleRegisterUser (c echo.Context) error {
 		"uuid":  user.Uuid,
 		"email": user.Email,
 		"name":  user.Name,
+		"org": "",
 		"exp":   time.Now().Add(time.Hour * 24).Unix(),
 	}, app.Jwt)
 
@@ -80,7 +81,7 @@ func handleRegisterUser (c echo.Context) error {
 		return err
 	}
 
-	writeAuthTokenToCookie(c, token)
+	WriteAuthTokenToCookie(c, token)
 
 	c.JSON(http.StatusOK, responses.ResponseType{
 		Success: true,
@@ -110,6 +111,10 @@ func handleSignIn (c echo.Context) error {
 		return echo.NewHTTPError(http.StatusBadRequest, responses.BadRequestResponse)
 	}
 
+	if err := c.Validate(req); err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, responses.BadRequestResponse)
+	}
+
 	user, err := app.Q.GetUserByEmail(c.Request().Context(), req.Email)
 
 	if err != nil {
@@ -122,10 +127,26 @@ func handleSignIn (c echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, responses.ErrorResponse(http.StatusForbidden, "Incorrect Credentials"))
 	}
 
+	orgs, err := app.Q.GetUserOrganizations(c.Request().Context(), user.Uuid)
+	
+	orgUUIDs := ""
+	
+	if err == nil {
+		for i, o := range orgs {
+			if i == 0 {
+				orgUUIDs = o.Uuid
+				continue
+			}
+			orgUUIDs = orgUUIDs + "," + o.Uuid
+
+		}
+	}
+	
 	token, err := j.GenerateToken(jwt.MapClaims{
 		"uuid":  user.Uuid,
 		"email": user.Email,
 		"name":  user.Name,
+		"orgs": 	 orgUUIDs,
 		"exp":   time.Now().Add(time.Hour * 24).Unix(),
 	}, app.Jwt)
 
@@ -133,7 +154,7 @@ func handleSignIn (c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
 	}
 
-	writeAuthTokenToCookie(c, token)
+	WriteAuthTokenToCookie(c, token)
 
 	c.JSON(http.StatusOK, responses.ResponseType{
 		Success: true,

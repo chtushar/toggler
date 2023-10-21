@@ -10,3 +10,11 @@ RETURNING *;
 SELECT *
 FROM organizations
 WHERE uuid = $1;
+-- name: GetUserOrganizations :many
+SELECT o.uuid AS uuid,
+    o.name AS name,
+    o.created_at AS created_at
+FROM users u
+    JOIN organization_members om ON u.uuid = om.user_uuid
+    JOIN organizations o ON om.org_uuid = o.uuid
+WHERE u.uuid = $1;

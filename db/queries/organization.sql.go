@@ -52,3 +52,33 @@ func (q *Queries) GetOrganizationByUUID(ctx context.Context, argUuid string) (Or
 	err := row.Scan(&i.Uuid, &i.Name, &i.CreatedAt)
 	return i, err
 }
+
+const getUserOrganizations = `-- name: GetUserOrganizations :many
+SELECT o.uuid AS uuid,
+    o.name AS name,
+    o.created_at AS created_at
+FROM users u
+    JOIN organization_members om ON u.uuid = om.user_uuid
+    JOIN organizations o ON om.org_uuid = o.uuid
+WHERE u.uuid = $1
+`
+
+func (q *Queries) GetUserOrganizations(ctx context.Context, argUuid string) ([]Organization, error) {
+	rows, err := q.db.Query(ctx, getUserOrganizations, argUuid)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Organization
+	for rows.Next() {
+		var i Organization
+		if err := rows.Scan(&i.Uuid, &i.Name, &i.CreatedAt); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
