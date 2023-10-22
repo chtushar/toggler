@@ -9,28 +9,18 @@ import (
 	"context"
 )
 
-const createEnvironment = `-- name: CreateEnvironment :one
-INSERT INTO environments(name, color, id)
+const createEnvironment = `-- name: CreateEnvironment :exec
+INSERT INTO environments(name, color, org_id)
 VALUES ($1, $2, $3)
-RETURNING uuid, id, name, color, org_id, created_at
 `
 
 type CreateEnvironmentParams struct {
 	Name  string  `json:"name"`
 	Color *string `json:"color"`
-	ID    *int32  `json:"-"`
+	OrgID *int32  `json:"org_id"`
 }
 
-func (q *Queries) CreateEnvironment(ctx context.Context, arg CreateEnvironmentParams) (Environment, error) {
-	row := q.db.QueryRow(ctx, createEnvironment, arg.Name, arg.Color, arg.ID)
-	var i Environment
-	err := row.Scan(
-		&i.Uuid,
-		&i.ID,
-		&i.Name,
-		&i.Color,
-		&i.OrgID,
-		&i.CreatedAt,
-	)
-	return i, err
+func (q *Queries) CreateEnvironment(ctx context.Context, arg CreateEnvironmentParams) error {
+	_, err := q.db.Exec(ctx, createEnvironment, arg.Name, arg.Color, arg.OrgID)
+	return err
 }

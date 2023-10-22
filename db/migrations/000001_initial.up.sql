@@ -36,7 +36,7 @@ CREATE TABLE environments (
     uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     id SERIAL UNIQUE,
     name VARCHAR(255) NOT NULL,
-    color VARCHAR(255) DEFAULT NULL,
+    color CHAR(7) DEFAULT NULL,
     org_id INT REFERENCES organizations(id),
     created_at TIMESTAMP DEFAULT NOW()
 );
