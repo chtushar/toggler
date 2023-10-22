@@ -17,10 +17,43 @@ VALUES ($1, $2, $3)
 type CreateEnvironmentParams struct {
 	Name  string  `json:"name"`
 	Color *string `json:"color"`
-	OrgID *int32  `json:"org_id"`
+	OrgID *int32  `json:"-"`
 }
 
 func (q *Queries) CreateEnvironment(ctx context.Context, arg CreateEnvironmentParams) error {
 	_, err := q.db.Exec(ctx, createEnvironment, arg.Name, arg.Color, arg.OrgID)
 	return err
+}
+
+const getOrganizationEnvironments = `-- name: GetOrganizationEnvironments :many
+SELECT uuid, id, name, color, org_id, created_at
+FROM environments
+WHERE org_id = $1
+`
+
+func (q *Queries) GetOrganizationEnvironments(ctx context.Context, orgID *int32) ([]Environment, error) {
+	rows, err := q.db.Query(ctx, getOrganizationEnvironments, orgID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Environment
+	for rows.Next() {
+		var i Environment
+		if err := rows.Scan(
+			&i.Uuid,
+			&i.ID,
+			&i.Name,
+			&i.Color,
+			&i.OrgID,
+			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }

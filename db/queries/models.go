@@ -13,24 +13,24 @@ type Environment struct {
 	ID        *int32     `json:"-"`
 	Name      string     `json:"name"`
 	Color     *string    `json:"color"`
-	OrgID     *int32     `json:"org_id"`
+	OrgID     *int32     `json:"-"`
 	CreatedAt *time.Time `json:"created_at"`
 }
 
 type FlagsGroup struct {
 	Uuid           string     `json:"uuid"`
-	ID             *int32     `json:"id"`
+	ID             *int32     `json:"-"`
 	Name           string     `json:"name"`
-	OrgID          *int32     `json:"org_id"`
-	FolderID       *int32     `json:"folder_id"`
+	OrgID          *int32     `json:"-"`
+	FolderID       *int32     `json:"-"`
 	CurrentVersion *int32     `json:"current_version"`
-	EnvironmentID  *int32     `json:"environment_id"`
+	EnvironmentID  *int32     `json:"-"`
 	CreatedAt      *time.Time `json:"created_at"`
 }
 
 type FlagsGroupState struct {
 	Uuid      string     `json:"uuid"`
-	ID        *int32     `json:"id"`
+	ID        *int32     `json:"-"`
 	Version   *int32     `json:"version"`
 	Code      *string    `json:"code"`
 	CreatedAt *time.Time `json:"created_at"`
@@ -40,7 +40,7 @@ type Folder struct {
 	Uuid      string     `json:"uuid"`
 	ID        *int32     `json:"-"`
 	Name      string     `json:"name"`
-	OrgID     *int32     `json:"org_id"`
+	OrgID     *int32     `json:"-"`
 	CreatedAt *time.Time `json:"created_at"`
 }
 
@@ -52,8 +52,8 @@ type Organization struct {
 }
 
 type OrganizationMember struct {
-	UserID *int32 `json:"user_id"`
-	OrgID  *int32 `json:"org_id"`
+	UserID *int32 `json:"-"`
+	OrgID  *int32 `json:"-"`
 }
 
 type User struct {

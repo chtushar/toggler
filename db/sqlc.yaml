@@ -16,10 +16,37 @@ overrides:
       - column: "organizations.id"
         go_struct_tag: 'json:"-"'
 
+      - column: "organization_members.user_id"
+        go_struct_tag: 'json:"-"'
+
+      - column: "organization_members.org_id"
+        go_struct_tag: 'json:"-"'
+
       - column: "folders.id"
         go_struct_tag: 'json:"-"'
 
+      - column: "folders.org_id"
+        go_struct_tag: 'json:"-"'
+
       - column: "environments.id"
+        go_struct_tag: 'json:"-"'
+
+      - column: "environments.org_id"
+        go_struct_tag: 'json:"-"'
+
+      - column: "flags_group_states.id"
+        go_struct_tag: 'json:"-"'
+
+      - column: "flags_groups.id"
+        go_struct_tag: 'json:"-"'
+
+      - column: "flags_groups.org_id"
+        go_struct_tag: 'json:"-"'
+
+      - column: "flags_groups.folder_id"
+        go_struct_tag: 'json:"-"'
+
+      - column: "flags_groups.environment_id"
         go_struct_tag: 'json:"-"'
 sql:
   - engine: "postgresql"

@@ -17,8 +17,8 @@ RETURNING user_id, org_id
 `
 
 type AddOrganizationMemberParams struct {
-	UserID *int32 `json:"user_id"`
-	OrgID  *int32 `json:"org_id"`
+	UserID *int32 `json:"-"`
+	OrgID  *int32 `json:"-"`
 }
 
 func (q *Queries) AddOrganizationMember(ctx context.Context, arg AddOrganizationMemberParams) error {

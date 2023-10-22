@@ -68,10 +68,35 @@ func handleCreateEnvironments (c echo.Context) error {
 }
 
 func handleGetEnvironments (c echo.Context) error {
-	return nil
-}
+	var (
+		app = c.Get("app").(*app.App)
+		orgUUID = c.Param("orgUUID")
+	)
 
-func handleRemoveEnvironments (c echo.Context) error {
+	ok, err := utils.IsValidUUID(orgUUID)
+
+	if !ok {
+		app.Log.Println("Failed to get Organization", err)
+		return echo.NewHTTPError(http.StatusBadRequest, responses.BadRequestResponse)
+	}
+
+	org, err := app.Q.GetOrganizationByUUID(c.Request().Context(), orgUUID)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
+	}
+
+	envs, err := app.Q.GetOrganizationEnvironments(c.Request().Context(), org.ID)
+
+	if err != nil {
+		return echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
+	}
+
+	c.JSON(http.StatusOK, responses.ResponseType{
+		Success: true,
+		Data: envs,
+		Error: nil,
+	})
 	return nil
 }
 
