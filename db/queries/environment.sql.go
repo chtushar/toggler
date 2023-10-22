@@ -7,31 +7,29 @@ package queries
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
 const createEnvironment = `-- name: CreateEnvironment :one
-INSERT INTO environments(name, color, org_uuid)
+INSERT INTO environments(name, color, id)
 VALUES ($1, $2, $3)
-RETURNING uuid, id, name, color, org_uuid, created_at
+RETURNING uuid, id, name, color, org_id, created_at
 `
 
 type CreateEnvironmentParams struct {
-	Name    string     `json:"name"`
-	Color   *string    `json:"color"`
-	OrgUuid *uuid.UUID `json:"org_uuid"`
+	Name  string  `json:"name"`
+	Color *string `json:"color"`
+	ID    *int32  `json:"-"`
 }
 
 func (q *Queries) CreateEnvironment(ctx context.Context, arg CreateEnvironmentParams) (Environment, error) {
-	row := q.db.QueryRow(ctx, createEnvironment, arg.Name, arg.Color, arg.OrgUuid)
+	row := q.db.QueryRow(ctx, createEnvironment, arg.Name, arg.Color, arg.ID)
 	var i Environment
 	err := row.Scan(
 		&i.Uuid,
 		&i.ID,
 		&i.Name,
 		&i.Color,
-		&i.OrgUuid,
+		&i.OrgID,
 		&i.CreatedAt,
 	)
 	return i, err

@@ -6,8 +6,6 @@ package queries
 
 import (
 	"time"
-
-	"github.com/google/uuid"
 )
 
 type Environment struct {
@@ -15,22 +13,24 @@ type Environment struct {
 	ID        *int32     `json:"-"`
 	Name      string     `json:"name"`
 	Color     *string    `json:"color"`
-	OrgUuid   *uuid.UUID `json:"org_uuid"`
+	OrgID     *int32     `json:"org_id"`
 	CreatedAt *time.Time `json:"created_at"`
 }
 
 type FlagsGroup struct {
-	Uuid            string     `json:"uuid"`
-	Name            string     `json:"name"`
-	OrgUuid         *uuid.UUID `json:"org_uuid"`
-	FolderUuid      *uuid.UUID `json:"folder_uuid"`
-	CurrentVersion  *uuid.UUID `json:"current_version"`
-	EnvironmentUuid *uuid.UUID `json:"environment_uuid"`
-	CreatedAt       *time.Time `json:"created_at"`
+	Uuid           string     `json:"uuid"`
+	ID             *int32     `json:"id"`
+	Name           string     `json:"name"`
+	OrgID          *int32     `json:"org_id"`
+	FolderID       *int32     `json:"folder_id"`
+	CurrentVersion *int32     `json:"current_version"`
+	EnvironmentID  *int32     `json:"environment_id"`
+	CreatedAt      *time.Time `json:"created_at"`
 }
 
 type FlagsGroupState struct {
 	Uuid      string     `json:"uuid"`
+	ID        *int32     `json:"id"`
 	Version   *int32     `json:"version"`
 	Code      *string    `json:"code"`
 	CreatedAt *time.Time `json:"created_at"`
@@ -40,7 +40,7 @@ type Folder struct {
 	Uuid      string     `json:"uuid"`
 	ID        *int32     `json:"-"`
 	Name      string     `json:"name"`
-	OrgUuid   *uuid.UUID `json:"org_uuid"`
+	OrgID     *int32     `json:"org_id"`
 	CreatedAt *time.Time `json:"created_at"`
 }
 
@@ -52,8 +52,8 @@ type Organization struct {
 }
 
 type OrganizationMember struct {
-	UserUuid *uuid.UUID `json:"user_uuid"`
-	OrgUuid  *uuid.UUID `json:"org_uuid"`
+	UserID *int32 `json:"user_id"`
+	OrgID  *int32 `json:"org_id"`
 }
 
 type User struct {

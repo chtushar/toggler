@@ -8,23 +8,21 @@ package queries
 import (
 	"context"
 	"time"
-
-	"github.com/google/uuid"
 )
 
 const addOrganizationMember = `-- name: AddOrganizationMember :exec
-INSERT INTO organization_members(user_uuid, org_uuid)
+INSERT INTO organization_members(user_id, org_id)
 VALUES ($1, $2)
-RETURNING user_uuid, org_uuid
+RETURNING user_id, org_id
 `
 
 type AddOrganizationMemberParams struct {
-	UserUuid *uuid.UUID `json:"user_uuid"`
-	OrgUuid  *uuid.UUID `json:"org_uuid"`
+	UserID *int32 `json:"user_id"`
+	OrgID  *int32 `json:"org_id"`
 }
 
 func (q *Queries) AddOrganizationMember(ctx context.Context, arg AddOrganizationMemberParams) error {
-	_, err := q.db.Exec(ctx, addOrganizationMember, arg.UserUuid, arg.OrgUuid)
+	_, err := q.db.Exec(ctx, addOrganizationMember, arg.UserID, arg.OrgID)
 	return err
 }
 
@@ -52,8 +50,8 @@ FROM organizations
 WHERE uuid = $1
 `
 
-func (q *Queries) GetOrganizationByUUID(ctx context.Context, argUuid string) (Organization, error) {
-	row := q.db.QueryRow(ctx, getOrganizationByUUID, argUuid)
+func (q *Queries) GetOrganizationByUUID(ctx context.Context, uuid string) (Organization, error) {
+	row := q.db.QueryRow(ctx, getOrganizationByUUID, uuid)
 	var i Organization
 	err := row.Scan(
 		&i.Uuid,
@@ -69,8 +67,8 @@ SELECT o.uuid AS uuid,
     o.name AS name,
     o.created_at AS created_at
 FROM users u
-    JOIN organization_members om ON u.uuid = om.user_uuid
-    JOIN organizations o ON om.org_uuid = o.uuid
+    JOIN organization_members om ON u.id = om.user_id
+    JOIN organizations o ON om.org_id = o.id
 WHERE u.uuid = $1
 `
 
@@ -80,8 +78,8 @@ type GetUserOrganizationsRow struct {
 	CreatedAt *time.Time `json:"created_at"`
 }
 
-func (q *Queries) GetUserOrganizations(ctx context.Context, argUuid string) ([]GetUserOrganizationsRow, error) {
-	rows, err := q.db.Query(ctx, getUserOrganizations, argUuid)
+func (q *Queries) GetUserOrganizations(ctx context.Context, uuid string) ([]GetUserOrganizationsRow, error) {
+	rows, err := q.db.Query(ctx, getUserOrganizations, uuid)
 	if err != nil {
 		return nil, err
 	}

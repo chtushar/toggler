@@ -6,3 +6,7 @@ RETURNING *;
 SELECT *
 FROM users
 WHERE email = $1;
+-- name: GetUserByUUID :one
+SELECT *
+FROM users
+WHERE uuid = $1;

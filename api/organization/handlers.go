@@ -9,7 +9,6 @@ import (
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/chtushar/toggler/utils"
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
@@ -31,9 +30,9 @@ func handleCreateOrganization (c echo.Context) error {
 	}
 
 	userUuidStr := token.Claims.(jwt.MapClaims)["uuid"].(string)
-	userUuid, err := uuid.Parse(userUuidStr)
+	ok, err := utils.IsValidUUID(userUuidStr)
 
-	if err != nil {
+	if !ok {
 		app.Log.Println("Failed to parse the user uuid", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
 	}	
@@ -45,16 +44,16 @@ func handleCreateOrganization (c echo.Context) error {
 			return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
 		}
 
-		orgUuid, err := uuid.Parse(org.Uuid)
+		user, err := q.GetUserByUUID(c.Request().Context(), userUuidStr)
 
 		if err!= nil {
-			app.Log.Println("Failed to parse the uuid", err)
+			app.Log.Println("Failed to get the user", err)
 			return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
 		}
 
 		q.AddOrganizationMember(c.Request().Context(), queries.AddOrganizationMemberParams{
-			UserUuid: &userUuid,
-			OrgUuid: &orgUuid,
+			UserID: user.ID,
+			OrgID: org.ID,
 		})
 
 		return &org, nil
@@ -83,9 +82,9 @@ func handleAddOrganizationMembers (c echo.Context) error {
 		}{}
 	)
 
-	orgUUID, err := uuid.Parse(orgUUIDStr)
+	ok, err := utils.IsValidUUID(orgUUIDStr)
 	
-	if err != nil {
+	if !ok {
 		app.Log.Println("Failed to parse the uuid", err, orgUUIDStr)
 		return echo.NewHTTPError(http.StatusBadRequest, responses.BadRequestResponse)
 	}
@@ -104,20 +103,24 @@ func handleAddOrganizationMembers (c echo.Context) error {
 	}
 
 	_, err = db.WithDBTransaction[bool](app, c.Request().Context(), func(q *queries.Queries) (*bool, error){
+		org, err := q.GetOrganizationByUUID(c.Request().Context(), orgUUIDStr)
+		
+		if err != nil {
+			app.Log.Println("Can't find the org", err)
+			return nil, echo.NewHTTPError(http.StatusBadRequest, responses.BadRequestResponse)
+		}
+
 		for _, e := range req.Emails {
 			u, err := q.GetUserByEmail(c.Request().Context(), e)
+			
 			if err != nil {
 				app.Log.Println("Can't find user with email", e)
 				continue
 			}
-			userUUID, err := uuid.Parse(u.Uuid)
-			if err != nil {
-				app.Log.Println("Can't parse user uuid", u.Uuid)
-				continue
-			}
+
 			err = q.AddOrganizationMember(c.Request().Context(), queries.AddOrganizationMemberParams{
-				OrgUuid: &orgUUID,
-				UserUuid: &userUUID,
+				OrgID: org.ID,
+				UserID: u.ID,
 			})
 			if err != nil {
 				return nil, echo.NewHTTPError(http.StatusBadRequest, responses.BadRequestResponse)

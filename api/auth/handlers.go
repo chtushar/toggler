@@ -8,7 +8,6 @@ import (
 	"github.com/chtushar/toggler/api/app"
 	j "github.com/chtushar/toggler/api/jwt"
 	"github.com/chtushar/toggler/api/responses"
-	u "github.com/chtushar/toggler/api/user"
 	"github.com/chtushar/toggler/db"
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/chtushar/toggler/utils"
@@ -85,14 +84,7 @@ func handleRegisterUser (c echo.Context) error {
 
 	c.JSON(http.StatusOK, responses.ResponseType{
 		Success: true,
-		Data: u.UserNoPassword{
-			Uuid: user.Uuid,
-			Name: user.Name,
-			Email: user.Email,
-			EmailVerified: *user.EmailVerified,
-			Active: *user.Active,
-			CreatedAt: *user.CreatedAt,
-		},
+		Data: user,
 		Error: nil,
 	})
 	return nil
@@ -158,14 +150,7 @@ func handleSignIn (c echo.Context) error {
 
 	c.JSON(http.StatusOK, responses.ResponseType{
 		Success: true,
-		Data: u.UserNoPassword {
-			Uuid: user.Uuid,
-			Name: user.Name,
-			Email: user.Email,
-			EmailVerified: *user.EmailVerified,
-			Active: *user.Active,
-			CreatedAt: *user.CreatedAt,
-		},
+		Data: user,
 		Error: nil,
 	})
 	return nil
