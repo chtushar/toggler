@@ -12,15 +12,16 @@ import (
 )
 
 func handleCreateEnvironments (c echo.Context) error {
-	type Env struct {
+	type envType struct {
 		Name string `json:"name" validate:"required,min=3"`
 		Color string `json:"color" validate:"required,min=7,max=7"`
 	}
+
 	var (
 		app = c.Get("app").(*app.App)
 		orgUUID = c.Param("orgUUID")
 		req = &struct{
-			Envs []Env `json:"envs" validate:"required,dive"`
+			Envs []envType `json:"envs" validate:"required,dive"`
 		}{}
 	)
 
@@ -101,5 +102,69 @@ func handleGetEnvironments (c echo.Context) error {
 }
 
 func handleUpdateEnvironment (c echo.Context) error {
+	var (
+		app = c.Get("app").(*app.App)
+		envUUID = c.Param("envUUID")
+		req = &struct{
+			Name string `json:"name" validate:"omitempty,min=3"`
+			Color string `json:"color" validate:"omitempty,min=7,max=7"`
+		}{}
+	)
+
+	ok, err := utils.IsValidUUID(envUUID)
+
+	if !ok {
+		app.Log.Println("Can't parse the env uuid", err)
+		return echo.NewHTTPError(http.StatusBadRequest, responses.BadRequestResponse)
+	}
+
+	if err := c.Bind(req); err != nil {
+		app.Log.Println(err)
+		return echo.NewHTTPError(http.StatusBadRequest, responses.BadRequestResponse)
+	}
+
+	if err := c.Validate(req); err != nil {
+		app.Log.Println(err)
+		return err
+	}
+
+	_, err = db.WithDBTransaction[bool](app, c.Request().Context(), func(q *queries.Queries) (*bool, error) {
+		if req.Name != "" {
+			err := q.UpdateEnvironmentName(c.Request().Context(), queries.UpdateEnvironmentNameParams{
+				Uuid: envUUID,
+				Name: req.Name,
+			})
+
+			if err != nil {
+				app.Log.Println("Couldn't update the env name")
+				return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
+			}
+		}
+
+		if req.Color != "" {
+			err := q.UpdateEnvironmentColor(c.Request().Context(), queries.UpdateEnvironmentColorParams{
+				Uuid: envUUID,
+				Color: &req.Color,
+			})
+
+			if err != nil {
+				app.Log.Println("Couldn't update the env color")
+				return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
+			}
+		}
+
+		ok := true
+		return &ok, nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	c.JSON(http.StatusOK, responses.ResponseType{
+		Success: true,
+		Data: "Env updated",
+		Error: nil,
+	})
 	return nil
 }

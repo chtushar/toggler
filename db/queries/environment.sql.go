@@ -57,3 +57,35 @@ func (q *Queries) GetOrganizationEnvironments(ctx context.Context, orgID *int32)
 	}
 	return items, nil
 }
+
+const updateEnvironmentColor = `-- name: UpdateEnvironmentColor :exec
+UPDATE environments
+SET color = $2
+WHERE uuid = $1
+`
+
+type UpdateEnvironmentColorParams struct {
+	Uuid  string  `json:"uuid"`
+	Color *string `json:"color"`
+}
+
+func (q *Queries) UpdateEnvironmentColor(ctx context.Context, arg UpdateEnvironmentColorParams) error {
+	_, err := q.db.Exec(ctx, updateEnvironmentColor, arg.Uuid, arg.Color)
+	return err
+}
+
+const updateEnvironmentName = `-- name: UpdateEnvironmentName :exec
+UPDATE environments
+SET name = $2
+WHERE uuid = $1
+`
+
+type UpdateEnvironmentNameParams struct {
+	Uuid string `json:"uuid"`
+	Name string `json:"name"`
+}
+
+func (q *Queries) UpdateEnvironmentName(ctx context.Context, arg UpdateEnvironmentNameParams) error {
+	_, err := q.db.Exec(ctx, updateEnvironmentName, arg.Uuid, arg.Name)
+	return err
+}
