@@ -35,7 +35,6 @@ func CheckOrgAccessMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			}
 
 			orgsUUIDs := strings.Split(orgs, ",")
-
 			for _, o := range orgsUUIDs {
 				if o == orgUUID {
 					return next(c)

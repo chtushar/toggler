@@ -158,7 +158,6 @@ func handleGetOrganization (c echo.Context) error {
 	}
 
 	org, err := app.Q.GetOrganizationByUUID(c.Request().Context(), orgUUID)
-
 	if err != nil {
 		app.Log.Println("Failed to Get organization ", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)

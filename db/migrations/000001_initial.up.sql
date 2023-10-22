@@ -32,6 +32,7 @@ CREATE TABLE folders (
 CREATE TABLE environments (
     uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
+    color VARCHAR(255) DEFAULT NULL,
     org_uuid UUID REFERENCES organizations(uuid),
     created_at TIMESTAMP DEFAULT NOW()
 );
