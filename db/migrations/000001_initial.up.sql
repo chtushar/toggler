@@ -2,12 +2,14 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Organization table
 CREATE TABLE organizations (
     uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id SERIAL,
     name VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT NOW()
 );
 -- User table
 CREATE TABLE users (
     uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id SERIAL,
     name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
@@ -24,6 +26,7 @@ CREATE TABLE organization_members (
 -- Folder table
 CREATE TABLE folders (
     uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id SERIAL,
     name VARCHAR(255) NOT NULL,
     org_uuid UUID REFERENCES organizations(uuid),
     created_at TIMESTAMP DEFAULT NOW()
@@ -31,6 +34,7 @@ CREATE TABLE folders (
 -- Environment table 
 CREATE TABLE environments (
     uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id SERIAL,
     name VARCHAR(255) NOT NULL,
     color VARCHAR(255) DEFAULT NULL,
     org_uuid UUID REFERENCES organizations(uuid),

@@ -7,6 +7,7 @@ package queries
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -30,18 +31,23 @@ func (q *Queries) AddOrganizationMember(ctx context.Context, arg AddOrganization
 const createOrganization = `-- name: CreateOrganization :one
 INSERT INTO organizations(name)
 VALUES ($1)
-RETURNING uuid, name, created_at
+RETURNING uuid, id, name, created_at
 `
 
 func (q *Queries) CreateOrganization(ctx context.Context, name string) (Organization, error) {
 	row := q.db.QueryRow(ctx, createOrganization, name)
 	var i Organization
-	err := row.Scan(&i.Uuid, &i.Name, &i.CreatedAt)
+	err := row.Scan(
+		&i.Uuid,
+		&i.ID,
+		&i.Name,
+		&i.CreatedAt,
+	)
 	return i, err
 }
 
 const getOrganizationByUUID = `-- name: GetOrganizationByUUID :one
-SELECT uuid, name, created_at
+SELECT uuid, id, name, created_at
 FROM organizations
 WHERE uuid = $1
 `
@@ -49,7 +55,12 @@ WHERE uuid = $1
 func (q *Queries) GetOrganizationByUUID(ctx context.Context, argUuid string) (Organization, error) {
 	row := q.db.QueryRow(ctx, getOrganizationByUUID, argUuid)
 	var i Organization
-	err := row.Scan(&i.Uuid, &i.Name, &i.CreatedAt)
+	err := row.Scan(
+		&i.Uuid,
+		&i.ID,
+		&i.Name,
+		&i.CreatedAt,
+	)
 	return i, err
 }
 
@@ -63,15 +74,21 @@ FROM users u
 WHERE u.uuid = $1
 `
 
-func (q *Queries) GetUserOrganizations(ctx context.Context, argUuid string) ([]Organization, error) {
+type GetUserOrganizationsRow struct {
+	Uuid      string     `json:"uuid"`
+	Name      string     `json:"name"`
+	CreatedAt *time.Time `json:"created_at"`
+}
+
+func (q *Queries) GetUserOrganizations(ctx context.Context, argUuid string) ([]GetUserOrganizationsRow, error) {
 	rows, err := q.db.Query(ctx, getUserOrganizations, argUuid)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Organization
+	var items []GetUserOrganizationsRow
 	for rows.Next() {
-		var i Organization
+		var i GetUserOrganizationsRow
 		if err := rows.Scan(&i.Uuid, &i.Name, &i.CreatedAt); err != nil {
 			return nil, err
 		}

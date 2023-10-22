@@ -7,6 +7,20 @@ overrides:
         go_type:
           type: "string"
 
+      - column: "users.id"
+        go_struct_tag: 'json:"-"'
+
+      - column: "users.password"
+        go_struct_tag: 'json:"-"'
+
+      - column: "organizations.id"
+        go_struct_tag: 'json:"-"'
+
+      - column: "folders.id"
+        go_struct_tag: 'json:"-"'
+
+      - column: "environments.id"
+        go_struct_tag: 'json:"-"'
 sql:
   - engine: "postgresql"
     queries: "./sql"

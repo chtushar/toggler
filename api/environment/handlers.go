@@ -1,6 +1,8 @@
 package environment
 
-import "github.com/labstack/echo/v4"
+import (
+	"github.com/labstack/echo/v4"
+)
 
 func handleCreateEnvironments (c echo.Context) error {
 	return nil

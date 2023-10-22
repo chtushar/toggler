@@ -12,13 +12,13 @@ import (
 const createActiveUser = `-- name: CreateActiveUser :one
 INSERT INTO users (name, email, password, email_verified, active)
 VALUES ($1, $2, $3, TRUE, TRUE)
-RETURNING uuid, name, email, password, email_verified, active, created_at
+RETURNING uuid, id, name, email, password, email_verified, active, created_at
 `
 
 type CreateActiveUserParams struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
-	Password string `json:"password"`
+	Password string `json:"-"`
 }
 
 func (q *Queries) CreateActiveUser(ctx context.Context, arg CreateActiveUserParams) (User, error) {
@@ -26,6 +26,7 @@ func (q *Queries) CreateActiveUser(ctx context.Context, arg CreateActiveUserPara
 	var i User
 	err := row.Scan(
 		&i.Uuid,
+		&i.ID,
 		&i.Name,
 		&i.Email,
 		&i.Password,
@@ -37,7 +38,7 @@ func (q *Queries) CreateActiveUser(ctx context.Context, arg CreateActiveUserPara
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT uuid, name, email, password, email_verified, active, created_at
+SELECT uuid, id, name, email, password, email_verified, active, created_at
 FROM users
 WHERE email = $1
 `
@@ -47,6 +48,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error
 	var i User
 	err := row.Scan(
 		&i.Uuid,
+		&i.ID,
 		&i.Name,
 		&i.Email,
 		&i.Password,
