@@ -23,6 +23,17 @@ CREATE TABLE organization_members (
     org_id INT REFERENCES organizations(id),
     UNIQUE(user_id, org_id)
 );
+-- API Keys table
+CREATE TABLE api_keys (
+    uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id SERIAL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    api_key VARCHAR(44) NOT NULL,
+    allowed_domains VARCHAR [] NOT NULL,
+    org_id INT REFERENCES organizations(id),
+    user_id INT REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT NOW()
+);
 -- Folder table
 CREATE TABLE folders (
     uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,

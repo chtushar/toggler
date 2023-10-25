@@ -49,6 +49,15 @@ overrides:
       - column: "flags_groups.environment_id"
         go_struct_tag: 'json:"-"'
 
+      - column: "api_keys.org_id"
+        go_struct_tag: 'json:"-"'
+
+      - column: "api_keys.user_id"
+        go_struct_tag: 'json:"-"'
+
+      - column: "api_keys.id"
+        go_struct_tag: 'json:"-"'
+
 sql:
   - engine: "postgresql"
     queries: "./sql"

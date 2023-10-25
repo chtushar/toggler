@@ -8,6 +8,17 @@ import (
 	"time"
 )
 
+type ApiKey struct {
+	Uuid           string     `json:"uuid"`
+	ID             *int32     `json:"-"`
+	Name           string     `json:"name"`
+	ApiKey         string     `json:"api_key"`
+	AllowedDomains []string   `json:"allowed_domains"`
+	OrgID          *int32     `json:"-"`
+	UserID         *int32     `json:"-"`
+	CreatedAt      *time.Time `json:"created_at"`
+}
+
 type Environment struct {
 	Uuid      string     `json:"uuid"`
 	ID        *int32     `json:"-"`
