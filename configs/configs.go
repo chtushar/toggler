@@ -30,6 +30,7 @@ func Get() *Config {
 				ForceTLS: viper.GetBool(keyDBForceTLS),
 			},
 			JWTSecret: viper.GetString(keyJWTSecret),
+			PrivateKey: viper.GetString(keyPrivatekey),
 		}
 	})
 	return Cfg

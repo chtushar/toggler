@@ -11,6 +11,7 @@ import (
 	"github.com/chtushar/toggler/configs"
 	"github.com/chtushar/toggler/db"
 	"github.com/chtushar/toggler/db/queries"
+	"github.com/chtushar/toggler/runner"
 	"github.com/jackc/pgx/v4/stdlib"
 )
 
@@ -72,4 +73,7 @@ func Execute() {
 
 	// Initialize the HTTP server
 	api.InitHTTPServer(app)
+
+	// Initialize the runner server
+	runner.InitRunner()
 }
