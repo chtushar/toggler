@@ -37,6 +37,12 @@ overrides:
       - column: "flags_group_states.id"
         go_struct_tag: 'json:"-"'
 
+      - column: "flags_group_states.environment_id"
+        go_struct_tag: 'json:"-"'
+
+      - column: "flags_group_states.flags_group_id"
+        go_struct_tag: 'json:"-"'
+
       - column: "flags_groups.id"
         go_struct_tag: 'json:"-"'
 
@@ -44,9 +50,6 @@ overrides:
         go_struct_tag: 'json:"-"'
 
       - column: "flags_groups.folder_id"
-        go_struct_tag: 'json:"-"'
-
-      - column: "flags_groups.environment_id"
         go_struct_tag: 'json:"-"'
 
       - column: "api_keys.org_id"
