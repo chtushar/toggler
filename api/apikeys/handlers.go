@@ -32,7 +32,6 @@ func handleCreateAPIKey(c echo.Context) error {
 	}
 
 	_, err = utils.IsValidUUID(orgUUID)
-
 	if err != nil{
 		app.Log.Println("Unable to parse the org uuid")
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
@@ -100,6 +99,42 @@ func handleCreateAPIKey(c echo.Context) error {
 }
 
 func handleGetOrgAPIKeys(c echo.Context) error {
+	var (
+		app = c.Get("app").(*app.App)
+		orgUUID = c.Param("orgUUID")
+	)
+
+	_, err := utils.IsValidUUID(orgUUID)
+	if err != nil{
+		app.Log.Println("Unable to parse the org uuid")
+		return echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
+	}
+
+	apiKeys, err := db.WithDBTransaction[[]queries.ApiKey](app, c.Request().Context(), func(q *queries.Queries) (*[]queries.ApiKey, error) {
+		org, err := q.GetOrganizationByUUID(c.Request().Context(), orgUUID)
+		
+		if err != nil {
+			return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
+		}
+	
+		apiKeys, err := q.GetOrganizationAPIKeys(c.Request().Context(), org.ID)
+		
+		if err != nil {
+			return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
+		}
+		
+		return &apiKeys, err
+	})
+
+	if err != nil {
+		return err
+	}
+
+	c.JSON(http.StatusOK, responses.ResponseType{
+		Success: true,
+		Data: apiKeys,
+		Error: nil,
+	})
 	return nil
 }
 
