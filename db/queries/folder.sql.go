@@ -36,11 +36,11 @@ func (q *Queries) CreateFolder(ctx context.Context, arg CreateFolderParams) (Fol
 const getFolderByUUID = `-- name: GetFolderByUUID :one
 SELECT uuid, id, name, org_id, created_at
 FROM folders
-WHERE org_id = $1
+WHERE uuid = $1
 `
 
-func (q *Queries) GetFolderByUUID(ctx context.Context, orgID *int32) (Folder, error) {
-	row := q.db.QueryRow(ctx, getFolderByUUID, orgID)
+func (q *Queries) GetFolderByUUID(ctx context.Context, uuid string) (Folder, error) {
+	row := q.db.QueryRow(ctx, getFolderByUUID, uuid)
 	var i Folder
 	err := row.Scan(
 		&i.Uuid,

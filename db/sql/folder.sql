@@ -9,7 +9,7 @@ WHERE org_id = $1;
 -- name: GetFolderByUUID :one
 SELECT *
 FROM folders
-WHERE org_id = $1;
+WHERE uuid = $1;
 -- name: UpdateFolderName :exec
 UPDATE folders
 SET name = $1

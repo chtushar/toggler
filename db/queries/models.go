@@ -7,6 +7,7 @@ package queries
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgtype"
 )
 
@@ -36,7 +37,7 @@ type FlagsGroup struct {
 	Name           string     `json:"name"`
 	OrgID          *int32     `json:"-"`
 	FolderID       *int32     `json:"-"`
-	CurrentVersion *int32     `json:"current_version"`
+	CurrentVersion *uuid.UUID `json:"current_version"`
 	CreatedAt      *time.Time `json:"created_at"`
 }
 

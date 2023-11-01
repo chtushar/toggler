@@ -54,7 +54,7 @@ func handleCreateAPIKey(c echo.Context) error {
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
 	}
 
-	apiKeyres, err := db.WithDBTransaction[queries.ApiKey](app, c.Request().Context(), func(q *queries.Queries) (*queries.ApiKey, error) {
+	apiKeyRes, err := db.WithDBTransaction[queries.ApiKey](app, c.Request().Context(), func(q *queries.Queries) (*queries.ApiKey, error) {
 		u, err := q.GetUserByUUID(c.Request().Context(), userUuid)
 		
 		if err != nil {
@@ -92,7 +92,7 @@ func handleCreateAPIKey(c echo.Context) error {
 
 	c.JSON(http.StatusOK, responses.ResponseType{
 		Success: true,
-		Data: apiKeyres,
+		Data: apiKeyRes,
 		Error: nil,
 	})
 	return nil

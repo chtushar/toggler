@@ -7,6 +7,8 @@ package queries
 
 import (
 	"context"
+
+	"github.com/google/uuid"
 )
 
 const createFlagsGroup = `-- name: CreateFlagsGroup :one
@@ -16,10 +18,10 @@ RETURNING uuid, id, name, org_id, folder_id, current_version, created_at
 `
 
 type CreateFlagsGroupParams struct {
-	Name           string `json:"name"`
-	OrgID          *int32 `json:"-"`
-	FolderID       *int32 `json:"-"`
-	CurrentVersion *int32 `json:"current_version"`
+	Name           string     `json:"name"`
+	OrgID          *int32     `json:"-"`
+	FolderID       *int32     `json:"-"`
+	CurrentVersion *uuid.UUID `json:"current_version"`
 }
 
 func (q *Queries) CreateFlagsGroup(ctx context.Context, arg CreateFlagsGroupParams) (FlagsGroup, error) {
@@ -117,8 +119,8 @@ WHERE uuid = $2
 `
 
 type UpdateFlagsGroupCurrentVersionParams struct {
-	CurrentVersion *int32 `json:"current_version"`
-	Uuid           string `json:"uuid"`
+	CurrentVersion *uuid.UUID `json:"current_version"`
+	Uuid           string     `json:"uuid"`
 }
 
 func (q *Queries) UpdateFlagsGroupCurrentVersion(ctx context.Context, arg UpdateFlagsGroupCurrentVersionParams) error {
