@@ -69,19 +69,26 @@ func handleCreateFlagsGroup(c echo.Context) error {
 
 	db.WithDBTransaction[bool](app, c.Request().Context(), func(q *queries.Queries) (*bool, error) {
 		envs, err := q.GetOrganizationEnvironments(c.Request().Context(), fg.OrgID)
-		fmt.Println(envs)
 		if err != nil {
 			return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
 		}
 
 		var one int32 = 1
+		var jsonbValue pgtype.JSONB
+
+		err = jsonbValue.Set("{}")
+
+		if err != nil {
+			fmt.Println("Error:", err)
+			return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
+		}
 
 		for _, e := range envs {
 			_, err := q.CreateFlagsGroupState(c.Request().Context(), queries.CreateFlagsGroupStateParams{
 				Version:       &one,
 				FlagsGroupID:  fg.ID,
 				EnvironmentID: e.ID,
-				Json:          pgtype.JSONB{},
+				Json:          jsonbValue,
 			})
 
 			if err != nil {
