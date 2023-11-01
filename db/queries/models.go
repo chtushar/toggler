@@ -7,7 +7,6 @@ package queries
 import (
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgtype"
 )
 
@@ -32,20 +31,18 @@ type Environment struct {
 }
 
 type FlagsGroup struct {
-	Uuid           string     `json:"uuid"`
-	ID             *int32     `json:"-"`
-	Name           string     `json:"name"`
-	OrgID          *int32     `json:"-"`
-	FolderID       *int32     `json:"-"`
-	CurrentVersion *uuid.UUID `json:"current_version"`
-	CreatedAt      *time.Time `json:"created_at"`
+	Uuid      string     `json:"uuid"`
+	ID        *int32     `json:"-"`
+	Name      string     `json:"name"`
+	OrgID     *int32     `json:"-"`
+	FolderID  *int32     `json:"-"`
+	CreatedAt *time.Time `json:"created_at"`
 }
 
 type FlagsGroupState struct {
 	Uuid          string       `json:"uuid"`
 	ID            *int32       `json:"-"`
 	FlagsGroupID  *int32       `json:"-"`
-	Version       *int32       `json:"version"`
 	Json          pgtype.JSONB `json:"json"`
 	EnvironmentID *int32       `json:"-"`
 	CreatedAt     *time.Time   `json:"created_at"`

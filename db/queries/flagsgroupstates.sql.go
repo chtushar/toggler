@@ -12,31 +12,24 @@ import (
 )
 
 const createFlagsGroupState = `-- name: CreateFlagsGroupState :one
-INSERT INTO flags_group_states(version, json, flags_group_id, environment_id)
-VALUES ($1, $2, $3, $4)
-RETURNING uuid, id, flags_group_id, version, json, environment_id, created_at
+INSERT INTO flags_group_states(json, flags_group_id, environment_id)
+VALUES ($1, $2, $3)
+RETURNING uuid, id, flags_group_id, json, environment_id, created_at
 `
 
 type CreateFlagsGroupStateParams struct {
-	Version       *int32       `json:"version"`
 	Json          pgtype.JSONB `json:"json"`
 	FlagsGroupID  *int32       `json:"-"`
 	EnvironmentID *int32       `json:"-"`
 }
 
 func (q *Queries) CreateFlagsGroupState(ctx context.Context, arg CreateFlagsGroupStateParams) (FlagsGroupState, error) {
-	row := q.db.QueryRow(ctx, createFlagsGroupState,
-		arg.Version,
-		arg.Json,
-		arg.FlagsGroupID,
-		arg.EnvironmentID,
-	)
+	row := q.db.QueryRow(ctx, createFlagsGroupState, arg.Json, arg.FlagsGroupID, arg.EnvironmentID)
 	var i FlagsGroupState
 	err := row.Scan(
 		&i.Uuid,
 		&i.ID,
 		&i.FlagsGroupID,
-		&i.Version,
 		&i.Json,
 		&i.EnvironmentID,
 		&i.CreatedAt,
@@ -45,7 +38,7 @@ func (q *Queries) CreateFlagsGroupState(ctx context.Context, arg CreateFlagsGrou
 }
 
 const getFlagsGroupStateByID = `-- name: GetFlagsGroupStateByID :one
-SELECT uuid, id, flags_group_id, version, json, environment_id, created_at
+SELECT uuid, id, flags_group_id, json, environment_id, created_at
 FROM flags_group_states
 WHERE id = $1
 `
@@ -57,7 +50,6 @@ func (q *Queries) GetFlagsGroupStateByID(ctx context.Context, id *int32) (FlagsG
 		&i.Uuid,
 		&i.ID,
 		&i.FlagsGroupID,
-		&i.Version,
 		&i.Json,
 		&i.EnvironmentID,
 		&i.CreatedAt,
@@ -66,7 +58,7 @@ func (q *Queries) GetFlagsGroupStateByID(ctx context.Context, id *int32) (FlagsG
 }
 
 const getFlagsGroupStateByUUID = `-- name: GetFlagsGroupStateByUUID :one
-SELECT uuid, id, flags_group_id, version, json, environment_id, created_at
+SELECT uuid, id, flags_group_id, json, environment_id, created_at
 FROM flags_group_states
 WHERE uuid = $1
 `
@@ -78,7 +70,6 @@ func (q *Queries) GetFlagsGroupStateByUUID(ctx context.Context, uuid string) (Fl
 		&i.Uuid,
 		&i.ID,
 		&i.FlagsGroupID,
-		&i.Version,
 		&i.Json,
 		&i.EnvironmentID,
 		&i.CreatedAt,

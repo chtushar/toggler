@@ -1,6 +1,6 @@
 -- name: CreateFlagsGroupState :one
-INSERT INTO flags_group_states(version, json, flags_group_id, environment_id)
-VALUES ($1, $2, $3, $4)
+INSERT INTO flags_group_states(json, flags_group_id, environment_id)
+VALUES ($1, $2, $3)
 RETURNING *;
 -- name: GetFlagsGroupStateByID :one
 SELECT *

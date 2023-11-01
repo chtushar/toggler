@@ -58,7 +58,6 @@ CREATE TABLE flags_groups (
     name VARCHAR(255) NOT NULL,
     org_id INT REFERENCES organizations(id),
     folder_id INT REFERENCES folders(id),
-    current_version UUID,
     created_at TIMESTAMP DEFAULT NOW(),
     UNIQUE(
         uuid,
@@ -71,7 +70,6 @@ CREATE TABLE flags_group_states (
     uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     id SERIAL UNIQUE,
     flags_group_id INT REFERENCES flags_groups(id),
-    version INT,
     json JSONB DEFAULT '{}',
     environment_id INT REFERENCES environments(id),
     created_at TIMESTAMP DEFAULT NOW(),

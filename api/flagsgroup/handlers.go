@@ -50,10 +50,9 @@ func handleCreateFlagsGroup(c echo.Context) error {
 		}
 
 		fg, err := q.CreateFlagsGroup(c.Request().Context(), queries.CreateFlagsGroupParams{
-			Name:           req.Name,
-			OrgID:          org.ID,
-			FolderID:       folder.ID,
-			CurrentVersion: nil,
+			Name:     req.Name,
+			OrgID:    org.ID,
+			FolderID: folder.ID,
 		})
 
 		if err != nil {
@@ -73,7 +72,6 @@ func handleCreateFlagsGroup(c echo.Context) error {
 			return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
 		}
 
-		var one int32 = 1
 		var jsonbValue pgtype.JSONB
 
 		err = jsonbValue.Set("{}")
@@ -85,7 +83,6 @@ func handleCreateFlagsGroup(c echo.Context) error {
 
 		for _, e := range envs {
 			_, err := q.CreateFlagsGroupState(c.Request().Context(), queries.CreateFlagsGroupStateParams{
-				Version:       &one,
 				FlagsGroupID:  fg.ID,
 				EnvironmentID: e.ID,
 				Json:          jsonbValue,

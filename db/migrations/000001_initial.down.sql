@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS flags_groups;
 DROP TABLE IF EXISTS flags_group_states;
+DROP TABLE IF EXISTS flags_groups;
 DROP TABLE IF EXISTS folders;
 DROP TABLE IF EXISTS environments;
 DROP TABLE IF EXISTS api_keys;

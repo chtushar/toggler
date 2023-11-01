@@ -7,30 +7,22 @@ package queries
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
 const createFlagsGroup = `-- name: CreateFlagsGroup :one
-INSERT INTO flags_groups(name, org_id, folder_id, current_version)
-VALUES ($1, $2, $3, $4)
-RETURNING uuid, id, name, org_id, folder_id, current_version, created_at
+INSERT INTO flags_groups(name, org_id, folder_id)
+VALUES ($1, $2, $3)
+RETURNING uuid, id, name, org_id, folder_id, created_at
 `
 
 type CreateFlagsGroupParams struct {
-	Name           string     `json:"name"`
-	OrgID          *int32     `json:"-"`
-	FolderID       *int32     `json:"-"`
-	CurrentVersion *uuid.UUID `json:"current_version"`
+	Name     string `json:"name"`
+	OrgID    *int32 `json:"-"`
+	FolderID *int32 `json:"-"`
 }
 
 func (q *Queries) CreateFlagsGroup(ctx context.Context, arg CreateFlagsGroupParams) (FlagsGroup, error) {
-	row := q.db.QueryRow(ctx, createFlagsGroup,
-		arg.Name,
-		arg.OrgID,
-		arg.FolderID,
-		arg.CurrentVersion,
-	)
+	row := q.db.QueryRow(ctx, createFlagsGroup, arg.Name, arg.OrgID, arg.FolderID)
 	var i FlagsGroup
 	err := row.Scan(
 		&i.Uuid,
@@ -38,14 +30,13 @@ func (q *Queries) CreateFlagsGroup(ctx context.Context, arg CreateFlagsGroupPara
 		&i.Name,
 		&i.OrgID,
 		&i.FolderID,
-		&i.CurrentVersion,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
 const getFolderFlagsGroup = `-- name: GetFolderFlagsGroup :many
-SELECT uuid, id, name, org_id, folder_id, current_version, created_at
+SELECT uuid, id, name, org_id, folder_id, created_at
 FROM flags_groups
 WHERE folder_id = $1
 `
@@ -65,7 +56,6 @@ func (q *Queries) GetFolderFlagsGroup(ctx context.Context, folderID *int32) ([]F
 			&i.Name,
 			&i.OrgID,
 			&i.FolderID,
-			&i.CurrentVersion,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -79,7 +69,7 @@ func (q *Queries) GetFolderFlagsGroup(ctx context.Context, folderID *int32) ([]F
 }
 
 const getOrgFlagsGroup = `-- name: GetOrgFlagsGroup :many
-SELECT uuid, id, name, org_id, folder_id, current_version, created_at
+SELECT uuid, id, name, org_id, folder_id, created_at
 FROM flags_groups
 WHERE org_id = $1
 `
@@ -99,7 +89,6 @@ func (q *Queries) GetOrgFlagsGroup(ctx context.Context, orgID *int32) ([]FlagsGr
 			&i.Name,
 			&i.OrgID,
 			&i.FolderID,
-			&i.CurrentVersion,
 			&i.CreatedAt,
 		); err != nil {
 			return nil, err
@@ -110,20 +99,4 @@ func (q *Queries) GetOrgFlagsGroup(ctx context.Context, orgID *int32) ([]FlagsGr
 		return nil, err
 	}
 	return items, nil
-}
-
-const updateFlagsGroupCurrentVersion = `-- name: UpdateFlagsGroupCurrentVersion :exec
-UPDATE flags_groups
-SET current_version = $1
-WHERE uuid = $2
-`
-
-type UpdateFlagsGroupCurrentVersionParams struct {
-	CurrentVersion *uuid.UUID `json:"current_version"`
-	Uuid           string     `json:"uuid"`
-}
-
-func (q *Queries) UpdateFlagsGroupCurrentVersion(ctx context.Context, arg UpdateFlagsGroupCurrentVersionParams) error {
-	_, err := q.db.Exec(ctx, updateFlagsGroupCurrentVersion, arg.CurrentVersion, arg.Uuid)
-	return err
 }
