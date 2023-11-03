@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	cfg  *Config
+	Cfg  *Config
 	once sync.Once
 )
 
@@ -18,7 +18,7 @@ func Get() *Config {
 	readConfig()
 
 	once.Do(func() {
-		cfg = &Config{
+		Cfg = &Config{
 			Port:       viper.GetInt(keyPort),
 			Production: isProduction(viper.GetString(keyEnv)),
 			DB: &DB{
@@ -30,9 +30,10 @@ func Get() *Config {
 				ForceTLS: viper.GetBool(keyDBForceTLS),
 			},
 			JWTSecret: viper.GetString(keyJWTSecret),
+			PrivateKey: viper.GetString(keyPrivatekey),
 		}
 	})
-	return cfg
+	return Cfg
 }
 
 func readConfig() {

@@ -1,11 +1,9 @@
-DROP TABLE IF EXISTS organization_members;
-DROP TABLE IF EXISTS organizations;
-DROP TABLE IF EXISTS feature_flags;
-DROP TABLE IF EXISTS users;
-DROP TABLE IF EXISTS projects;
+DROP TABLE IF EXISTS flags_group_states;
+DROP TABLE IF EXISTS flags_groups;
+DROP TABLE IF EXISTS folders;
 DROP TABLE IF EXISTS environments;
-DROP TABLE IF EXISTS project_features;
-DROP TABLE IF EXISTS feature_states;
-DROP TYPE IF EXISTS user_role CASCADE;
-DROP TYPE IF EXISTS feature_flag_type CASCADE;
+DROP TABLE IF EXISTS api_keys;
+DROP TABLE IF EXISTS organization_members;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS organizations;
 DROP EXTENSION IF EXISTS "uuid-ossp";

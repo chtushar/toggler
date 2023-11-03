@@ -5,115 +5,76 @@
 package queries
 
 import (
-	"database/sql/driver"
-	"fmt"
 	"time"
 
 	"github.com/jackc/pgtype"
 )
 
-type FeatureFlagType string
-
-const (
-	FeatureFlagTypeBoolean FeatureFlagType = "boolean"
-)
-
-func (e *FeatureFlagType) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = FeatureFlagType(s)
-	case string:
-		*e = FeatureFlagType(s)
-	default:
-		return fmt.Errorf("unsupported scan type for FeatureFlagType: %T", src)
-	}
-	return nil
-}
-
-type NullFeatureFlagType struct {
-	FeatureFlagType FeatureFlagType `json:"feature_flag_type"`
-	Valid           bool            `json:"valid"` // Valid is true if FeatureFlagType is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullFeatureFlagType) Scan(value interface{}) error {
-	if value == nil {
-		ns.FeatureFlagType, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.FeatureFlagType.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullFeatureFlagType) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.FeatureFlagType), nil
+type ApiKey struct {
+	Uuid           string     `json:"uuid"`
+	ID             *int32     `json:"-"`
+	Name           string     `json:"name"`
+	ApiKey         string     `json:"api_key"`
+	AllowedDomains []string   `json:"allowed_domains"`
+	OrgID          *int32     `json:"-"`
+	UserID         *int32     `json:"-"`
+	CreatedAt      *time.Time `json:"created_at"`
 }
 
 type Environment struct {
-	ID        int32     `json:"id"`
-	Name      string    `json:"name"`
-	ProjectID int64     `json:"project_id"`
-	ApiKeys   []string  `json:"api_keys"`
-	Uuid      string    `json:"uuid"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Uuid      string     `json:"uuid"`
+	ID        *int32     `json:"-"`
+	Name      string     `json:"name"`
+	Color     *string    `json:"color"`
+	OrgID     *int32     `json:"-"`
+	CreatedAt *time.Time `json:"created_at"`
 }
 
-type FeatureFlag struct {
-	ID        int32           `json:"id"`
-	ProjectID int64           `json:"project_id"`
-	Uuid      string          `json:"uuid"`
-	FlagType  FeatureFlagType `json:"flag_type"`
-	Name      string          `json:"name"`
+type FlagsGroup struct {
+	Uuid      string     `json:"uuid"`
+	ID        *int32     `json:"-"`
+	Name      string     `json:"name"`
+	OrgID     *int32     `json:"-"`
+	FolderID  *int32     `json:"-"`
+	CreatedAt *time.Time `json:"created_at"`
 }
 
-type FeatureState struct {
-	ID            int32        `json:"id"`
+type FlagsGroupState struct {
 	Uuid          string       `json:"uuid"`
-	EnvironmentID int64        `json:"environment_id"`
-	FeatureFlagID int64        `json:"feature_flag_id"`
-	Enabled       bool         `json:"enabled"`
-	Value         pgtype.JSONB `json:"value"`
-	CreatedAt     time.Time    `json:"created_at"`
-	UpdatedAt     time.Time    `json:"updated_at"`
+	ID            *int32       `json:"-"`
+	FlagsGroupID  *int32       `json:"-"`
+	Json          pgtype.JSONB `json:"json"`
+	EnvironmentID *int32       `json:"-"`
+	CreatedAt     *time.Time   `json:"created_at"`
+}
+
+type Folder struct {
+	Uuid      string     `json:"uuid"`
+	ID        *int32     `json:"-"`
+	Name      string     `json:"name"`
+	OrgID     *int32     `json:"-"`
+	CreatedAt *time.Time `json:"created_at"`
 }
 
 type Organization struct {
-	ID        int32     `json:"id"`
-	Uuid      string    `json:"uuid"`
-	Name      string    `json:"name"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	Uuid      string     `json:"uuid"`
+	ID        *int32     `json:"-"`
+	Name      string     `json:"name"`
+	CreatedAt *time.Time `json:"created_at"`
 }
 
 type OrganizationMember struct {
-	UserID    int64     `json:"user_id"`
-	OrgID     int64     `json:"org_id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-}
-
-type Project struct {
-	ID        int32     `json:"id"`
-	Name      string    `json:"name"`
-	Uuid      string    `json:"uuid"`
-	OrgID     int64     `json:"org_id"`
-	OwnerID   int64     `json:"owner_id"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	UserID *int32 `json:"-"`
+	OrgID  *int32 `json:"-"`
 }
 
 type User struct {
-	ID            int32     `json:"id"`
-	Name          *string   `json:"name"`
-	Uuid          string    `json:"uuid"`
-	Password      *string   `json:"password"`
-	Email         *string   `json:"email"`
-	EmailVerified bool      `json:"email_verified"`
-	CreatedAt     time.Time `json:"created_at"`
-	UpdatedAt     time.Time `json:"updated_at"`
+	Uuid          string     `json:"uuid"`
+	ID            *int32     `json:"-"`
+	Name          string     `json:"name"`
+	Email         string     `json:"email"`
+	Password      string     `json:"-"`
+	EmailVerified *bool      `json:"email_verified"`
+	Active        *bool      `json:"active"`
+	CreatedAt     *time.Time `json:"created_at"`
 }

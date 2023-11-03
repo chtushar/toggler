@@ -9,210 +9,74 @@ import (
 	"context"
 )
 
-const checkIfUserExists = `-- name: CheckIfUserExists :one
-SELECT EXISTS (
-        SELECT 1
-        FROM users
-        WHERE email = $1
-    )
+const createActiveUser = `-- name: CreateActiveUser :one
+INSERT INTO users (name, email, password, email_verified, active)
+VALUES ($1, $2, $3, TRUE, TRUE)
+RETURNING uuid, id, name, email, password, email_verified, active, created_at
 `
 
-func (q *Queries) CheckIfUserExists(ctx context.Context, email *string) (bool, error) {
-	row := q.db.QueryRow(ctx, checkIfUserExists, email)
-	var exists bool
-	err := row.Scan(&exists)
-	return exists, err
+type CreateActiveUserParams struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"-"`
 }
 
-const countUsers = `-- name: CountUsers :one
-SELECT COUNT(*)
-FROM users
-`
-
-func (q *Queries) CountUsers(ctx context.Context) (int64, error) {
-	row := q.db.QueryRow(ctx, countUsers)
-	var count int64
-	err := row.Scan(&count)
-	return count, err
-}
-
-const createUser = `-- name: CreateUser :one
-INSERT INTO users(name, email, email_verified, password)
-VALUES ($1, $2, $3, $4)
-RETURNING id, name, uuid, password, email, email_verified, created_at, updated_at
-`
-
-type CreateUserParams struct {
-	Name          *string `json:"name"`
-	Email         *string `json:"email"`
-	EmailVerified bool    `json:"email_verified"`
-	Password      *string `json:"password"`
-}
-
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, createUser,
-		arg.Name,
-		arg.Email,
-		arg.EmailVerified,
-		arg.Password,
-	)
+func (q *Queries) CreateActiveUser(ctx context.Context, arg CreateActiveUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, createActiveUser, arg.Name, arg.Email, arg.Password)
 	var i User
 	err := row.Scan(
+		&i.Uuid,
 		&i.ID,
 		&i.Name,
-		&i.Uuid,
-		&i.Password,
 		&i.Email,
-		&i.EmailVerified,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const deleteUser = `-- name: DeleteUser :exec
-DELETE FROM users
-WHERE id = $1
-`
-
-func (q *Queries) DeleteUser(ctx context.Context, id int32) error {
-	_, err := q.db.Exec(ctx, deleteUser, id)
-	return err
-}
-
-const getAllUsers = `-- name: GetAllUsers :many
-SELECT id, name, uuid, password, email, email_verified, created_at, updated_at
-FROM users
-`
-
-func (q *Queries) GetAllUsers(ctx context.Context) ([]User, error) {
-	rows, err := q.db.Query(ctx, getAllUsers)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []User
-	for rows.Next() {
-		var i User
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Uuid,
-			&i.Password,
-			&i.Email,
-			&i.EmailVerified,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getUser = `-- name: GetUser :one
-SELECT id, name, uuid, password, email, email_verified, created_at, updated_at
-FROM users
-WHERE id = $1
-LIMIT 1
-`
-
-func (q *Queries) GetUser(ctx context.Context, id int32) (User, error) {
-	row := q.db.QueryRow(ctx, getUser, id)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Uuid,
 		&i.Password,
-		&i.Email,
 		&i.EmailVerified,
+		&i.Active,
 		&i.CreatedAt,
-		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
-SELECT id, name, uuid, password, email, email_verified, created_at, updated_at
+SELECT uuid, id, name, email, password, email_verified, active, created_at
 FROM users
 WHERE email = $1
 `
 
-func (q *Queries) GetUserByEmail(ctx context.Context, email *string) (User, error) {
+func (q *Queries) GetUserByEmail(ctx context.Context, email string) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByEmail, email)
 	var i User
 	err := row.Scan(
+		&i.Uuid,
 		&i.ID,
 		&i.Name,
-		&i.Uuid,
-		&i.Password,
 		&i.Email,
+		&i.Password,
 		&i.EmailVerified,
+		&i.Active,
 		&i.CreatedAt,
-		&i.UpdatedAt,
 	)
 	return i, err
 }
 
-const updateUser = `-- name: UpdateUser :one
-UPDATE users
-SET name = $1,
-    email_verified = $3
-WHERE email = $2
-RETURNING id, name, uuid, password, email, email_verified, created_at, updated_at
+const getUserByUUID = `-- name: GetUserByUUID :one
+SELECT uuid, id, name, email, password, email_verified, active, created_at
+FROM users
+WHERE uuid = $1
 `
 
-type UpdateUserParams struct {
-	Name          *string `json:"name"`
-	Email         *string `json:"email"`
-	EmailVerified bool    `json:"email_verified"`
-}
-
-func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
-	row := q.db.QueryRow(ctx, updateUser, arg.Name, arg.Email, arg.EmailVerified)
+func (q *Queries) GetUserByUUID(ctx context.Context, uuid string) (User, error) {
+	row := q.db.QueryRow(ctx, getUserByUUID, uuid)
 	var i User
 	err := row.Scan(
+		&i.Uuid,
 		&i.ID,
 		&i.Name,
-		&i.Uuid,
-		&i.Password,
 		&i.Email,
-		&i.EmailVerified,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
-}
-
-const updateUserPassword = `-- name: UpdateUserPassword :one
-UPDATE users
-SET password = $1
-WHERE id = $2
-RETURNING id, name, uuid, password, email, email_verified, created_at, updated_at
-`
-
-type UpdateUserPasswordParams struct {
-	Password *string `json:"password"`
-	ID       int32   `json:"id"`
-}
-
-func (q *Queries) UpdateUserPassword(ctx context.Context, arg UpdateUserPasswordParams) (User, error) {
-	row := q.db.QueryRow(ctx, updateUserPassword, arg.Password, arg.ID)
-	var i User
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.Uuid,
 		&i.Password,
-		&i.Email,
 		&i.EmailVerified,
+		&i.Active,
 		&i.CreatedAt,
-		&i.UpdatedAt,
 	)
 	return i, err
 }

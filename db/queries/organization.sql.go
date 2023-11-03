@@ -13,11 +13,12 @@ import (
 const addOrganizationMember = `-- name: AddOrganizationMember :exec
 INSERT INTO organization_members(user_id, org_id)
 VALUES ($1, $2)
+RETURNING user_id, org_id
 `
 
 type AddOrganizationMemberParams struct {
-	UserID int64 `json:"user_id"`
-	OrgID  int64 `json:"org_id"`
+	UserID *int32 `json:"-"`
+	OrgID  *int32 `json:"-"`
 }
 
 func (q *Queries) AddOrganizationMember(ctx context.Context, arg AddOrganizationMemberParams) error {
@@ -28,133 +29,65 @@ func (q *Queries) AddOrganizationMember(ctx context.Context, arg AddOrganization
 const createOrganization = `-- name: CreateOrganization :one
 INSERT INTO organizations(name)
 VALUES ($1)
-RETURNING id, uuid, name, created_at, updated_at
+RETURNING uuid, id, name, created_at
 `
 
 func (q *Queries) CreateOrganization(ctx context.Context, name string) (Organization, error) {
 	row := q.db.QueryRow(ctx, createOrganization, name)
 	var i Organization
 	err := row.Scan(
-		&i.ID,
 		&i.Uuid,
+		&i.ID,
 		&i.Name,
 		&i.CreatedAt,
-		&i.UpdatedAt,
 	)
 	return i, err
 }
 
-const doesUserBelongToOrg = `-- name: DoesUserBelongToOrg :one
-SELECT EXISTS (
-        SELECT 1
-        FROM organization_members
-        WHERE user_id = $1
-            AND org_id = $2
-    ) AS user_belongs_to_organization
-`
-
-type DoesUserBelongToOrgParams struct {
-	UserID int64 `json:"user_id"`
-	OrgID  int64 `json:"org_id"`
-}
-
-func (q *Queries) DoesUserBelongToOrg(ctx context.Context, arg DoesUserBelongToOrgParams) (bool, error) {
-	row := q.db.QueryRow(ctx, doesUserBelongToOrg, arg.UserID, arg.OrgID)
-	var user_belongs_to_organization bool
-	err := row.Scan(&user_belongs_to_organization)
-	return user_belongs_to_organization, err
-}
-
-const getOrganization = `-- name: GetOrganization :one
-SELECT id, uuid, name, created_at, updated_at
+const getOrganizationByUUID = `-- name: GetOrganizationByUUID :one
+SELECT uuid, id, name, created_at
 FROM organizations
-WHERE id = $1
+WHERE uuid = $1
 `
 
-func (q *Queries) GetOrganization(ctx context.Context, id int32) (Organization, error) {
-	row := q.db.QueryRow(ctx, getOrganization, id)
+func (q *Queries) GetOrganizationByUUID(ctx context.Context, uuid string) (Organization, error) {
+	row := q.db.QueryRow(ctx, getOrganizationByUUID, uuid)
 	var i Organization
 	err := row.Scan(
-		&i.ID,
 		&i.Uuid,
+		&i.ID,
 		&i.Name,
 		&i.CreatedAt,
-		&i.UpdatedAt,
 	)
 	return i, err
-}
-
-const getOrganizationMembers = `-- name: GetOrganizationMembers :many
-SELECT u.id AS id,
-    u.name AS name,
-    u.uuid AS uuid,
-    u.email AS email,
-    u.email_verified AS email_verified,
-    u.created_at AS created_at
-FROM organization_members om
-    JOIN users u ON om.user_id = u.id
-WHERE om.org_id = $1
-`
-
-type GetOrganizationMembersRow struct {
-	ID            int32     `json:"id"`
-	Name          *string   `json:"name"`
-	Uuid          string    `json:"uuid"`
-	Email         *string   `json:"email"`
-	EmailVerified bool      `json:"email_verified"`
-	CreatedAt     time.Time `json:"created_at"`
-}
-
-func (q *Queries) GetOrganizationMembers(ctx context.Context, orgID int64) ([]GetOrganizationMembersRow, error) {
-	rows, err := q.db.Query(ctx, getOrganizationMembers, orgID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetOrganizationMembersRow
-	for rows.Next() {
-		var i GetOrganizationMembersRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.Name,
-			&i.Uuid,
-			&i.Email,
-			&i.EmailVerified,
-			&i.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const getUserOrganizations = `-- name: GetUserOrganizations :many
-SELECT o.id, o.uuid, o.name, o.created_at, o.updated_at
-FROM organizations o
-    INNER JOIN organization_members om ON om.org_id = o.id
-WHERE om.user_id = $1
+SELECT o.uuid AS uuid,
+    o.name AS name,
+    o.created_at AS created_at
+FROM users u
+    JOIN organization_members om ON u.id = om.user_id
+    JOIN organizations o ON om.org_id = o.id
+WHERE u.uuid = $1
 `
 
-func (q *Queries) GetUserOrganizations(ctx context.Context, userID int64) ([]Organization, error) {
-	rows, err := q.db.Query(ctx, getUserOrganizations, userID)
+type GetUserOrganizationsRow struct {
+	Uuid      string     `json:"uuid"`
+	Name      string     `json:"name"`
+	CreatedAt *time.Time `json:"created_at"`
+}
+
+func (q *Queries) GetUserOrganizations(ctx context.Context, uuid string) ([]GetUserOrganizationsRow, error) {
+	rows, err := q.db.Query(ctx, getUserOrganizations, uuid)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Organization
+	var items []GetUserOrganizationsRow
 	for rows.Next() {
-		var i Organization
-		if err := rows.Scan(
-			&i.ID,
-			&i.Uuid,
-			&i.Name,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-		); err != nil {
+		var i GetUserOrganizationsRow
+		if err := rows.Scan(&i.Uuid, &i.Name, &i.CreatedAt); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -163,29 +96,4 @@ func (q *Queries) GetUserOrganizations(ctx context.Context, userID int64) ([]Org
 		return nil, err
 	}
 	return items, nil
-}
-
-const updateOrganization = `-- name: UpdateOrganization :one
-UPDATE organizations
-set name = $2
-WHERE id = $1
-RETURNING id, uuid, name, created_at, updated_at
-`
-
-type UpdateOrganizationParams struct {
-	ID   int32  `json:"id"`
-	Name string `json:"name"`
-}
-
-func (q *Queries) UpdateOrganization(ctx context.Context, arg UpdateOrganizationParams) (Organization, error) {
-	row := q.db.QueryRow(ctx, updateOrganization, arg.ID, arg.Name)
-	var i Organization
-	err := row.Scan(
-		&i.ID,
-		&i.Uuid,
-		&i.Name,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
 }

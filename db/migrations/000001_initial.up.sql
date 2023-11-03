@@ -1,63 +1,80 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-DROP TYPE IF EXISTS feature_flag_type CASCADE;
-CREATE TYPE feature_flag_type AS ENUM ('boolean');
-CREATE TABLE IF NOT EXISTS organizations (
-    id SERIAL PRIMARY KEY,
-    uuid UUID UNIQUE DEFAULT gen_random_uuid() NOT NULL,
+-- Organization table
+CREATE TABLE organizations (
+    uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id SERIAL UNIQUE,
     name VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT NOW()
 );
-CREATE TABLE IF NOT EXISTS organization_members (
-    user_id BIGINT NOT NULL,
-    org_id BIGINT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (user_id, org_id)
-);
-CREATE TABLE IF NOT EXISTS projects (
-    id SERIAL PRIMARY KEY,
+-- User table
+CREATE TABLE users (
+    uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id SERIAL UNIQUE,
     name VARCHAR(255) NOT NULL,
-    uuid UUID UNIQUE DEFAULT gen_random_uuid() NOT NULL,
-    org_id BIGINT NOT NULL,
-    owner_id BIGINT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    email_verified BOOLEAN DEFAULT FALSE,
+    active BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW()
 );
-CREATE TABLE IF NOT EXISTS users (
-    id SERIAL PRIMARY KEY,
-    name VARCHAR(255),
-    uuid UUID UNIQUE DEFAULT gen_random_uuid() NOT NULL,
-    password VARCHAR(255),
-    email VARCHAR(255) UNIQUE,
-    email_verified BOOLEAN NOT NULL DEFAULT false,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+-- Organization Members table
+CREATE TABLE organization_members (
+    user_id INT REFERENCES users(id),
+    org_id INT REFERENCES organizations(id),
+    UNIQUE(user_id, org_id)
 );
-CREATE TABLE IF NOT EXISTS environments (
-    id SERIAL PRIMARY KEY,
+-- API Keys table
+CREATE TABLE api_keys (
+    uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id SERIAL UNIQUE,
     name VARCHAR(255) NOT NULL,
-    project_id BIGINT NOT NULL,
-    api_keys VARCHAR [] NOT NULL,
-    uuid UUID UNIQUE DEFAULT gen_random_uuid() NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    api_key TEXT NOT NULL,
+    allowed_domains VARCHAR [] NOT NULL,
+    org_id INT REFERENCES organizations(id),
+    user_id INT REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT NOW()
 );
-CREATE TABLE IF NOT EXISTS feature_flags (
-    id SERIAL PRIMARY KEY,
-    project_id BIGINT NOT NULL,
-    uuid UUID UNIQUE DEFAULT gen_random_uuid() NOT NULL,
-    flag_type feature_flag_type NOT NULL DEFAULT 'boolean'::feature_flag_type,
-    name VARCHAR(255) NOT NULL
+-- Folder table
+CREATE TABLE folders (
+    uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id SERIAL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    org_id INT REFERENCES organizations(id),
+    created_at TIMESTAMP DEFAULT NOW()
 );
-CREATE TABLE IF NOT EXISTS feature_states (
-    id SERIAL PRIMARY KEY,
-    uuid UUID UNIQUE DEFAULT gen_random_uuid() NOT NULL,
-    environment_id BIGINT NOT NULL,
-    feature_flag_id BIGINT NOT NULL,
-    enabled BOOLEAN NOT NULL DEFAULT false,
-    value JSONB NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE (environment_id, feature_flag_id, id)
+-- Environment table
+CREATE TABLE environments (
+    uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id SERIAL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    color CHAR(7) DEFAULT NULL,
+    org_id INT REFERENCES organizations(id),
+    created_at TIMESTAMP DEFAULT NOW()
+);
+-- Flags Group table
+CREATE TABLE flags_groups (
+    uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id SERIAL UNIQUE,
+    name VARCHAR(255) NOT NULL,
+    org_id INT REFERENCES organizations(id),
+    folder_id INT REFERENCES folders(id),
+    created_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(
+        uuid,
+        org_id,
+        folder_id
+    )
+);
+-- Flags Group State table
+CREATE TABLE flags_group_states (
+    uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    id SERIAL UNIQUE,
+    flags_group_id INT REFERENCES flags_groups(id),
+    json JSONB DEFAULT '{}',
+    environment_id INT REFERENCES environments(id),
+    created_at TIMESTAMP DEFAULT NOW(),
+    UNIQUE(
+        flags_group_id,
+        environment_id
+    )
 );

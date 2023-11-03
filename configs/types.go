@@ -15,5 +15,6 @@ type (
 		Production bool
 		DB         *DB
 		JWTSecret  string
+		PrivateKey string
 	}
 )

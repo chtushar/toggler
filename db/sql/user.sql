@@ -1,39 +1,12 @@
--- name: CreateUser :one
-INSERT INTO users(name, email, email_verified, password)
-VALUES ($1, $2, $3, $4)
+-- name: CreateActiveUser :one
+INSERT INTO users (name, email, password, email_verified, active)
+VALUES ($1, $2, $3, TRUE, TRUE)
 RETURNING *;
--- name: CountUsers :one
-SELECT COUNT(*)
-FROM users;
--- name: GetUser :one
-SELECT *
-FROM users
-WHERE id = $1
-LIMIT 1;
--- name: GetAllUsers :many
-SELECT *
-FROM users;
 -- name: GetUserByEmail :one
 SELECT *
 FROM users
 WHERE email = $1;
--- name: UpdateUser :one
-UPDATE users
-SET name = $1,
-    email_verified = $3
-WHERE email = $2
-RETURNING *;
--- name: UpdateUserPassword :one
-UPDATE users
-SET password = $1
-WHERE id = $2
-RETURNING *;
--- name: DeleteUser :exec
-DELETE FROM users
-WHERE id = $1;
--- name: CheckIfUserExists :one
-SELECT EXISTS (
-        SELECT 1
-        FROM users
-        WHERE email = $1
-    );
+-- name: GetUserByUUID :one
+SELECT *
+FROM users
+WHERE uuid = $1;

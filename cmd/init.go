@@ -7,19 +7,9 @@ import (
 	"os"
 
 	"github.com/chtushar/toggler/configs"
-	"github.com/chtushar/toggler/db/queries"
 	"github.com/jackc/pgx/v4/pgxpool"
-	"github.com/labstack/echo/v4"
 	_ "github.com/lib/pq"
 )
-
-type App struct {
-	port   int
-	jwt    string
-	dbConn *pgxpool.Pool
-	q      *queries.Queries
-	log    *log.Logger
-}
 
 var (
 	dbConn *pgxpool.Pool
@@ -82,22 +72,4 @@ func initDB() *pgxpool.Pool {
 	}
 
 	return pool
-}
-
-func initHTTPServer(app *App) *echo.Echo {
-	srv := echo.New()
-
-	// Passing the app instance to all the handlers
-	// Helpful for using the database connection and logger
-	srv.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			c.Set("app", app)
-			return next(c)
-		}
-	})
-
-	// Initialize all the API handlers
-	initHTTPHandler(srv, app)
-	srv.Logger.Fatal(srv.Start(fmt.Sprintf(":%d", app.port)))
-	return srv
 }

@@ -4,35 +4,17 @@ VALUES ($1)
 RETURNING *;
 -- name: AddOrganizationMember :exec
 INSERT INTO organization_members(user_id, org_id)
-VALUES ($1, $2);
--- name: GetOrganization :one
+VALUES ($1, $2)
+RETURNING *;
+-- name: GetOrganizationByUUID :one
 SELECT *
 FROM organizations
-WHERE id = $1;
+WHERE uuid = $1;
 -- name: GetUserOrganizations :many
-SELECT o.*
-FROM organizations o
-    INNER JOIN organization_members om ON om.org_id = o.id
-WHERE om.user_id = $1;
--- name: DoesUserBelongToOrg :one
-SELECT EXISTS (
-        SELECT 1
-        FROM organization_members
-        WHERE user_id = $1
-            AND org_id = $2
-    ) AS user_belongs_to_organization;
--- name: UpdateOrganization :one
-UPDATE organizations
-set name = $2
-WHERE id = $1
-RETURNING *;
--- name: GetOrganizationMembers :many
-SELECT u.id AS id,
-    u.name AS name,
-    u.uuid AS uuid,
-    u.email AS email,
-    u.email_verified AS email_verified,
-    u.created_at AS created_at
-FROM organization_members om
-    JOIN users u ON om.user_id = u.id
-WHERE om.org_id = $1;
+SELECT o.uuid AS uuid,
+    o.name AS name,
+    o.created_at AS created_at
+FROM users u
+    JOIN organization_members om ON u.id = om.user_id
+    JOIN organizations o ON om.org_id = o.id
+WHERE u.uuid = $1;

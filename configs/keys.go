@@ -10,4 +10,5 @@ const (
 	keyDBName     = "db.name"
 	keyDBForceTLS = "db.forceTLS"
 	keyJWTSecret  = "jwt-secret"
+	keyPrivatekey = "private-key"
 )

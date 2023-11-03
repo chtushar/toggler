@@ -9,41 +9,30 @@ import (
 	"context"
 )
 
-const createEnvironment = `-- name: CreateEnvironment :one
-INSERT INTO environments(name, project_id, api_keys)
+const createEnvironment = `-- name: CreateEnvironment :exec
+INSERT INTO environments(name, color, org_id)
 VALUES ($1, $2, $3)
-RETURNING id, name, project_id, api_keys, uuid, created_at, updated_at
 `
 
 type CreateEnvironmentParams struct {
-	Name      string   `json:"name"`
-	ProjectID int64    `json:"project_id"`
-	ApiKeys   []string `json:"api_keys"`
+	Name  string  `json:"name"`
+	Color *string `json:"color"`
+	OrgID *int32  `json:"-"`
 }
 
-func (q *Queries) CreateEnvironment(ctx context.Context, arg CreateEnvironmentParams) (Environment, error) {
-	row := q.db.QueryRow(ctx, createEnvironment, arg.Name, arg.ProjectID, arg.ApiKeys)
-	var i Environment
-	err := row.Scan(
-		&i.ID,
-		&i.Name,
-		&i.ProjectID,
-		&i.ApiKeys,
-		&i.Uuid,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-	)
-	return i, err
+func (q *Queries) CreateEnvironment(ctx context.Context, arg CreateEnvironmentParams) error {
+	_, err := q.db.Exec(ctx, createEnvironment, arg.Name, arg.Color, arg.OrgID)
+	return err
 }
 
-const getProjectEnvironments = `-- name: GetProjectEnvironments :many
-SELECT id, name, project_id, api_keys, uuid, created_at, updated_at
+const getOrganizationEnvironments = `-- name: GetOrganizationEnvironments :many
+SELECT uuid, id, name, color, org_id, created_at
 FROM environments
-WHERE project_id = $1
+WHERE org_id = $1
 `
 
-func (q *Queries) GetProjectEnvironments(ctx context.Context, projectID int64) ([]Environment, error) {
-	rows, err := q.db.Query(ctx, getProjectEnvironments, projectID)
+func (q *Queries) GetOrganizationEnvironments(ctx context.Context, orgID *int32) ([]Environment, error) {
+	rows, err := q.db.Query(ctx, getOrganizationEnvironments, orgID)
 	if err != nil {
 		return nil, err
 	}
@@ -52,13 +41,12 @@ func (q *Queries) GetProjectEnvironments(ctx context.Context, projectID int64) (
 	for rows.Next() {
 		var i Environment
 		if err := rows.Scan(
+			&i.Uuid,
 			&i.ID,
 			&i.Name,
-			&i.ProjectID,
-			&i.ApiKeys,
-			&i.Uuid,
+			&i.Color,
+			&i.OrgID,
 			&i.CreatedAt,
-			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -68,4 +56,36 @@ func (q *Queries) GetProjectEnvironments(ctx context.Context, projectID int64) (
 		return nil, err
 	}
 	return items, nil
+}
+
+const updateEnvironmentColor = `-- name: UpdateEnvironmentColor :exec
+UPDATE environments
+SET color = $2
+WHERE uuid = $1
+`
+
+type UpdateEnvironmentColorParams struct {
+	Uuid  string  `json:"uuid"`
+	Color *string `json:"color"`
+}
+
+func (q *Queries) UpdateEnvironmentColor(ctx context.Context, arg UpdateEnvironmentColorParams) error {
+	_, err := q.db.Exec(ctx, updateEnvironmentColor, arg.Uuid, arg.Color)
+	return err
+}
+
+const updateEnvironmentName = `-- name: UpdateEnvironmentName :exec
+UPDATE environments
+SET name = $2
+WHERE uuid = $1
+`
+
+type UpdateEnvironmentNameParams struct {
+	Uuid string `json:"uuid"`
+	Name string `json:"name"`
+}
+
+func (q *Queries) UpdateEnvironmentName(ctx context.Context, arg UpdateEnvironmentNameParams) error {
+	_, err := q.db.Exec(ctx, updateEnvironmentName, arg.Uuid, arg.Name)
+	return err
 }
