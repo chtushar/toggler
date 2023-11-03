@@ -13,3 +13,5 @@ WHERE uuid = $1;
 UPDATE environments
 SET color = $2
 WHERE uuid = $1;
+-- name: GetEnvironmentByUUID :one
+SELECT * FROM environments WHERE uuid = $1;

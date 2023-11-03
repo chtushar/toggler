@@ -10,3 +10,6 @@ WHERE folder_id = $1;
 SELECT *
 FROM flags_groups
 WHERE org_id = $1;
+-- name: GetFlagsGroupByUUID :one
+SELECT * FROM flags_groups
+WHERE uuid = $1;

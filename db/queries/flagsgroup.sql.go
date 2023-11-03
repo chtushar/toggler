@@ -35,6 +35,25 @@ func (q *Queries) CreateFlagsGroup(ctx context.Context, arg CreateFlagsGroupPara
 	return i, err
 }
 
+const getFlagsGroupByUUID = `-- name: GetFlagsGroupByUUID :one
+SELECT uuid, id, name, org_id, folder_id, created_at FROM flags_groups
+WHERE uuid = $1
+`
+
+func (q *Queries) GetFlagsGroupByUUID(ctx context.Context, uuid string) (FlagsGroup, error) {
+	row := q.db.QueryRow(ctx, getFlagsGroupByUUID, uuid)
+	var i FlagsGroup
+	err := row.Scan(
+		&i.Uuid,
+		&i.ID,
+		&i.Name,
+		&i.OrgID,
+		&i.FolderID,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const getFolderFlagsGroup = `-- name: GetFolderFlagsGroup :many
 SELECT uuid, id, name, org_id, folder_id, created_at
 FROM flags_groups

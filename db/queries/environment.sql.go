@@ -25,6 +25,24 @@ func (q *Queries) CreateEnvironment(ctx context.Context, arg CreateEnvironmentPa
 	return err
 }
 
+const getEnvironmentByUUID = `-- name: GetEnvironmentByUUID :one
+SELECT uuid, id, name, color, org_id, created_at FROM environments WHERE uuid = $1
+`
+
+func (q *Queries) GetEnvironmentByUUID(ctx context.Context, uuid string) (Environment, error) {
+	row := q.db.QueryRow(ctx, getEnvironmentByUUID, uuid)
+	var i Environment
+	err := row.Scan(
+		&i.Uuid,
+		&i.ID,
+		&i.Name,
+		&i.Color,
+		&i.OrgID,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
 const getOrganizationEnvironments = `-- name: GetOrganizationEnvironments :many
 SELECT uuid, id, name, color, org_id, created_at
 FROM environments

@@ -37,14 +37,19 @@ func (q *Queries) CreateFlagsGroupState(ctx context.Context, arg CreateFlagsGrou
 	return i, err
 }
 
-const getFlagsGroupStateByID = `-- name: GetFlagsGroupStateByID :one
+const getFlagsGroupState = `-- name: GetFlagsGroupState :one
 SELECT uuid, id, flags_group_id, json, environment_id, created_at
 FROM flags_group_states
-WHERE id = $1
+WHERE flags_group_id = $1 AND environment_id = $2
 `
 
-func (q *Queries) GetFlagsGroupStateByID(ctx context.Context, id *int32) (FlagsGroupState, error) {
-	row := q.db.QueryRow(ctx, getFlagsGroupStateByID, id)
+type GetFlagsGroupStateParams struct {
+	FlagsGroupID  *int32 `json:"-"`
+	EnvironmentID *int32 `json:"-"`
+}
+
+func (q *Queries) GetFlagsGroupState(ctx context.Context, arg GetFlagsGroupStateParams) (FlagsGroupState, error) {
+	row := q.db.QueryRow(ctx, getFlagsGroupState, arg.FlagsGroupID, arg.EnvironmentID)
 	var i FlagsGroupState
 	err := row.Scan(
 		&i.Uuid,
@@ -65,6 +70,33 @@ WHERE uuid = $1
 
 func (q *Queries) GetFlagsGroupStateByUUID(ctx context.Context, uuid string) (FlagsGroupState, error) {
 	row := q.db.QueryRow(ctx, getFlagsGroupStateByUUID, uuid)
+	var i FlagsGroupState
+	err := row.Scan(
+		&i.Uuid,
+		&i.ID,
+		&i.FlagsGroupID,
+		&i.Json,
+		&i.EnvironmentID,
+		&i.CreatedAt,
+	)
+	return i, err
+}
+
+const updateFlagGroupsStateJSON = `-- name: UpdateFlagGroupsStateJSON :one
+UPDATE flags_group_states
+SET json = $1
+WHERE flags_group_id = $2 AND environment_id = $3
+RETURNING uuid, id, flags_group_id, json, environment_id, created_at
+`
+
+type UpdateFlagGroupsStateJSONParams struct {
+	Json          pgtype.JSONB `json:"json"`
+	FlagsGroupID  *int32       `json:"-"`
+	EnvironmentID *int32       `json:"-"`
+}
+
+func (q *Queries) UpdateFlagGroupsStateJSON(ctx context.Context, arg UpdateFlagGroupsStateJSONParams) (FlagsGroupState, error) {
+	row := q.db.QueryRow(ctx, updateFlagGroupsStateJSON, arg.Json, arg.FlagsGroupID, arg.EnvironmentID)
 	var i FlagsGroupState
 	err := row.Scan(
 		&i.Uuid,

@@ -13,9 +13,9 @@ import (
 
 func handleCreateFolder(c echo.Context) error {
 	var (
-		app = c.Get("app").(*app.App)
+		app     = c.Get("app").(*app.App)
 		orgUUID = c.Param("orgUUID")
-		req = &struct{
+		req     = &struct {
 			Name string `json:"name" validate:"required,min=3"`
 		}{}
 	)
@@ -44,7 +44,7 @@ func handleCreateFolder(c echo.Context) error {
 		}
 
 		folder, err := q.CreateFolder(c.Request().Context(), queries.CreateFolderParams{
-			Name: req.Name,
+			Name:  req.Name,
 			OrgID: org.ID,
 		})
 
@@ -62,15 +62,15 @@ func handleCreateFolder(c echo.Context) error {
 
 	c.JSON(http.StatusOK, responses.ResponseType{
 		Success: true,
-		Data: folder,
-		Error: nil,
+		Data:    folder,
+		Error:   nil,
 	})
 	return nil
 }
 
 func handleGetAllFolders(c echo.Context) error {
 	var (
-		app = c.Get("app").(*app.App)
+		app     = c.Get("app").(*app.App)
 		orgUUID = c.Param("orgUUID")
 	)
 
@@ -97,17 +97,17 @@ func handleGetAllFolders(c echo.Context) error {
 
 	c.JSON(http.StatusOK, responses.ResponseType{
 		Success: true,
-		Data: folders,
-		Error: nil,
+		Data:    folders,
+		Error:   nil,
 	})
 	return nil
 }
 
 func handleUpdateFolder(c echo.Context) error {
 	var (
-		app = c.Get("app").(*app.App)
+		app        = c.Get("app").(*app.App)
 		folderUUID = c.Param("folderUUID")
-		req = &struct{
+		req        = &struct {
 			Name string `json:"name" validate:"omitempty,min=3"`
 		}{}
 	)
@@ -141,7 +141,7 @@ func handleUpdateFolder(c echo.Context) error {
 				return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
 			}
 		}
-		
+
 		ok := true
 		return &ok, nil
 	})
@@ -152,12 +152,51 @@ func handleUpdateFolder(c echo.Context) error {
 
 	c.JSON(http.StatusOK, responses.ResponseType{
 		Success: true,
-		Data: "Folder updated",
-		Error: nil,
+		Data:    "Folder updated",
+		Error:   nil,
 	})
 	return nil
 }
 
 func handleGetAllFlagsGroups(c echo.Context) error {
+	var (
+		app        = c.Get("app").(*app.App)
+		folderUUID = c.Param("folderUUID")
+	)
+
+	ok, err := utils.IsValidUUID(folderUUID)
+
+	if !ok {
+		app.Log.Println("Failed to parse folder uuid", err)
+		return echo.NewHTTPError(http.StatusBadRequest, responses.BadRequestResponse)
+	}
+
+	fgs, err := db.WithDBTransaction[[]queries.FlagsGroup](app, c.Request().Context(), func(q *queries.Queries) (*[]queries.FlagsGroup, error) {
+		folder, err := q.GetFolderByUUID(c.Request().Context(), folderUUID)
+
+		if err != nil {
+			app.Log.Println(" Couldn't get the folder", err)
+			return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
+		}
+
+		fgs, err := q.GetFolderFlagsGroup(c.Request().Context(), folder.ID)
+
+		if err != nil {
+			app.Log.Println("Couldn't get the folder flags group", err)
+			return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
+		}
+
+		return &fgs, nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	c.JSON(http.StatusOK, responses.ResponseType{
+		Success: true,
+		Data:    fgs,
+		Error:   nil,
+	})
 	return nil
 }
