@@ -7,6 +7,7 @@ import (
 	"github.com/chtushar/toggler/api/auth"
 	"github.com/chtushar/toggler/api/environment"
 	"github.com/chtushar/toggler/api/flagsgroup"
+	"github.com/chtushar/toggler/api/flagsgroupstate"
 	"github.com/chtushar/toggler/api/folder"
 	"github.com/chtushar/toggler/api/organization"
 	"github.com/chtushar/toggler/api/responses"
@@ -18,21 +19,21 @@ import (
 )
 
 func initHTTPHandler(e *echo.Echo) {
-
+	e.Pre(middleware.AddTrailingSlash())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     []string{"http://localhost:5173", "http://localhost:9091"},
 		AllowCredentials: true,
 	}))
-	
+
 	// Middlewares
 	// Serve static files
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 		Filesystem: dashboard.BuildHTTPFS(),
 		HTML5:      true,
 	}))
-	
+
 	v1 := e.Group("/api/v1")
-	
+
 	// // Echo group for protected routes
 	v1_protected := v1.Group("")
 	v1_protected.Use(echojwt.WithConfig(echojwt.Config{
@@ -51,4 +52,5 @@ func initHTTPHandler(e *echo.Echo) {
 	folder.FolderRoutes(org_access)
 	apikeys.APIKeysRoutes(org_access)
 	flagsgroup.FlagGroupsRoutes(org_access)
+	flagsgroupstate.FlagsGroupStateRoutes(org_access)
 }

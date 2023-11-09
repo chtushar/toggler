@@ -8,8 +8,8 @@ import (
 	"github.com/chtushar/toggler/db"
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/chtushar/toggler/utils"
+	"github.com/jackc/pgtype"
 	"github.com/labstack/echo/v4"
-	"golang.org/x/tools/go/analysis/passes/ifaceassert"
 )
 
 func handleGetFlagsGroupState(c echo.Context) error {
@@ -18,7 +18,6 @@ func handleGetFlagsGroupState(c echo.Context) error {
 		fgUUID  = c.Param("fgUUID")
 		envUUID = c.QueryParam("env")
 	)
-
 	ok, err := utils.IsValidUUID(fgUUID)
 
 	if !ok {
@@ -102,7 +101,6 @@ func handleUpdateFlagsGroupStateJSON(c echo.Context) error {
 
 	err = jsonbValue.Set(req.Value)
 	if err != nil {
-		fmt.Println("Error:", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
 	}
 
