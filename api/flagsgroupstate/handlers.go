@@ -78,7 +78,7 @@ func handleUpdateFlagsGroupStateJSON(c echo.Context) error {
 		fgUUID = c.Param("fgUUID")
 		req    = &struct {
 			EnvUUID string `json:"env_uuid" validate:"uuid4,required"`
-			Value   string `json:"value" validate:"json"`
+			Value   interface{} `json:"value"`
 		}{}
 	)
 
@@ -90,10 +90,12 @@ func handleUpdateFlagsGroupStateJSON(c echo.Context) error {
 	}
 
 	if err := c.Bind(req); err != nil {
+		app.Log.Println(err)
 		return echo.NewHTTPError(http.StatusBadRequest, responses.BadRequestResponse)
 	}
-
+	
 	if err := c.Validate(req); err != nil {
+		app.Log.Println("Failed to validate request body", err)
 		return err
 	}
 
