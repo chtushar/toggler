@@ -70,7 +70,7 @@ CREATE TABLE flags_group_states (
     uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     id SERIAL UNIQUE,
     flags_group_id INT REFERENCES flags_groups(id),
-    json JSONB DEFAULT '{}',
+    js TEXT DEFAULT NULL,
     environment_id INT REFERENCES environments(id),
     created_at TIMESTAMP DEFAULT NOW(),
     UNIQUE(

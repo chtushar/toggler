@@ -6,5 +6,5 @@ func FlagsGroupStateRoutes(g *echo.Group) {
 	fgs := g.Group("/:orgUUID/flagsgroup/:fgUUID/flagsgroupstate")
 
 	fgs.GET("/", handleGetFlagsGroupState)
-	fgs.POST("/update_json/", handleUpdateFlagsGroupStateJSON)
+	fgs.POST("/update_js/", handleUpdateFlagsGroupStateJS)
 }

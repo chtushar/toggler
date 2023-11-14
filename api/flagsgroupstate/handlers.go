@@ -8,7 +8,6 @@ import (
 	"github.com/chtushar/toggler/db"
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/chtushar/toggler/utils"
-	"github.com/jackc/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
@@ -72,13 +71,13 @@ func handleGetFlagsGroupState(c echo.Context) error {
 	return nil
 }
 
-func handleUpdateFlagsGroupStateJSON(c echo.Context) error {
+func handleUpdateFlagsGroupStateJS(c echo.Context) error {
 	var (
 		app    = c.Get("app").(*app.App)
 		fgUUID = c.Param("fgUUID")
 		req    = &struct {
 			EnvUUID string `json:"env_uuid" validate:"uuid4,required"`
-			Value   interface{} `json:"value"`
+			Value   string `json:"value"`
 		}{}
 	)
 
@@ -99,13 +98,6 @@ func handleUpdateFlagsGroupStateJSON(c echo.Context) error {
 		return err
 	}
 
-	var jsonbValue pgtype.JSONB
-
-	err = jsonbValue.Set(req.Value)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
-	}
-
 	fgs, err := db.WithDBTransaction[queries.FlagsGroupState](app, c.Request().Context(), func(q *queries.Queries) (*queries.FlagsGroupState, error) {
 		env, err := q.GetEnvironmentByUUID(c.Request().Context(), req.EnvUUID)
 
@@ -121,14 +113,14 @@ func handleUpdateFlagsGroupStateJSON(c echo.Context) error {
 			return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
 		}
 
-		fgs, err := q.UpdateFlagGroupsStateJSON(c.Request().Context(), queries.UpdateFlagGroupsStateJSONParams{
-			Json:          jsonbValue,
+		fgs, err := q.UpdateFlagGroupsStateJS(c.Request().Context(), queries.UpdateFlagGroupsStateJSParams{
 			FlagsGroupID:  fg.ID,
 			EnvironmentID: env.ID,
+			Js: &req.Value,
 		})
 
 		if err != nil {
-			app.Log.Println("Couldn't set the flag groups state json", err)
+			app.Log.Println("Couldn't set the flag groups state js code", err)
 			return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
 		}
 

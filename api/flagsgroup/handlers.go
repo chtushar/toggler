@@ -1,7 +1,6 @@
 package flagsgroup
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/chtushar/toggler/api/app"
@@ -9,7 +8,6 @@ import (
 	"github.com/chtushar/toggler/db"
 	"github.com/chtushar/toggler/db/queries"
 	"github.com/chtushar/toggler/utils"
-	"github.com/jackc/pgtype"
 	"github.com/labstack/echo/v4"
 )
 
@@ -72,20 +70,10 @@ func handleCreateFlagsGroup(c echo.Context) error {
 			return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
 		}
 
-		var jsonbValue pgtype.JSONB
-
-		err = jsonbValue.Set("{}")
-
-		if err != nil {
-			fmt.Println("Error:", err)
-			return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
-		}
-
 		for _, e := range envs {
 			_, err := q.CreateFlagsGroupState(c.Request().Context(), queries.CreateFlagsGroupStateParams{
 				FlagsGroupID:  fg.ID,
 				EnvironmentID: e.ID,
-				Json:          jsonbValue,
 			})
 
 			if err != nil {

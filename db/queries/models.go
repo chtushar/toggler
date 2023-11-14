@@ -6,8 +6,6 @@ package queries
 
 import (
 	"time"
-
-	"github.com/jackc/pgtype"
 )
 
 type ApiKey struct {
@@ -40,12 +38,12 @@ type FlagsGroup struct {
 }
 
 type FlagsGroupState struct {
-	Uuid          string       `json:"uuid"`
-	ID            *int32       `json:"-"`
-	FlagsGroupID  *int32       `json:"-"`
-	Json          pgtype.JSONB `json:"json"`
-	EnvironmentID *int32       `json:"-"`
-	CreatedAt     *time.Time   `json:"created_at"`
+	Uuid          string     `json:"uuid"`
+	ID            *int32     `json:"-"`
+	FlagsGroupID  *int32     `json:"-"`
+	Js            *string    `json:"js"`
+	EnvironmentID *int32     `json:"-"`
+	CreatedAt     *time.Time `json:"created_at"`
 }
 
 type Folder struct {

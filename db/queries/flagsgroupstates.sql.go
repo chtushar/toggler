@@ -7,30 +7,27 @@ package queries
 
 import (
 	"context"
-
-	"github.com/jackc/pgtype"
 )
 
 const createFlagsGroupState = `-- name: CreateFlagsGroupState :one
-INSERT INTO flags_group_states(json, flags_group_id, environment_id)
-VALUES ($1, $2, $3)
-RETURNING uuid, id, flags_group_id, json, environment_id, created_at
+INSERT INTO flags_group_states(flags_group_id, environment_id)
+VALUES ($1, $2)
+RETURNING uuid, id, flags_group_id, js, environment_id, created_at
 `
 
 type CreateFlagsGroupStateParams struct {
-	Json          pgtype.JSONB `json:"json"`
-	FlagsGroupID  *int32       `json:"-"`
-	EnvironmentID *int32       `json:"-"`
+	FlagsGroupID  *int32 `json:"-"`
+	EnvironmentID *int32 `json:"-"`
 }
 
 func (q *Queries) CreateFlagsGroupState(ctx context.Context, arg CreateFlagsGroupStateParams) (FlagsGroupState, error) {
-	row := q.db.QueryRow(ctx, createFlagsGroupState, arg.Json, arg.FlagsGroupID, arg.EnvironmentID)
+	row := q.db.QueryRow(ctx, createFlagsGroupState, arg.FlagsGroupID, arg.EnvironmentID)
 	var i FlagsGroupState
 	err := row.Scan(
 		&i.Uuid,
 		&i.ID,
 		&i.FlagsGroupID,
-		&i.Json,
+		&i.Js,
 		&i.EnvironmentID,
 		&i.CreatedAt,
 	)
@@ -38,9 +35,10 @@ func (q *Queries) CreateFlagsGroupState(ctx context.Context, arg CreateFlagsGrou
 }
 
 const getFlagsGroupState = `-- name: GetFlagsGroupState :one
-SELECT uuid, id, flags_group_id, json, environment_id, created_at
+SELECT uuid, id, flags_group_id, js, environment_id, created_at
 FROM flags_group_states
-WHERE flags_group_id = $1 AND environment_id = $2
+WHERE flags_group_id = $1
+    AND environment_id = $2
 `
 
 type GetFlagsGroupStateParams struct {
@@ -55,7 +53,7 @@ func (q *Queries) GetFlagsGroupState(ctx context.Context, arg GetFlagsGroupState
 		&i.Uuid,
 		&i.ID,
 		&i.FlagsGroupID,
-		&i.Json,
+		&i.Js,
 		&i.EnvironmentID,
 		&i.CreatedAt,
 	)
@@ -63,7 +61,7 @@ func (q *Queries) GetFlagsGroupState(ctx context.Context, arg GetFlagsGroupState
 }
 
 const getFlagsGroupStateByUUID = `-- name: GetFlagsGroupStateByUUID :one
-SELECT uuid, id, flags_group_id, json, environment_id, created_at
+SELECT uuid, id, flags_group_id, js, environment_id, created_at
 FROM flags_group_states
 WHERE uuid = $1
 `
@@ -75,34 +73,35 @@ func (q *Queries) GetFlagsGroupStateByUUID(ctx context.Context, uuid string) (Fl
 		&i.Uuid,
 		&i.ID,
 		&i.FlagsGroupID,
-		&i.Json,
+		&i.Js,
 		&i.EnvironmentID,
 		&i.CreatedAt,
 	)
 	return i, err
 }
 
-const updateFlagGroupsStateJSON = `-- name: UpdateFlagGroupsStateJSON :one
+const updateFlagGroupsStateJS = `-- name: UpdateFlagGroupsStateJS :one
 UPDATE flags_group_states
-SET json = $1
-WHERE flags_group_id = $2 AND environment_id = $3
-RETURNING uuid, id, flags_group_id, json, environment_id, created_at
+SET js = $1
+WHERE flags_group_id = $2
+    AND environment_id = $3
+RETURNING uuid, id, flags_group_id, js, environment_id, created_at
 `
 
-type UpdateFlagGroupsStateJSONParams struct {
-	Json          pgtype.JSONB `json:"json"`
-	FlagsGroupID  *int32       `json:"-"`
-	EnvironmentID *int32       `json:"-"`
+type UpdateFlagGroupsStateJSParams struct {
+	Js            *string `json:"js"`
+	FlagsGroupID  *int32  `json:"-"`
+	EnvironmentID *int32  `json:"-"`
 }
 
-func (q *Queries) UpdateFlagGroupsStateJSON(ctx context.Context, arg UpdateFlagGroupsStateJSONParams) (FlagsGroupState, error) {
-	row := q.db.QueryRow(ctx, updateFlagGroupsStateJSON, arg.Json, arg.FlagsGroupID, arg.EnvironmentID)
+func (q *Queries) UpdateFlagGroupsStateJS(ctx context.Context, arg UpdateFlagGroupsStateJSParams) (FlagsGroupState, error) {
+	row := q.db.QueryRow(ctx, updateFlagGroupsStateJS, arg.Js, arg.FlagsGroupID, arg.EnvironmentID)
 	var i FlagsGroupState
 	err := row.Scan(
 		&i.Uuid,
 		&i.ID,
 		&i.FlagsGroupID,
-		&i.Json,
+		&i.Js,
 		&i.EnvironmentID,
 		&i.CreatedAt,
 	)
