@@ -1,6 +1,7 @@
 package flagsgroupstate
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/chtushar/toggler/api/app"
@@ -62,6 +63,14 @@ func handleGetFlagsGroupState(c echo.Context) error {
 	if err != nil {
 		return err
 	}
+
+	r, err := app.Node.SafelyRunJSCode(`result = function handle(){
+		return {
+			hello: "world"
+		}
+	}`)
+
+	fmt.Println(r, err)
 
 	c.JSON(http.StatusOK, responses.ResponseType{
 		Success: true,

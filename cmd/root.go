@@ -6,12 +6,12 @@ import (
 	"log"
 	"os"
 
+	"github.com/chtushar/toggler/adapters/node"
 	"github.com/chtushar/toggler/api"
 	"github.com/chtushar/toggler/api/app"
 	"github.com/chtushar/toggler/configs"
 	"github.com/chtushar/toggler/db"
 	"github.com/chtushar/toggler/db/queries"
-	"github.com/chtushar/toggler/runner"
 	"github.com/jackc/pgx/v4/stdlib"
 )
 
@@ -38,12 +38,16 @@ func Execute() {
 	// Initialize the database
 	dbConn = initDB()
 
+	n := node.Node{}
+	n.Init()
+
 	app := &app.App{
 		Port:   cfg.Port,
 		DbConn: dbConn,
 		Jwt:    cfg.JWTSecret,
 		Q:      queries.New(dbConn),
 		Log:    log.New(os.Stdout, "toggler: ", log.LstdFlags),
+		Node: 	&n,
 	};
 
 	defer dbConn.Close()
@@ -73,7 +77,4 @@ func Execute() {
 
 	// Initialize the HTTP server
 	api.InitHTTPServer(app)
-
-	// Initialize the runner server
-	runner.InitRunner()
 }
