@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -28,7 +29,7 @@ func (cv *CustomValidator) Validate(i interface{}) error {
   return nil
 }
 
-func InitHTTPServer(app *app.App) *echo.Echo {
+func InitHTTPServer(app *app.App, ctx context.Context) *echo.Echo {
 	srv := echo.New()
 	srv.Validator = &CustomValidator{validator: validator.New()}
 	// Passing the app instance to all the handlers
@@ -43,6 +44,13 @@ func InitHTTPServer(app *app.App) *echo.Echo {
 	cfg = configs.Get()
 	// Initialize all the API handlers
 	initHTTPHandler(srv)
-	srv.Logger.Fatal(srv.Start(fmt.Sprintf(":%d", app.Port)))
+	go func() {
+		app.Log.Fatal(srv.Start(fmt.Sprintf(":%d", app.Port)))
+	}()
+
+	<- ctx.Done()
+		fmt.Println("shutting down server")
+		srv.Close()
+
 	return srv
 }

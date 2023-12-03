@@ -64,11 +64,9 @@ func handleGetFlagsGroupState(c echo.Context) error {
 		return err
 	}
 
-	r, err := app.Node.SafelyRunJSCode(`result = function handle(){
-		return {
-			hello: "world"
-		}
-	}`)
+	code := `result = {hello: "world"}`
+
+	r, err := app.Node.SafelyRunJSCode(code)
 
 	fmt.Println(r, err)
 

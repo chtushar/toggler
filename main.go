@@ -1,7 +1,11 @@
 package main
 
 import (
+	"context"
 	"embed"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/chtushar/toggler/cmd"
 	"github.com/chtushar/toggler/configs"
@@ -14,9 +18,10 @@ var configExample embed.FS
 func main() {
 	// Embed static files
 	configs.ConfigExample = configExample
-	
-	// Execute with CLI flags
-	// No flags start the server
-	// init-config flag creates a config file
-	cmd.Execute()
+
+	ctx := context.Background()
+	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGINT, syscall.SIGABRT, syscall.SIGTERM)
+	defer cancel()
+
+	cmd.Execute(ctx)
 }

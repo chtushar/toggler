@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -15,7 +16,7 @@ import (
 	"github.com/jackc/pgx/v4/stdlib"
 )
 
-func Execute() {
+func Execute(ctx context.Context) {
 	// Pointer to the init-config flag
 	initConfigPtr := flag.Bool("init-config", false, "Initialize the configuration file")
 	runUPMigrationPtr := flag.Bool("up-migration", false, "Run the up migration")
@@ -38,16 +39,12 @@ func Execute() {
 	// Initialize the database
 	dbConn = initDB()
 
-	n := node.Node{}
-	n.Init()
-
 	app := &app.App{
 		Port:   cfg.Port,
 		DbConn: dbConn,
 		Jwt:    cfg.JWTSecret,
 		Q:      queries.New(dbConn),
 		Log:    log.New(os.Stdout, "toggler: ", log.LstdFlags),
-		Node: 	&n,
 	};
 
 	defer dbConn.Close()
@@ -75,6 +72,11 @@ func Execute() {
 		os.Exit(0)
 	}
 
+	n := node.Node{}
+	n.Init(ctx)
+
+	app.Node = &n
+
 	// Initialize the HTTP server
-	api.InitHTTPServer(app)
+	api.InitHTTPServer(app, ctx)
 }
