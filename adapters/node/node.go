@@ -2,71 +2,85 @@ package node
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"io"
 	"os/exec"
 )
 
 type Node struct {
-	Cmd *exec.Cmd
-	Stdin io.WriteCloser
-	Stdout io.ReadCloser
+    cmd *exec.Cmd
+    stdin          io.WriteCloser
+    stdout         io.ReadCloser
+    runCodeChannel chan string
+    resultChannel chan  string
 }
 
-func(n *Node) Init() *Node  {
-	// Create New Node Process
-	n.Cmd = exec.Command("node", "runner.js")
-	
-	// Create pipes for the input/output of the script
-	stdin, err := n.Cmd.StdinPipe()
-	if err != nil {
-		fmt.Println("Error creating stdin pipe:", err)
-        return nil
-    }
-	n.Stdin = stdin
+func (n *Node) Init(ctx context.Context) *Node {
+    // Create New Node Process
+    n.cmd = exec.Command("node", "adapters/node/dist/index.js")
 
-	stdout, _ := n.Cmd.StdoutPipe()
-	if err != nil {
-        fmt.Println("Error creating stdin pipe:", err)
-        return nil
-    }
-	n.Stdout = stdout
-
-	return n
-}
-
-func(n *Node) SafelyRunJSCode(code string) (*string, error) {
-    // Start the Node process
-    if err := n.Cmd.Start(); err != nil {
-        fmt.Println("Error starting Node process:", err)
-        return nil, err
-    }
-
-	// Write code to Node.js process
-    _, err := n.Stdin.Write([]byte(code))
+    // Set up stdin and stdout pipes
+    var err error
+    n.stdin, err = n.cmd.StdinPipe()
     if err != nil {
-        fmt.Println("Error writing to stdin:", err)
-        return nil, err
+        fmt.Println("Error creating stdin pipe:", err)
+        return n
     }
 
-    // Close stdin to signal that no more input will be sent
-    if err := n.Stdin.Close(); err != nil {
-        fmt.Println("Error closing stdin:", err)
-        return nil, err
+    n.stdout, err = n.cmd.StdoutPipe()
+    if err != nil {
+        fmt.Println("Error creating stdout pipe:", err)
+        return n
     }
 
-    // Read output from Node.js process
-    scanner := bufio.NewScanner(n.Stdout)
-    output := ""
-    for scanner.Scan() {
-        output += scanner.Text() + "\n"
+    // Start the Node.js process
+    if err := n.cmd.Start(); err != nil {
+        fmt.Println("Error starting Node.js process:", err)
+        return n
     }
 
-    // Wait for the Node process to finish
-    if err := n.Cmd.Wait(); err != nil {
-        fmt.Println("Error waiting for Node process:", err)
-        return nil, err
-    }
+    n.runCodeChannel = make(chan string)
+    n.resultChannel = make(chan string)
 
-    return &output, nil
+    go n.handleJSCode(ctx)
+
+    return n
+}
+
+func (n *Node) SafelyRunJSCode(code string) (string, error) {
+    n.runCodeChannel <- code
+    result := <-n.resultChannel
+    return result, nil
+}
+
+func (n *Node) handleJSCode(ctx context.Context) {
+    reader := bufio.NewReader(n.stdout)
+
+    for {
+        select {
+        case <- ctx.Done():
+            n.stdin.Close()
+            n.stdout.Close()
+            return
+        case c := <- n.runCodeChannel:
+            // Run the code and pass value of the result to the channel
+            _, err := n.stdin.Write([]byte(c + "\n"))
+            if err != nil {
+                fmt.Println("Error writing to stdin:", err)
+                n.resultChannel <- "Error"
+                continue
+            }
+
+            // Read result from stdout
+            output, err := reader.ReadString('\n')
+            if err != nil {
+                fmt.Println("Error reading from stdout:", err)
+                n.resultChannel <- "Error"
+                continue
+            }
+
+            n.resultChannel <- output
+        }
+    }
 }

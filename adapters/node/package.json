@@ -1,0 +1,17 @@
+{
+  "name": "node-adapter-toggler",
+  "version": "1.0.0",
+  "description": "",
+  "main": "runner.js",
+  "scripts": {
+    "build": "ncc build runner.js -o dist"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "isolated-vm": "^4.6.0"
+  },
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.1"
+  }
+}
