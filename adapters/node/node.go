@@ -1,7 +1,6 @@
 package node
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"io"
@@ -55,8 +54,6 @@ func (n *Node) SafelyRunJSCode(code string) (string, error) {
 }
 
 func (n *Node) handleJSCode(ctx context.Context) {
-    reader := bufio.NewReader(n.stdout)
-
     for {
         select {
         case <- ctx.Done():
@@ -64,23 +61,7 @@ func (n *Node) handleJSCode(ctx context.Context) {
             n.stdout.Close()
             return
         case c := <- n.runCodeChannel:
-            // Run the code and pass value of the result to the channel
-            _, err := n.stdin.Write([]byte(c + "\n"))
-            if err != nil {
-                fmt.Println("Error writing to stdin:", err)
-                n.resultChannel <- "Error"
-                continue
-            }
-
-            // Read result from stdout
-            output, err := reader.ReadString('\n')
-            if err != nil {
-                fmt.Println("Error reading from stdout:", err)
-                n.resultChannel <- "Error"
-                continue
-            }
-
-            n.resultChannel <- output
+            n.resultChannel <- c;
         }
     }
 }

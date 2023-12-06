@@ -65,21 +65,10 @@ func handleCreateFlagsGroup(c echo.Context) error {
 	}
 
 	db.WithDBTransaction[bool](app, c.Request().Context(), func(q *queries.Queries) (*bool, error) {
-		envs, err := q.GetOrganizationEnvironments(c.Request().Context(), fg.OrgID)
+		_, err := q.CreateFlagsGroupState(c.Request().Context(), fg.ID)
 		if err != nil {
+			app.Log.Println(err)
 			return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
-		}
-
-		for _, e := range envs {
-			_, err := q.CreateFlagsGroupState(c.Request().Context(), queries.CreateFlagsGroupStateParams{
-				FlagsGroupID:  fg.ID,
-				EnvironmentID: e.ID,
-			})
-
-			if err != nil {
-				app.Log.Println(err)
-				return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
-			}
 		}
 
 		ok := true

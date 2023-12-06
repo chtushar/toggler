@@ -1,7 +1,6 @@
 package flagsgroupstate
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/chtushar/toggler/api/app"
@@ -16,19 +15,11 @@ func handleGetFlagsGroupState(c echo.Context) error {
 	var (
 		app     = c.Get("app").(*app.App)
 		fgUUID  = c.Param("fgUUID")
-		envUUID = c.QueryParam("env")
 	)
 	ok, err := utils.IsValidUUID(fgUUID)
 
 	if !ok {
 		app.Log.Println("Failed to parse flags group uuid", err)
-		return echo.NewHTTPError(http.StatusBadRequest, responses.BadRequestResponse)
-	}
-
-	ok, err = utils.IsValidUUID(envUUID)
-
-	if !ok {
-		app.Log.Println("Failed to parse env uuid", err)
 		return echo.NewHTTPError(http.StatusBadRequest, responses.BadRequestResponse)
 	}
 
@@ -40,17 +31,7 @@ func handleGetFlagsGroupState(c echo.Context) error {
 			return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
 		}
 
-		env, err := q.GetEnvironmentByUUID(c.Request().Context(), envUUID)
-
-		if err != nil {
-			app.Log.Println(" Couldn't get the environment", err)
-			return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
-		}
-
-		fgs, err := q.GetFlagsGroupState(c.Request().Context(), queries.GetFlagsGroupStateParams{
-			FlagsGroupID:  fg.ID,
-			EnvironmentID: env.ID,
-		})
+		fgs, err := q.GetFlagsGroupState(c.Request().Context(), fg.ID)
 
 		if err != nil {
 			app.Log.Println(" Couldn't get the Flags group state", err)
@@ -63,12 +44,6 @@ func handleGetFlagsGroupState(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-
-	code := `result = {hello: "world"}`
-
-	r, err := app.Node.SafelyRunJSCode(code)
-
-	fmt.Println(r, err)
 
 	c.JSON(http.StatusOK, responses.ResponseType{
 		Success: true,
@@ -83,7 +58,6 @@ func handleUpdateFlagsGroupStateJS(c echo.Context) error {
 		app    = c.Get("app").(*app.App)
 		fgUUID = c.Param("fgUUID")
 		req    = &struct {
-			EnvUUID string `json:"env_uuid" validate:"uuid4,required"`
 			Value   string `json:"value"`
 		}{}
 	)
@@ -106,13 +80,6 @@ func handleUpdateFlagsGroupStateJS(c echo.Context) error {
 	}
 
 	fgs, err := db.WithDBTransaction[queries.FlagsGroupState](app, c.Request().Context(), func(q *queries.Queries) (*queries.FlagsGroupState, error) {
-		env, err := q.GetEnvironmentByUUID(c.Request().Context(), req.EnvUUID)
-
-		if err != nil {
-			app.Log.Println("Couldn't get the environment", err)
-			return nil, echo.NewHTTPError(http.StatusInternalServerError, responses.InternalServerErrorResponse)
-		}
-
 		fg, err := q.GetFlagsGroupByUUID(c.Request().Context(), fgUUID)
 
 		if err != nil {
@@ -122,7 +89,6 @@ func handleUpdateFlagsGroupStateJS(c echo.Context) error {
 
 		fgs, err := q.UpdateFlagGroupsStateJS(c.Request().Context(), queries.UpdateFlagGroupsStateJSParams{
 			FlagsGroupID:  fg.ID,
-			EnvironmentID: env.ID,
 			Js: &req.Value,
 		})
 

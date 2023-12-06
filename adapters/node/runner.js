@@ -15,7 +15,7 @@ async function main() {
       const global = context.global;
       const result = await global.get("result");
 
-      return result;
+      return await result;
     } catch (error) {
       return `Error: ${error.message}`;
     }
@@ -24,7 +24,7 @@ async function main() {
   const processCode = (data) => {
     executeCode(data.toString())
       .then((result) => {
-        process.stdout.write(JSON.stringify(result));
+        process.stdout.write(JSON.stringify(result) + "\n");
       })
       .catch((error) => {
         console.error(`Execution error: ${error.message}`);

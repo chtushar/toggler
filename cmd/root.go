@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/chtushar/toggler/adapters/node"
 	"github.com/chtushar/toggler/api"
 	"github.com/chtushar/toggler/api/app"
 	"github.com/chtushar/toggler/configs"
@@ -71,11 +70,6 @@ func Execute(ctx context.Context) {
 		db.RunDownMigration(stdlib.OpenDB(*pgxPoolConfig.ConnConfig), app.Log)
 		os.Exit(0)
 	}
-
-	n := node.Node{}
-	n.Init(ctx)
-
-	app.Node = &n
 
 	// Initialize the HTTP server
 	api.InitHTTPServer(app, ctx)

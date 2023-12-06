@@ -5,7 +5,6 @@ import (
 
 	"github.com/chtushar/toggler/api/apikeys"
 	"github.com/chtushar/toggler/api/auth"
-	"github.com/chtushar/toggler/api/environment"
 	"github.com/chtushar/toggler/api/flagsgroup"
 	"github.com/chtushar/toggler/api/flagsgroupstate"
 	"github.com/chtushar/toggler/api/folder"
@@ -48,7 +47,6 @@ func initHTTPHandler(e *echo.Echo) {
 	user.UserRoutes(v1_protected)
 	org_access := organization.OrganizationRoutes(v1_protected)
 
-	environment.EnvironmentRoutes(org_access)
 	folder.FolderRoutes(org_access)
 	apikeys.APIKeysRoutes(org_access)
 	flagsgroup.FlagGroupsRoutes(org_access)
