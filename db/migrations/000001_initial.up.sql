@@ -42,15 +42,6 @@ CREATE TABLE folders (
     org_id INT REFERENCES organizations(id),
     created_at TIMESTAMP DEFAULT NOW()
 );
--- Environment table
-CREATE TABLE environments (
-    uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
-    id SERIAL UNIQUE,
-    name VARCHAR(255) NOT NULL,
-    color CHAR(7) DEFAULT NULL,
-    org_id INT REFERENCES organizations(id),
-    created_at TIMESTAMP DEFAULT NOW()
-);
 -- Flags Group table
 CREATE TABLE flags_groups (
     uuid UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -71,10 +62,5 @@ CREATE TABLE flags_group_states (
     id SERIAL UNIQUE,
     flags_group_id INT REFERENCES flags_groups(id),
     js TEXT DEFAULT NULL,
-    environment_id INT REFERENCES environments(id),
-    created_at TIMESTAMP DEFAULT NOW(),
-    UNIQUE(
-        flags_group_id,
-        environment_id
-    )
+    created_at TIMESTAMP DEFAULT NOW()
 );

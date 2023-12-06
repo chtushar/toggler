@@ -19,15 +19,6 @@ type ApiKey struct {
 	CreatedAt      *time.Time `json:"created_at"`
 }
 
-type Environment struct {
-	Uuid      string     `json:"uuid"`
-	ID        *int32     `json:"-"`
-	Name      string     `json:"name"`
-	Color     *string    `json:"color"`
-	OrgID     *int32     `json:"-"`
-	CreatedAt *time.Time `json:"created_at"`
-}
-
 type FlagsGroup struct {
 	Uuid      string     `json:"uuid"`
 	ID        *int32     `json:"-"`
@@ -38,12 +29,11 @@ type FlagsGroup struct {
 }
 
 type FlagsGroupState struct {
-	Uuid          string     `json:"uuid"`
-	ID            *int32     `json:"-"`
-	FlagsGroupID  *int32     `json:"-"`
-	Js            *string    `json:"js"`
-	EnvironmentID *int32     `json:"-"`
-	CreatedAt     *time.Time `json:"created_at"`
+	Uuid         string     `json:"uuid"`
+	ID           *int32     `json:"-"`
+	FlagsGroupID *int32     `json:"-"`
+	Js           *string    `json:"js"`
+	CreatedAt    *time.Time `json:"created_at"`
 }
 
 type Folder struct {
